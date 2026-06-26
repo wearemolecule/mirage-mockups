@@ -1,0 +1,10 @@
+---
+description: raw/ is client reference only; FA work lives in fund-allocations/
+alwaysApply: true
+---
+
+# `raw/` — reference only
+
+- **`raw/`** (and any `Raw/` path): **Do not edit, delete, or refactor** unless the user explicitly asks to change that folder. Treat files there as **incoming reference** for mockups.
+- **Fund Allocations UI** shipped in this repo: **`fund-allocations/`** only (HTML/JS there, e.g. `fund-allocations.html`, `settings.html`, `book-card-collapse.js`, `mapping-rules-app.js`). When the user says “FA screens” or “fund allocations mockups”, scope work to **`fund-allocations/`** and **`css/fund-allocations.css`** (and related shared CSS they link). **Do not** modify `raw/fund-allocations-v2.html` or other `raw/*` files for FA feature work.
+- If something is only defined in `raw/` and needed for FA, **re-implement or copy the needed snippet into `fund-allocations/`** (or shared CSS used by FA), not by editing `raw/`.

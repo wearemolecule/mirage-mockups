@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fund Allocations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Figtree:wght@300;400;500;600;700&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/as-of-picker.css">
+<link rel="stylesheet" href="../css/fund-allocations.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+</head>
+<body class="fa-standalone-shell app-sidebar-enabled fa-fund-alloc-embedded-strip">
+
+<div class="app-header-mount"></div>
+
+<div class="main main-content fa-main-shell">
+
+  <!-- Allocations screen title + calendar popover (grid/legend match fund-allocations-v2) -->
+  <div id="fa-alloc-screen-head" class="fa-alloc-screen-head">
+    <div class="page-header fa-alloc-page-header-row">
+      <div class="fa-alloc-title-line page-header__title-row">
+        <h1 class="page-title fa-alloc-page-title">Fund Allocations</h1>
+        <div class="as-of-picker" role="group" aria-label="As-of date">
+          <button type="button" class="as-of-picker__nav" id="fa-alloc-as-of-prev" aria-label="Previous day">
+            <span class="as-of-picker__chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </span>
+          </button>
+          <button type="button" id="fa-alloc-as-of-trigger" class="as-of-picker__trigger" aria-expanded="false" aria-haspopup="dialog" aria-controls="fa-alloc-as-of-popover">
+            <span class="as-of-picker__label"></span>
+          </button>
+          <button type="button" class="as-of-picker__nav" id="fa-alloc-as-of-next" aria-label="Next day">
+            <span class="as-of-picker__chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fa-alloc-as-of-popover" class="as-of-picker__popover" style="display:none" role="dialog" aria-label="Allocation calendar" hidden>
+    <div class="as-of-picker__popover-inner">
+      <div>
+        <div class="as-of-picker__cal-head">
+          <button type="button" class="as-of-picker__cal-month-btn" id="fa-alloc-as-of-month-prev" aria-label="Previous month"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+          <span class="as-of-picker__cal-month-label" id="fa-alloc-as-of-month-label"></span>
+          <button type="button" class="as-of-picker__cal-month-btn" id="fa-alloc-as-of-month-next" aria-label="Next month"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+        </div>
+        <div id="fa-alloc-as-of-grid" class="as-of-picker__cal-grid"></div>
+      </div>
+      <div class="fa-alloc-cal-legend">
+        <div class="fa-alloc-cal-legend-row"><span class="fa-alloc-cal-swatch fa-alloc-cal-swatch--ok"></span>All finalized</div>
+        <div class="fa-alloc-cal-legend-row"><span class="fa-alloc-cal-swatch fa-alloc-cal-swatch--bad"></span>Has unfinalized</div>
+        <div class="fa-alloc-cal-legend-row"><span class="fa-alloc-cal-swatch fa-alloc-cal-swatch--none"></span>No trades</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="tabs-stack fa-alloc-tabbed-section" data-tabs-stack>
+      <div class="tabs-stack__bar">
+        <div class="tabs-stack__tabs" role="tablist" aria-label="Allocations and true-up">
+          <button type="button" class="tabs-stack__tab active" role="tab" aria-selected="true" data-tab-panel="allocations" id="fa-tab-allocations">
+            <span class="tabs-stack__tab-label">Allocations</span>
+          </button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="trueup" id="fa-alloc-tab-trueup">True-up</button>
+        </div>
+        <div class="tabs-stack__actions actions action-toolbar fa-alloc-tab-allocations-actions" id="fa-tab-actions-allocations" data-tab-panel="allocations">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="faAllocFinalizeAllClick()" title="Finalize all unfinalized parent trades in the mock">Finalize All</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="faAllocUnfinalizeAllClick()" title="Unfinalize all finalized parent trades in the mock">Unfinalize All</button>
+          <button type="button" id="fa-alloc-save-allocations" class="btn btn-primary btn-sm" onclick="faAllocSaveAllocationsClick()" hidden title="Mock — no action yet">Save Allocations</button>
+          <div class="fa-expand-collapse-all-group" role="group" aria-label="Expand or collapse all allocation books">
+            <button type="button" id="fa-alloc-strip-expand-all" class="btn btn-ghost btn-sm fa-expand-collapse-all-btn" onclick="faStripExpandAllBookCards()" aria-label="Expand all allocation book cards" title="Expand all allocation book cards"><i class="fas fa-angles-down" aria-hidden="true"></i></button>
+            <button type="button" id="fa-alloc-strip-collapse-all" class="btn btn-ghost btn-sm fa-expand-collapse-all-btn" onclick="faStripCollapseAllBookCards()" aria-label="Collapse all allocation book cards" title="Collapse all allocation book cards"><i class="fas fa-angles-up" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        <div class="tabs-stack__actions actions action-toolbar" id="fa-alloc-tab-actions-trueup" data-tab-panel="trueup" hidden>
+          <button type="button" class="action-btn" onclick="renderTrueup()" title="Recalculate True-Up for All Books from Current Mock Data">Refresh</button>
+          <button type="button" class="action-btn">Run True-Up</button>
+          <button type="button" class="action-btn">True-Up History</button>
+          <button type="button" class="action-btn">Export Report</button>
+          <div class="fa-expand-collapse-all-group" role="group" aria-label="Expand or collapse all true-up books">
+            <button type="button" class="action-btn fa-expand-collapse-all-btn" id="fa-trueup-expand-all" onclick="faTrueupExpandAllBookCards()" aria-label="Expand all true-up book sections" title="Expand all true-up book sections"><i class="fas fa-angles-down" aria-hidden="true"></i></button>
+            <button type="button" class="action-btn fa-expand-collapse-all-btn" id="fa-trueup-collapse-all" onclick="faTrueupCollapseAllBookCards()" aria-label="Collapse all true-up book sections" title="Collapse all true-up book sections"><i class="fas fa-angles-up" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-stack__panels">
+        <div class="tabs-stack__panel active fa-tab-panel-allocations--embedded-main" role="tabpanel" data-tab-panel="allocations" id="fa-tab-panel-allocations">
+          <div class="content-area fa-alloc-embedded-main">
+        <!-- ════════════════════════════════════════════ TRADES & STRIP -->
+        <div class="fa-panels-container active" id="panel-orders">
+            <div class="fa-content-bottom split">
+    
+            <!-- Left: compact parent trades list -->
+            <div class="fa-left-container split-left fa-split-left-trades">
+              <section class="content-card trades-list-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <span class="fa-trades-title-cluster">
+                      <span class="fa-card-title-text">Parent Trades</span>
+                      <span id="trades-pending-badge-anchor" class="fa-trades-pending-badge-anchor" hidden>
+                        <span class="fa-tooltip-wrap fa-trades-pending-count-tooltip" id="trades-pending-tooltip" data-tooltip="">
+                          <span id="trades-pending-count" class="fa-trades-pending-badge"></span>
+                        </span>
+                      </span>
+                    </span>
+                  </div>
+                  <div class="card-actions action-toolbar">
+                    <button type="button" class="btn btn-ghost btn-sm" title="Mock — no action yet">New Trade</button>
+                    <button type="button" class="btn btn-ghost btn-sm fa-parent-trades-pane-toggle" id="fa-parent-trades-pane-toggle" onclick="faToggleParentTradesPaneWidth(event)" title="Widen parent trades panel" aria-label="Widen parent trades panel" aria-pressed="false"><i class="fas fa-angles-right" aria-hidden="true"></i></button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="refine-row fa-trades-refine-row">
+                    <div class="refine-input-group">
+                      <span class="refine-icon" id="fa-trades-refine-toggle-icon" onclick="toggleRefineMode('fa-trades')" style="cursor:pointer"><i class="fas fa-search"></i></span>
+                      <input type="text" class="refine-input" id="fa-trades-refine-input" placeholder="Search current results" oninput="renderTradesList()">
+                      <button type="button" class="refine-apply-btn" id="fa-trades-refine-apply-btn" style="display:none" onclick="renderTradesList()">Apply</button>
+                    </div>
+                    <div class="refine-right">
+                      <button type="button" class="icon-btn" title="Refresh" onclick="renderTradesList();renderStrip()"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+                      <button type="button" class="icon-btn fa-trades-refine-across-line-btn" title="Mock — no action yet" aria-label="Column options"><i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                  <div class="fa-trades-table-wrapper table-wrapper">
+                    <div class="table-container fa-trades-table-container fa-trades-grid-scroll">
+                      <table class="data-table fa-trades-grid fa-trades-grid--parent-wide" id="fa-trades-grid-table">
+                        <colgroup>
+                          <col class="fa-trades-col-id" />
+                          <col class="fa-trades-col-product" />
+                          <col class="fa-trades-col-price" />
+                          <col class="fa-trades-col-qty" />
+                          <col class="fa-trades-col-tenor" />
+                          <col class="fa-trades-col-tenor" />
+                          <col class="fa-trades-col-book" />
+                          <col class="fa-trades-col-dir" />
+                          <col class="fa-trades-col-uom" />
+                        </colgroup>
+                        <thead>
+                          <tr>
+                            <th>Trade ID</th>
+                            <th>Product</th>
+                            <th class="r">Price</th>
+                            <th class="r">Qty</th>
+                            <th>Tenor Start</th>
+                            <th>Tenor End</th>
+                            <th>Book</th>
+                            <th class="fa-trades-col-dir">Dir</th>
+                            <th>UOM</th>
+                          </tr>
+                        </thead>
+                        <tbody id="fa-trades-grid-body"></tbody>
+                      </table>
+                    </div>
+                    <div class="pagination-row fa-trades-pagination-row">
+                      <div style="position:relative"></div>
+                      <div class="pagination-info">
+                        <span id="fa-trades-pagination-text" class="pagination-count-text">0 to 0 of 0</span>
+                        <div class="pagination-controls">
+                          <button type="button" class="page-btn" id="fa-trades-page-first" disabled title="First page" onclick="faTradesPageFirst()"><i class="fas fa-angle-double-left"></i></button>
+                          <button type="button" class="page-btn" id="fa-trades-page-prev" disabled title="Previous page" onclick="faTradesPagePrev()"><i class="fas fa-angle-left"></i></button>
+                          <span class="pagination-page-text" id="fa-trades-pagination-page">Page 1 of 1</span>
+                          <button type="button" class="page-btn" id="fa-trades-page-next" disabled title="Next page" onclick="faTradesPageNext()"><i class="fas fa-angle-right"></i></button>
+                          <button type="button" class="page-btn" id="fa-trades-page-last" disabled title="Last page" onclick="faTradesPageLast()"><i class="fas fa-angle-double-right"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+    
+            <div class="panel-resize-handle fa-orders-resize-handle" id="fa-orders-resize-handle">
+              <i class="fas fa-grip-lines-vertical"></i>
+            </div>
+    
+            <!-- Right: scrollable per-book strip cards -->
+            <div class="fa-right-container split-right fa-split-right-alloc">
+              <div class="fa-alloc-strip-scroll" role="region" aria-label="Allocation strips by book"></div>
+            </div>
+    
+            </div>
+        </div><!-- /panel-orders -->
+
+          </div><!-- /content-area.fa-alloc-embedded-main -->
+        </div><!-- /tabs-stack__panel allocations -->
+        <div class="tabs-stack__panel fa-tab-panel-trueup--embedded" role="tabpanel" hidden data-tab-panel="trueup" id="fa-tab-panel-trueup">
+          <div class="content-area fa-trueup-standalone-layout">
+            <div id="trueup-books"></div>
+            <div id="trueup-adj-GH5600" style="display:none" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="modal-fa-alloc-fill-trades" class="modal-overlay fa-alloc-fill-trades-overlay" style="display:none" onclick="faAllocCloseFillTradesModal()">
+  <div class="modal-card modal-card--fa-alloc-fill-trades" onclick="event.stopPropagation()" role="dialog" aria-labelledby="fa-alloc-fill-trades-title" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title-nb fa-alloc-fill-trades-title" id="fa-alloc-fill-trades-title">Fill trades</div>
+    </div>
+    <div class="modal-body fa-alloc-fill-trades-modal-body">
+      <div class="table-wrapper fa-alloc-fill-trades-table-wrap">
+        <div class="table-container fa-alloc-fill-trades-table-scroll">
+          <table class="data-table trades-grid fa-alloc-fill-trades-grid">
+            <thead>
+              <tr>
+                <th>Fill Trade</th>
+                <th>Parent Trade</th>
+                <th>FCM / Account</th>
+                <th>Dir</th>
+                <th class="trades-col-num">Lots</th>
+                <th class="trades-col-num">Entry Price</th>
+              </tr>
+            </thead>
+            <tbody id="fa-alloc-fill-trades-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn primary" onclick="faAllocCloseFillTradesModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/tabs-stack.js"></script>
+<script src="book-card-collapse.js"></script>
+<script src="../js/as-of-picker.js"></script>
+<script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const COLORS = ['var(--c0)','var(--c1)','var(--c2)','var(--c3)'];
+
+/// Mapping rules: book → SMA account lines (including historical retired entries)
+const BOOK_RULES = {
+  '#GH5600': [
+    { fcm:'Morgan Stanley', acctNum:'MS-5758778',  target:.30, ci:0, status:'active',  effectiveFrom:'Jan 1, 2026' },
+    { fcm:'JP Morgan',      acctNum:'JPM-568767',  target:.30, ci:1, status:'active',  effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Goldman Sachs',  acctNum:'GS-456456',   target:.40, ci:2, status:'active',  effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Morgan Stanley', acctNum:'MS-5758778',  target:.25, ci:0, status:'retired', effectiveFrom:'Jul 1, 2025', effectiveTo:'Dec 31, 2025' },
+  ],
+  '#GH5601': [
+    { fcm:'Morgan Stanley', acctNum:'MS-5758778',  target:.50, ci:0, status:'active', effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Goldman Sachs',  acctNum:'GS-456456',   target:.50, ci:2, status:'active', effectiveFrom:'Jan 1, 2026' },
+  ],
+  '#GH5603': [
+    { fcm:'Citadel Securities', acctNum:'CIT-88234',  target:.45, ci:0, status:'active', effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Barclays',           acctNum:'BAR-44512',  target:.35, ci:1, status:'active', effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Morgan Stanley',     acctNum:'MS-5758778', target:.20, ci:2, status:'active', effectiveFrom:'Jan 1, 2026' },
+  ],
+};
+
+/** Short scope line next to strip card title — same labels as AUM Derived Ratios nested cards */
+const BOOK_SCOPE_SUBTITLE = {
+  '#GH5600': 'Natural Gas / WTI',
+  '#GH5601': 'Henry Hub',
+  '#GH5603': 'WTI Crude Oil',
+};
+
+// ─── Allocations strip (`.fa-alloc-strip-scroll`) — reusable HTML builders ────
+const ALLOC_STRIP_UI = {
+  statusDot: {
+    pending: { dot: 'var(--fa-pending-amber)', fg: 'var(--fa-pending-amber)' },
+    ok: { dot: 'var(--color-green)', fg: 'var(--muted)' },
+  },
+};
+
+function allocStripQuoteAttr(s) {
+  return String(s).replace(/'/g, "\\'");
+}
+
+function allocStripInputStyle(color) {
+  return `width:44px;text-align:right;box-sizing:border-box;border:1px solid var(--input-border);border-radius:3px;background:transparent;font-family:var(--font);font-size:.72rem;font-variant-numeric:tabular-nums;padding:1px 4px;color:${color};outline:none`;
+}
+
+/** Double-quoted HTML attribute value (e.g. input value="…") */
+function allocStripEscapeInputValueAttr(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+/** @param {boolean} monthSep  thicker top rule when starting a new month block */
+function allocStripMonthSepClass(monthSep) {
+  return monthSep ? ' alloc-strip-month-sep' : '';
+}
+
+function allocStripTradeMenuEmptyCell(monthSep) {
+  const ms = allocStripMonthSepClass(!!monthSep);
+  return `<td class="trades-col-menu alloc-strip-trade-menu-td${ms}" onclick="event.stopPropagation()"></td>`;
+}
+
+function allocStripTradeMenuCell(orderId, monthSep) {
+  const ms = allocStripMonthSepClass(!!monthSep);
+  const idAttr = allocStripEscapeInputValueAttr(String(orderId));
+  return `<td class="trades-col-menu alloc-strip-trade-menu-td${ms}" onclick="event.stopPropagation()"><div class="fa-strip-trade-menu-wrap" data-strip-order-id="${idAttr}"><button type="button" class="trades-row-menu-btn fa-strip-trade-menu-btn" aria-label="Row actions" aria-expanded="false" aria-haspopup="true" onclick="faStripTradeRowMenuToggle(event,this)"><i class="fas fa-ellipsis-vertical" aria-hidden="true"></i></button><div class="fa-strip-trade-menu-dropdown" role="menu"><button type="button" role="menuitem" class="action-btn" onclick="faStripTradeMenuMakeIndependent(this)">Make Independent</button></div></div></td>`;
+}
+
+function faStripTradeRowMenuToggle(e, btn) {
+  e.stopPropagation();
+  const wrap = btn.closest('.fa-strip-trade-menu-wrap');
+  const dd = wrap && wrap.querySelector('.fa-strip-trade-menu-dropdown');
+  if (!dd) return;
+  const wasOpen = dd.classList.contains('open');
+  document.querySelectorAll('.fa-strip-trade-menu-dropdown.open').forEach(el => {
+    el.classList.remove('open');
+    el.closest('.fa-strip-trade-menu-wrap')?.querySelector('.fa-strip-trade-menu-btn')?.setAttribute('aria-expanded', 'false');
+  });
+  if (!wasOpen) {
+    dd.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+function faStripTradeMenuCloseFromWrap(wrap) {
+  if (!wrap) return;
+  wrap.querySelector('.fa-strip-trade-menu-dropdown')?.classList.remove('open');
+  wrap.querySelector('.fa-strip-trade-menu-btn')?.setAttribute('aria-expanded', 'false');
+}
+
+function faStripTradeMenuMakeIndependent(fromEl) {
+  const wrap = fromEl.closest('.fa-strip-trade-menu-wrap');
+  faStripTradeMenuCloseFromWrap(wrap);
+  const id = wrap?.getAttribute('data-strip-order-id');
+  if (id == null || id === '') return;
+  const ok = window.confirm(
+    `Make trade ${id} independent? It will be removed from this strip.`
+  );
+  if (!ok) return;
+  faAllocStripMakeIndependentClick(id);
+}
+
+document.addEventListener('click', function faStripTradeMenuDocClick(e) {
+  if (e.target.closest('.fa-strip-trade-menu-wrap')) return;
+  document.querySelectorAll('.fa-strip-trade-menu-dropdown.open').forEach(el => {
+    el.classList.remove('open');
+    el.closest('.fa-strip-trade-menu-wrap')?.querySelector('.fa-strip-trade-menu-btn')?.setAttribute('aria-expanded', 'false');
+  });
+});
+
+/**
+ * Leftover = Total column lots minus sum of FCM account lots for the row (signed balance).
+ * @param {{ tradeRow?: boolean }} [opts] tradeRow: always "-" in the cell (detail rows); title/color still reflect imbalance.
+ */
+function allocStripLeftoverCell(diff, monthSep, opts) {
+  const tradeRow = Boolean(opts && opts.tradeRow);
+  const ms = allocStripMonthSepClass(monthSep);
+  const n = Math.round(Number(diff)) || 0;
+  if (tradeRow) {
+    const spanCls =
+      n === 0 ? 'alloc-strip-leftover-ok' : n > 0 ? 'alloc-strip-leftover-warn' : 'alloc-strip-leftover-bad';
+    const title =
+      n === 0
+        ? 'Balanced: Total equals FCM sum'
+        : n > 0
+          ? `${n} lot${n === 1 ? '' : 's'} unallocated (Total exceeds FCM sum)`
+          : `${-n} lot${-n === 1 ? '' : 's'} over-allocated (FCM sum exceeds Total)`;
+    const titleAttr = allocStripEscapeInputValueAttr(title);
+    return `<td class="r mono alloc-strip-leftover-td alloc-strip-leftover-td--num alloc-strip-leftover-td--dash${ms}"><span class="${spanCls}" title="${titleAttr}">-</span></td>`;
+  }
+  const spanCls =
+    n === 0 ? 'alloc-strip-leftover-ok' : n > 0 ? 'alloc-strip-leftover-warn' : 'alloc-strip-leftover-bad';
+  const title =
+    n === 0
+      ? 'Balanced: Total equals FCM sum'
+      : n > 0
+        ? `${n} lot${n === 1 ? '' : 's'} unallocated (Total exceeds FCM sum)`
+        : `${-n} lot${-n === 1 ? '' : 's'} over-allocated (FCM sum exceeds Total)`;
+  const titleAttr = allocStripEscapeInputValueAttr(title);
+  return `<td class="r mono alloc-strip-leftover-td alloc-strip-leftover-td--num${ms}"><span class="${spanCls}" title="${titleAttr}">${n}</span></td>`;
+}
+
+/** Striping inside an expanded block: 0 = base (first row after parent), 1 = alt, … */
+function allocStripExpStripeClass(localIndex) {
+  return localIndex % 2 === 0 ? 'alloc-strip-exp-base' : 'alloc-strip-exp-alt';
+}
+
+function allocStripStatusDot(text, dotColor, textColor) {
+  return `<span class="alloc-strip-status-dot"><span class="b-dot" style="background:${dotColor}"></span><span class="alloc-strip-status-label" style="color:${textColor}">${text}</span></span>`;
+}
+
+function allocStripAggregateStatusHtml(hasPending) {
+  const { pending, ok } = ALLOC_STRIP_UI.statusDot;
+  if (hasPending) return allocStripStatusDot('Unfinalized', pending.dot, pending.fg);
+  return allocStripStatusDot('Finalized', ok.dot, ok.fg);
+}
+
+/** Fill trades column: clickable count opens modal (parent summary rows only). */
+function allocStripFillTradesCellHtml(book, monthLabel, prod, count, monthSep) {
+  const ms = monthSep === true ? allocStripMonthSepClass(true) : '';
+  if (!count) {
+    return `<td class="r mono alloc-strip-fill-trades-cell alloc-strip-fill-trades-cell--empty${ms}">—</td>`;
+  }
+  const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const b = esc(book);
+  const m = esc(monthLabel);
+  const p = esc(prod);
+  const label = count === 1 ? '1 fill trade' : count + ' fill trades';
+  return (
+    `<td class="r mono alloc-strip-fill-trades-cell${ms}">` +
+    `<button type="button" class="alloc-strip-fill-trades-count-btn" ` +
+    `onclick="event.stopPropagation(); faAllocOpenFillTradesModal('${b}', '${m}', '${p}')" ` +
+    `title="View ${label} for this row" aria-label="View ${label}">` +
+    allocStripEscapeHtml(String(count)) +
+    `</button></td>`
+  );
+}
+
+/** Orders in one strip parent cell (book + month row + product). */
+function allocStripOrdersInCell(book, monthLabel, prod) {
+  const out = [];
+  orders.forEach(o => {
+    if (o.book !== book) return;
+    if (String(o.short.split(' ')[0]) !== String(prod)) return;
+    if (!getMonthLabels(o).includes(monthLabel)) return;
+    out.push(o);
+  });
+  return out;
+}
+
+/** Fill trade rows for a finalized parent summary cell (all FCMs, all parent orders). */
+function allocStripCollectFillsForCell(ordersInCell, monthLabel, activeRules) {
+  if (!allocStripParentRowUsesFinalizedFcmCells(ordersInCell)) return [];
+  const rows = [];
+  ordersInCell.forEach(o => {
+    if (!Array.isArray(o.fills)) return;
+    o.fills.forEach(f => {
+      if (!f.tradeId) return;
+      if (!allocStripFillContractMatchesMonth(f.contract, o, monthLabel)) return;
+      const rule = activeRules.find(r => r.acctNum === f.acctNum);
+      rows.push({
+        tradeId: f.tradeId,
+        parentOrderId: o.id,
+        book: o.book,
+        month: monthLabel,
+        product: o.short.split(' ')[0],
+        fcm: f.fcm,
+        acctNum: f.acctNum,
+        ci: f.ci != null ? f.ci : rule ? rule.ci : 0,
+        dir: f.dir || o.dir,
+        qty: f.qty,
+        entryPx: f.entryPx,
+      });
+    });
+  });
+  rows.sort((a, b) => {
+    const ac = String(a.acctNum).localeCompare(String(b.acctNum));
+    if (ac !== 0) return ac;
+    return String(a.tradeId).localeCompare(String(b.tradeId));
+  });
+  return rows;
+}
+
+function faAllocRenderFillTradesModalTable(rows) {
+  const tbody = document.getElementById('fa-alloc-fill-trades-tbody');
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="fa-alloc-fill-trades-empty">No fill trades for this row.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows
+    .map(r => {
+      const c = COLORS[r.ci] != null ? COLORS[r.ci] : 'var(--muted)';
+      const px =
+        r.entryPx != null && !Number.isNaN(Number(r.entryPx))
+          ? Number(r.entryPx).toFixed(4)
+          : '—';
+      return (
+        `<tr>` +
+        `<td class="trades-cell-id">${allocStripEscapeHtml(r.tradeId)}</td>` +
+        `<td class="trades-cell-id">${allocStripEscapeHtml(r.parentOrderId)}</td>` +
+        `<td style="color:${c};font-weight:600">${allocStripEscapeHtml(r.acctNum)}</td>` +
+        `<td>${allocStripEscapeHtml(r.dir)}</td>` +
+        `<td class="trades-col-num">${allocStripEscapeHtml(String(r.qty))}</td>` +
+        `<td class="trades-col-num">${allocStripEscapeHtml(px)}</td>` +
+        `</tr>`
+      );
+    })
+    .join('');
+}
+
+function faAllocFillTradesModalTitleHtml(book, monthLabel, prod) {
+  const sym = allocStripEscapeHtml(String(prod || '—'));
+  const bookEsc = allocStripEscapeHtml(String(book || ''));
+  const monthEsc = allocStripEscapeHtml(String(monthLabel || ''));
+  return (
+    'Fill Trades <span class="fa-alloc-fill-trades-title-light">for</span> ' +
+    bookEsc +
+    ' <span class="fa-alloc-fill-trades-title-light">' +
+    monthEsc +
+    '</span> ' +
+    '<span class="bracket">[</span><span class="short-name">' +
+    sym +
+    '</span><span class="bracket">]</span>'
+  );
+}
+
+function faAllocFillTradesModalTitlePlain(book, monthLabel, prod) {
+  return `Fill Trades for ${book} ${monthLabel} [${prod}]`;
+}
+
+function faAllocOpenFillTradesModal(book, monthLabel, prod) {
+  const modal = document.getElementById('modal-fa-alloc-fill-trades');
+  if (!modal) return;
+  const activeRules = (BOOK_RULES[book] || []).filter(r => r.status !== 'retired');
+  const ordersInCell = allocStripOrdersInCell(book, monthLabel, prod);
+  const rows = allocStripCollectFillsForCell(ordersInCell, monthLabel, activeRules);
+  const title = document.getElementById('fa-alloc-fill-trades-title');
+  const card = modal.querySelector('.modal-card--fa-alloc-fill-trades');
+  if (title) title.innerHTML = faAllocFillTradesModalTitleHtml(book, monthLabel, prod);
+  if (card) card.setAttribute('aria-label', faAllocFillTradesModalTitlePlain(book, monthLabel, prod));
+  faAllocRenderFillTradesModalTable(rows);
+  modal.style.display = 'flex';
+}
+
+function faAllocCloseFillTradesModal() {
+  const modal = document.getElementById('modal-fa-alloc-fill-trades');
+  if (modal) modal.style.display = 'none';
+}
+
+/** Parse mock trade `price` like `3.2650 $/MMBtu` into numeric string and unit. */
+function allocStripParseTradePrice(priceStr) {
+  const pm = String(priceStr || '').match(/^([\d.]+)\s+(.+)$/);
+  return pm ? { num: pm[1], unit: pm[2].trim() } : { num: null, unit: null };
+}
+
+/** UOM columns: strip price-style "$/" prefix (e.g. "$/MMBtu" → "MMBtu"). */
+function faUomColumnDisplay(uom) {
+  if (uom == null || uom === '') return '';
+  const s = String(uom).trim();
+  if (!s || s === '—') return s;
+  const stripped = s.replace(/^\$\/\s*/i, '').trim();
+  return stripped || s;
+}
+
+function allocStripAvgNumHtml(avgPx) {
+  if (avgPx != null) {
+    return `<span class="mono alloc-strip-avg-num">${avgPx.toFixed(4)}</span>`;
+  }
+  return `<span class="alloc-strip-avg-empty">—</span>`;
+}
+
+function allocStripUomHtml(wUnit) {
+  if (!wUnit) return '—';
+  const d = faUomColumnDisplay(wUnit);
+  return d ? allocStripEscapeHtml(d) : '—';
+}
+
+function allocStripExpandIcon(expanded) {
+  /* Collapsed: ▶ right · Expanded: ⌄ down */
+  const d = expanded ? 'M6 9l6 6 6-6' : 'M9 18l6-6-6-6';
+  return `<svg class="alloc-strip-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="${d}"/></svg>`;
+}
+
+/** Double-quoted HTML attributes (e.g. aria-label, data-fa-book-card) */
+function allocStripEscapeAttr(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;');
+}
+
+function allocStripEscapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** AUM label for strip band row — matches AUM_DATA.aum scale (millions → $450M). */
+function allocStripAumDollarLabel(acctNum) {
+  const m = typeof AUM_DATA !== 'undefined' ? AUM_DATA[acctNum]?.aum : null;
+  if (m == null || m === '' || Number.isNaN(Number(m))) return '—';
+  return '$' + m + 'M';
+}
+
+function allocStripFcmBandTh(rule) {
+  const c = COLORS[rule.ci];
+  const d = typeof AUM_DATA !== 'undefined' ? (AUM_DATA[rule.acctNum] || { client: rule.fcm, aum: 0 }) : { client: rule.fcm };
+  const client = allocStripEscapeHtml(d.client || rule.fcm || '');
+  const acct = allocStripEscapeHtml(rule.acctNum);
+  const aumLabel = allocStripEscapeHtml(allocStripAumDollarLabel(rule.acctNum));
+  const bullet = '<span class="fa-aum-fcm-key-sep" aria-hidden="true"> • </span>';
+  return (
+    `<th class="r alloc-strip-col-rsep fa-fcm-acct-th fa-fcm-acct-th--strip alloc-strip-fcm-col fa-fcm-acct-th--accent-var" style="--fa-fcm-accent:${c}">` +
+    `<span class="alloc-strip-fcm-band-line">` +
+    `<span class="alloc-strip-fcm-band-name">${client}</span>${bullet}` +
+    `<span class="fa-fcm-key-muted">${acct}</span>${bullet}` +
+    `<span class="fa-fcm-key-muted">${aumLabel}</span>` +
+    `</span></th>`
+  );
+}
+
+function allocStripFcmHeaderTh(rule) {
+  const c = COLORS[rule.ci];
+  return `<th class="r alloc-strip-col-rsep fa-fcm-acct-th fa-fcm-acct-th--strip alloc-strip-fcm-col fa-fcm-acct-th--accent-var" style="--fa-fcm-accent:${c}">${rule.acctNum}</th>`;
+}
+
+/** True on fund-allocations.html only: single thead row + FCM key above grid (main.html keeps two-row thead). */
+function allocStripUseCompactFcmStripHeader() {
+  return typeof document !== 'undefined' && document.body.classList.contains('fa-fund-alloc-embedded-strip');
+}
+
+/** One-line color key: dot + Name • acct# • $AUM per account (matches AUM book cards). */
+function allocStripFcmKeyHtml(activeRules) {
+  const items = activeRules.map((rule) => {
+    const c = COLORS[rule.ci];
+    const d = typeof AUM_DATA !== 'undefined' ? (AUM_DATA[rule.acctNum] || { client: rule.fcm, aum: 0 }) : { client: rule.fcm };
+    const client = allocStripEscapeHtml(d.client || rule.fcm || '');
+    const acct = allocStripEscapeHtml(rule.acctNum);
+    const aum = allocStripEscapeHtml(allocStripAumDollarLabel(rule.acctNum));
+    const bullet = '<span class="fa-aum-fcm-key-sep" aria-hidden="true"> • </span>';
+    return (
+      `<span class="alloc-strip-fcm-key-item" style="--fa-fcm-accent:${c}">` +
+      `<span class="alloc-strip-fcm-key-dot" aria-hidden="true"></span>` +
+      `<span class="alloc-strip-fcm-key-text">` +
+      `<span class="alloc-strip-fcm-band-name">${client}</span>` +
+      bullet +
+      `<span class="fa-fcm-key-muted">${acct}</span>` +
+      bullet +
+      `<span class="fa-fcm-key-muted">${aum}</span>` +
+      `</span></span>`
+    );
+  });
+  return `<div class="alloc-strip-fcm-key" role="note">${items.join('')}</div>`;
+}
+
+/**
+ * @param {number|string} value
+ * @param {{acctNum:string,ci:number}} rule
+ * @param {{orderId?:string,monthLabel:string,monthSep?:boolean,editable?:boolean,readOpacity?:number,fontWeight600?:boolean,parentOrderIds?:string[]}} opts
+ */
+function allocStripFcmCell(value, rule, opts) {
+  const { orderId, monthLabel, monthSep, editable, readOpacity, fontWeight600, parentOrderIds } = opts;
+  const ms = allocStripMonthSepClass(!!monthSep);
+  const color = COLORS[rule.ci];
+  const sa = allocStripQuoteAttr(rule.acctNum);
+  const sl = allocStripQuoteAttr(monthLabel);
+  const displayVal = value === '' || value == null ? '' : String(value);
+  const valAttr = allocStripEscapeInputValueAttr(displayVal);
+  const placeholder = displayVal === '' ? '\u2014' : '';
+  const extras = (fontWeight600 ? ';font-weight:600' : '') + (readOpacity != null ? `;opacity:${readOpacity}` : '');
+  const inputStyle = allocStripInputStyle(color) + extras;
+  const stop = ` onclick="event.stopPropagation()"`;
+  const oid = orderId ? allocStripQuoteAttr(orderId) : '';
+  const writable = Boolean(editable && orderId);
+  if (parentOrderIds && parentOrderIds.length) {
+    const idsJs = parentOrderIds.map(id => `'${allocStripQuoteAttr(id)}'`).join(',');
+    return `<td class="r alloc-strip-col-rsep alloc-strip-fcm-col${ms}"><input type="text" inputmode="numeric" autocomplete="off" class="alloc-strip-fcm-input" value="${valAttr}" placeholder="${placeholder}" style="${inputStyle}" onchange="setStripLotsParentGroup([${idsJs}],'${sa}','${sl}',this.value)"${stop}></td>`;
+  }
+  if (writable) {
+    return `<td class="r alloc-strip-col-rsep alloc-strip-fcm-col${ms}"><input type="text" inputmode="numeric" autocomplete="off" class="alloc-strip-fcm-input" value="${valAttr}" placeholder="${placeholder}" style="${inputStyle}" onchange="setStripLots('${oid}','${sa}','${sl}',this.value)"${stop}></td>`;
+  }
+  return `<td class="r alloc-strip-col-rsep alloc-strip-fcm-col${ms}"><input type="text" readonly tabindex="-1" class="alloc-strip-fcm-input alloc-strip-fcm-input--readonly" value="${valAttr}" placeholder="${placeholder}" style="${inputStyle};cursor:default"${stop}></td>`;
+}
+
+/** Per-trade (detail) rows: FCM cells show "-" (splits edited on parent summary; subtotal shows totals). */
+function allocStripFcmTradeDashCells(activeRules, monthSep) {
+  const ms = allocStripMonthSepClass(!!monthSep);
+  return activeRules
+    .map(r => {
+      const c = COLORS[r.ci];
+      return `<td class="r mono alloc-strip-col-rsep alloc-strip-fcm-col alloc-strip-fcm-trade-dash${ms}" style="color:${c};font-weight:600" onclick="event.stopPropagation()">-</td>`;
+    })
+    .join('');
+}
+
+/** FCM totals as plain text (not inputs): subtotal row, or finalized parent summary row. */
+function allocStripFcmSubtotalCell(value, rule, monthSep) {
+  const c = COLORS[rule.ci];
+  const display = value === '' || value == null ? '-' : String(value);
+  const ms = monthSep === true ? allocStripMonthSepClass(true) : '';
+  const valueHtml = allocStripEscapeHtml(display);
+  return `<td class="r mono alloc-strip-col-rsep alloc-strip-fcm-col alloc-strip-fcm-subtotal${ms}" style="color:${c};font-weight:600">${valueHtml}</td>`;
+}
+
+function faBookCardDisplayTitle(name) {
+  return String(name ?? '').trim().replace(/^\(+/, '').replace(/\)+$/, '');
+}
+
+function allocStripBookSlug(book) {
+  return String(book).replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '') || 'book';
+}
+
+function allocStripBookSectionHtml(book, activeRules, bodyRowsHtml) {
+  const accts = activeRules.map(r => r.acctNum).join(' · ');
+  const displayTitle = faBookCardDisplayTitle(book);
+  const scopeSub = BOOK_SCOPE_SUBTITLE[book] || '';
+  const scopeHtml = scopeSub ? `<span class="fa-aum-book-sub">${scopeSub}</span>` : '';
+  const compactHdr = allocStripUseCompactFcmStripHeader();
+  const fcmBandHeaders = activeRules.map(allocStripFcmBandTh).join('');
+  const fcmHeaders = activeRules.map(allocStripFcmHeaderTh).join('');
+  const fcmKeyBlock = compactHdr ? allocStripFcmKeyHtml(activeRules) : '';
+  const bandRowHtml = compactHdr
+    ? ''
+    : `<tr class="alloc-strip-thead-band">
+          <th colspan="2" class="alloc-strip-menu-col-band alloc-strip-menu-month-band" aria-hidden="true"></th>
+          <th aria-hidden="true"></th>
+          <th aria-hidden="true"></th>
+          <th aria-hidden="true"></th>
+          <th class="alloc-strip-col-rsep alloc-strip-uom-hd" aria-hidden="true"></th>
+          ${fcmBandHeaders}
+          <th aria-hidden="true"></th>
+          <th aria-hidden="true"></th>
+          <th aria-hidden="true"></th>
+        </tr>`;
+  const faCardId = 'strip|' + book;
+  const bookSlug = allocStripBookSlug(book);
+  const bodyId = 'fa-strip-book-body-' + bookSlug;
+  const bookCollapsed = typeof faBookCardIsCollapsed === 'function' && faBookCardIsCollapsed(faCardId);
+  return `<section class="content-card content-card--flush-body alloc-strip-book-card${bookCollapsed ? ' fa-book-card--collapsed' : ''}" data-fa-book-card="${allocStripEscapeAttr(faCardId)}">
+      <div class="card-header">
+        <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="${!bookCollapsed}" aria-controls="${bodyId}" aria-label="${allocStripEscapeAttr('Show or hide ' + displayTitle + ' allocations strip')}">
+          <div class="card-title alloc-strip-card-title-row">
+            <span class="fa-card-title-text">${displayTitle}<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i><span class="fa-strip-card-accts">${accts}</span>${scopeHtml}</span>
+          </div>
+        </button>
+        <div class="card-actions action-toolbar alloc-strip-book-card-actions">
+          <button type="button" class="btn btn-ghost btn-sm" onclick='faAllocFinalizeBookClick(${JSON.stringify(book)})' title="Finalize all unfinalized parent trades in this book">Finalize Book</button>
+          <div class="fa-expand-collapse-all-group" role="group" aria-label="${allocStripEscapeAttr('Expand or collapse rows for ' + book)}">
+            <button type="button" id="fa-strip-row-expand-${bookSlug}" class="btn btn-ghost btn-sm fa-expand-collapse-all-btn" onclick='faAllocStripExpandAllInBook(${JSON.stringify(book)})' aria-label="${allocStripEscapeAttr('Expand all rows for ' + book)}" title="${allocStripEscapeAttr('Expand all rows for ' + book)}"><i class="fas fa-angles-down" aria-hidden="true"></i></button>
+            <button type="button" id="fa-strip-row-collapse-${bookSlug}" class="btn btn-ghost btn-sm fa-expand-collapse-all-btn" onclick='faAllocStripCollapseAllInBook(${JSON.stringify(book)})' aria-label="${allocStripEscapeAttr('Collapse all rows for ' + book)}" title="${allocStripEscapeAttr('Collapse all rows for ' + book)}"><i class="fas fa-angles-up" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+      <div id="${bodyId}" class="card-body" ${bookCollapsed ? 'hidden' : ''}>
+      ${fcmKeyBlock}
+      <table class="data-table">
+        <colgroup>
+          <col class="alloc-strip-col-menu" />
+          <col class="alloc-strip-col-month" />
+          <col class="alloc-strip-col-product" />
+          <col class="alloc-strip-col-total" />
+          <col class="alloc-strip-col-avg" />
+          <col class="alloc-strip-col-uom" />
+        </colgroup>
+        <thead>
+        ${bandRowHtml}
+        <tr class="alloc-strip-thead-labels">
+          <th colspan="2" class="alloc-strip-menu-col alloc-strip-menu-month-th" scope="colgroup" aria-label="Month on summary rows; row menu and order on trades">Month</th>
+          <th>Product</th>
+          <th class="r">Total</th>
+          <th class="r">Avg Price</th>
+          <th class="alloc-strip-col-rsep alloc-strip-uom-hd">UOM</th>
+          ${fcmHeaders}
+          <th class="r alloc-strip-leftover-th">Leftover</th>
+          <th class="r alloc-strip-fill-trades-th">Fill Trades</th>
+          <th class="alloc-strip-status-th">Status</th>
+        </tr>
+        </thead>
+        <tbody>${bodyRowsHtml}</tbody>
+      </table>
+      </div>
+    </section>`;
+}
+
+const orders = [
+  // ── Pending ──────────────────────────────────────────────────────────────────
+  // NG May 2026, 20 lots, #GH5600
+  { id:'ORD-7678500', ar:'AR-1102',
+    product:'Natural Gas (NG) · May 2026', short:'NG May 26',
+    contractRange:'May 2026', months:1, lotsPerMonth:20,
+    dir:'Buy', qty:20, price:'3.2650 $/MMBtu', date:'Mar 6, 2026',
+    book:'#GH5600', isOrder:true, status:'pending', proposedAt:'Today 08:30',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:6,  final:6,  target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:6,  final:6,  target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:8,  final:8,  target:.40, ci:2 },
+    ], fills:[] },
+  // WTI Apr 2026, 15 lots, #GH5603
+  { id:'ORD-7678501', ar:'AR-1103',
+    product:'WTI Crude Oil · Apr 2026', short:'WTI Apr 26',
+    contractRange:'Apr 2026', months:1, lotsPerMonth:15,
+    dir:'Sell', qty:15, price:'79.1500 $/bbl', date:'Mar 6, 2026',
+    book:'#GH5603', isOrder:true, status:'pending', proposedAt:'Today 09:05',
+    lines:[
+      { fcm:'Citadel Securities', acctNum:'CIT-88234', proposed:7,  final:7,  target:.45, ci:0 },
+      { fcm:'Barclays',           acctNum:'BAR-44512', proposed:5,  final:5,  target:.35, ci:1 },
+      { fcm:'Morgan Stanley',     acctNum:'MS-5758778',proposed:3,  final:3,  target:.20, ci:2 },
+    ], fills:[] },
+  // Strip: NG Apr–Sep 2026, 10 lots/month, #GH5600
+  { id:'ORD-2847', ar:'AR-1094',
+    product:'Natural Gas (NG) · Apr – Sep 2026', short:'NG Apr–Sep 26',
+    contractRange:'Apr – Sep 2026', months:6, lotsPerMonth:10,
+    dir:'Buy', qty:60, price:'3.2470 $/MMBtu', date:'Mar 5, 2026',
+    book:'#GH5600', isOrder:true, status:'pending', proposedAt:'Yesterday 09:14',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:18, final:18, target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:18, final:18, target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:24, final:24, target:.40, ci:2 },
+    ], fills:[] },
+  // Strip: WTI Jun–Dec 2026, 5 lots/month, #GH5600
+  { id:'ORD-2848', ar:'AR-1095',
+    product:'WTI Crude Oil · Jun – Dec 2026', short:'WTI Jun–Dec 26',
+    contractRange:'Jun – Dec 2026', months:7, lotsPerMonth:5,
+    dir:'Sell', qty:35, price:'78.4200 $/bbl', date:'Mar 5, 2026',
+    book:'#GH5600', isOrder:true, status:'pending', proposedAt:'Yesterday 10:02',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:10, final:10, target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:11, final:11, target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:14, final:14, target:.40, ci:2 },
+    ], fills:[] },
+  // HH Mar 2026, 4 lots, #GH5601
+  { id:'ORD-2849', ar:'AR-1096',
+    product:'Henry Hub NG · Mar 2026', short:'HH Mar 26',
+    contractRange:'Mar 2026', months:1, lotsPerMonth:4,
+    dir:'Buy', qty:4, price:'3.1190 $/MMBtu', date:'Mar 4, 2026',
+    book:'#GH5601', isOrder:true, status:'pending', proposedAt:'Mar 4, 15:44',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:2, final:2, target:.50, ci:0 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:2, final:2, target:.50, ci:2 },
+    ], fills:[] },
+  // WTI Jun 2026, 25 lots, #GH5603
+  { id:'ORD-7678504', ar:'AR-1106',
+    product:'WTI Crude Oil · Jun 2026', short:'WTI Jun 26',
+    contractRange:'Jun 2026', months:1, lotsPerMonth:25,
+    dir:'Buy', qty:25, price:'77.8800 $/bbl', date:'Mar 5, 2026',
+    book:'#GH5603', isOrder:true, status:'pending', proposedAt:'Yesterday 14:20',
+    lines:[
+      { fcm:'Citadel Securities', acctNum:'CIT-88234', proposed:11, final:11, target:.45, ci:0 },
+      { fcm:'Barclays',           acctNum:'BAR-44512', proposed:9,  final:9,  target:.35, ci:1 },
+      { fcm:'Morgan Stanley',     acctNum:'MS-5758778',proposed:5,  final:5,  target:.20, ci:2 },
+    ], fills:[] },
+  // ── Finalized ─────────────────────────────────────────────────────────────────
+  // HH Apr–Jun 2026, 12 lots (4/mo × 3), #GH5601
+  { id:'ORD-7678502', ar:'AR-1104',
+    product:'Henry Hub NG · Apr – Jun 2026', short:'HH Apr–Jun 26',
+    contractRange:'Apr – Jun 2026', months:3, lotsPerMonth:4,
+    dir:'Buy', qty:12, price:'3.1190 $/MMBtu', date:'Mar 4, 2026',
+    book:'#GH5601', isOrder:true, status:'finalized', proposedAt:'Mar 4, 09:30', finalizedAt:'Mar 4, 10:15', finalizedBy:'S. Patel',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:6, final:6, target:.50, ci:0 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:6, final:6, target:.50, ci:2 },
+    ],
+    fills:[
+      { tradeId:'TRD-2910', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:2, contract:'Apr 2026', entryPx:3.1190, curvePx:3.2100, unrealPnl:1820, dayMtm:210, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2911', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:2, contract:'May 2026', entryPx:3.1190, curvePx:3.1950, unrealPnl:1520, dayMtm:190, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2912', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:2, contract:'Jun 2026', entryPx:3.1190, curvePx:3.1750, unrealPnl:1120, dayMtm:160, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2913', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:2, contract:'Apr 2026', entryPx:3.1190, curvePx:3.2100, unrealPnl:1820, dayMtm:210, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2914', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:2, contract:'May 2026', entryPx:3.1190, curvePx:3.1950, unrealPnl:1520, dayMtm:190, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2915', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:2, contract:'Jun 2026', entryPx:3.1190, curvePx:3.1750, unrealPnl:1120, dayMtm:160, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+    ] },
+  // NG Mar 2026, 30 lots, #GH5600, Sell
+  { id:'ORD-7678503', ar:'AR-1105',
+    product:'Natural Gas (NG) · Mar 2026', short:'NG Mar 26',
+    contractRange:'Mar 2026', months:1, lotsPerMonth:30,
+    dir:'Sell', qty:30, price:'3.2800 $/MMBtu', date:'Mar 3, 2026',
+    book:'#GH5600', isOrder:true, status:'finalized', proposedAt:'Mar 3, 11:20', finalizedAt:'Mar 3, 12:05', finalizedBy:'J. Smith',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:9,  final:9,  target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:9,  final:9,  target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:12, final:12, target:.40, ci:2 },
+    ],
+    fills:[
+      { tradeId:'TRD-2916', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Sell', qty:9,  contract:'Mar 2026', entryPx:3.2800, curvePx:3.3120, unrealPnl:-2880, dayMtm:-380, src:'user',   asOf:'Mar 5', updatedAt:'Mar 3, 12:05' },
+      { tradeId:'TRD-2917', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Sell', qty:9,  contract:'Mar 2026', entryPx:3.2800, curvePx:3.3120, unrealPnl:-2880, dayMtm:-380, src:'user',   asOf:'Mar 5', updatedAt:'Mar 3, 12:05' },
+      { tradeId:'TRD-2918', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Sell', qty:12, contract:'Mar 2026', entryPx:3.2800, curvePx:3.3120, unrealPnl:-3840, dayMtm:-510, src:'user',   asOf:'Mar 5', updatedAt:'Mar 3, 12:05' },
+    ] },
+  // NG Jan–Jun 2026, 60 lots (10/mo), #GH5600, Buy — finalized strip
+  { id:'ORD-2844', ar:'AR-1091',
+    product:'Natural Gas (NG) · Jan – Jun 2026', short:'NG Jan–Jun 26',
+    contractRange:'Jan – Jun 2026', months:6, lotsPerMonth:10,
+    dir:'Buy', qty:60, price:'3.2310 $/MMBtu', date:'Mar 5, 2026',
+    book:'#GH5600', isOrder:true, status:'finalized', proposedAt:'Today 08:51', finalizedAt:'Today 09:47', finalizedBy:'J. Smith',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:18, final:18, target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:18, final:18, target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:24, final:24, target:.40, ci:2 },
+    ],
+    fills:[
+      { tradeId:'TRD-2901', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Jan 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:4740, dayMtm:540, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2902', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Feb 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:4230, dayMtm:480, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2903', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Mar 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:3720, dayMtm:410, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2904', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Jan 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:4740, dayMtm:540, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2905', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Feb 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:4230, dayMtm:480, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2906', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Mar 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:3720, dayMtm:410, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2907', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Jan 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:6320, dayMtm:720, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2908', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Feb 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:5640, dayMtm:640, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2909', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Mar 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:4960, dayMtm:550, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2919', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Apr 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:4740, dayMtm:540, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2920', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'May 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:4230, dayMtm:480, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2921', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Jun 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:3720, dayMtm:410, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2922', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Apr 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:4740, dayMtm:540, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2923', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'May 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:4230, dayMtm:480, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2924', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Jun 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:3720, dayMtm:410, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2925', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Apr 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:6320, dayMtm:720, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2926', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'May 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:5640, dayMtm:640, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2927', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Jun 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:4960, dayMtm:550, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+    ] },
+];
+
+/** Parent trades grid: same pagination / fill-height pattern as Trades screen */
+/** Match mock `orders` length (9) so no row is hidden on page 1 */
+const FA_TRADES_PAGE_SIZE = 9;
+let faTradesPageIndex = 0;
+let faTradesFilterKeyCached = '';
+
+function faTradesFilterKey() {
+  return document.getElementById('fa-trades-refine-input')?.value || '';
+}
+
+function updateFaTradesPagination(total, pageIndex, pageSize) {
+  const wrap = document.querySelector('.fa-trades-table-wrapper');
+  const maxPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+  if (wrap) {
+    wrap.dataset.maxPage = String(maxPage);
+    wrap.dataset.total = String(total);
+  }
+  const from = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const to = Math.min(total, (pageIndex + 1) * pageSize);
+  const pt = document.getElementById('fa-trades-pagination-text');
+  if (pt) pt.textContent = from + ' to ' + to + ' of ' + total;
+  const pp = document.getElementById('fa-trades-pagination-page');
+  const numPages = total === 0 ? 1 : maxPage + 1;
+  if (pp) pp.textContent = 'Page ' + (total === 0 ? 1 : pageIndex + 1) + ' of ' + numPages;
+  const dFirst = pageIndex <= 0 || total === 0;
+  const dLast = pageIndex >= maxPage || total === 0;
+  const elFirst = document.getElementById('fa-trades-page-first');
+  const elPrev = document.getElementById('fa-trades-page-prev');
+  const elNext = document.getElementById('fa-trades-page-next');
+  const elLast = document.getElementById('fa-trades-page-last');
+  if (elFirst) elFirst.disabled = dFirst;
+  if (elPrev) elPrev.disabled = dFirst;
+  if (elNext) elNext.disabled = dLast;
+  if (elLast) elLast.disabled = dLast;
+}
+
+/** Widen / restore default width for Parent Trades (left) pane; icon reflects state. */
+function faToggleParentTradesPaneWidth(ev) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  const panel = document.getElementById('panel-orders');
+  if (!panel) return;
+  const leftPane = panel.querySelector('.split-left');
+  const rightPane = panel.querySelector('.split-right');
+  const split = panel.querySelector('.split');
+  const btn = document.getElementById('fa-parent-trades-pane-toggle');
+  if (!leftPane || !rightPane || !split || !btn) return;
+
+  const icon = btn.querySelector('i');
+  const expanded = btn.getAttribute('aria-pressed') === 'true';
+  const widePx = 520;
+
+  if (expanded) {
+    leftPane.style.width = '';
+    leftPane.style.flex = '';
+    rightPane.style.flex = '';
+    leftPane.classList.remove('fa-split-left-trades--expanded');
+    btn.setAttribute('aria-pressed', 'false');
+    btn.title = 'Widen parent trades panel';
+    btn.setAttribute('aria-label', 'Widen parent trades panel');
+    if (icon) {
+      icon.classList.remove('fa-angles-left');
+      icon.classList.add('fa-angles-right');
+    }
+  } else {
+    const splitWidth = split.getBoundingClientRect().width;
+    const minLeft = 220;
+    const maxLeft = Math.max(minLeft, splitWidth - 340);
+    const next = Math.min(widePx, maxLeft);
+    leftPane.style.width = next + 'px';
+    leftPane.style.flex = '0 0 ' + next + 'px';
+    rightPane.style.flex = '1 1 auto';
+    leftPane.classList.add('fa-split-left-trades--expanded');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.title = 'Restore default panel width';
+    btn.setAttribute('aria-label', 'Restore default panel width');
+    if (icon) {
+      icon.classList.remove('fa-angles-right');
+      icon.classList.add('fa-angles-left');
+    }
+  }
+}
+
+function faTradesPageFirst() {
+  faTradesPageIndex = 0;
+  renderTradesList();
+}
+
+function faTradesPagePrev() {
+  if (faTradesPageIndex > 0) {
+    faTradesPageIndex--;
+    renderTradesList();
+  }
+}
+
+function faTradesPageNext() {
+  const wrap = document.querySelector('.fa-trades-table-wrapper');
+  const maxPage = parseInt(wrap?.dataset.maxPage || '0', 10);
+  if (faTradesPageIndex < maxPage) {
+    faTradesPageIndex++;
+    renderTradesList();
+  }
+}
+
+function faTradesPageLast() {
+  const wrap = document.querySelector('.fa-trades-table-wrapper');
+  const maxPage = parseInt(wrap?.dataset.maxPage || '0', 10);
+  faTradesPageIndex = maxPage;
+  renderTradesList();
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const fmt$ = n => { if(n==null) return '—'; const a=Math.abs(n); const s=a>=1000?'$'+(a/1000).toFixed(1)+'k':'$'+a.toFixed(0); return n<0?'('+s+')':s; };
+const fmtP = (n,d=4) => n==null?'—':n.toFixed(d);
+const pCls = n => n==null?'':n>=0?'pos':'neg';
+
+function statusBadge(s) {
+  return { pending:'<span class="badge b-amber"><span class="b-dot"></span>Unfinalized</span>', finalized:'<span class="badge b-green"><span class="b-dot"></span>Finalized</span>', cancelled:'<span class="badge b-gray"><span class="b-dot"></span>Cancelled</span>' }[s]||s;
+}
+
+// ─── Allocation calendar (shared as-of-picker + FA status legend) ─────────────
+const MOCKUP_TODAY = new Date(2026, 2, 26); // Mar 26, 2026 — aligns with date trigger + mock “today”
+const _MONTH_NUM = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function parseMockupDate(str) {
+  const m = (str||'').match(/(\w{3})\s+(\d+),\s+(\d{4})/);
+  return m ? new Date(+m[3], _MONTH_NUM[m[1]], +m[2]) : null;
+}
+
+let faAsOfPickerInstance = null;
+
+function renderFaAllocCalendar(instance) {
+  instance = instance || faAsOfPickerInstance;
+  if (!instance || !instance.gridEl) return;
+
+  const dateStatus = {};
+  orders.forEach(o => {
+    const d = parseMockupDate(o.date);
+    if (!d) return;
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (!dateStatus[key]) dateStatus[key] = 'ok';
+    if (o.status === 'pending') dateStatus[key] = 'bad';
+  });
+
+  const view = instance.viewDate;
+  const year = view.getFullYear();
+  const month = view.getMonth();
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const selected = instance.selectedDate;
+  const todayD = MOCKUP_TODAY.getDate();
+  const todayM = MOCKUP_TODAY.getMonth();
+  const todayY = MOCKUP_TODAY.getFullYear();
+
+  let html = DOWS.map(d => `<div class="as-of-picker__cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < firstDow; i++) html += '<div></div>';
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const status = dateStatus[key];
+    const isToday = day === todayD && month === todayM && year === todayY;
+    const isSelected = day === selected.getDate() && month === selected.getMonth() && year === selected.getFullYear();
+    const cls = ['as-of-picker__cal-day'];
+    if (status === 'ok') cls.push('c-ok');
+    else if (status === 'bad') cls.push('c-bad');
+    if (isToday) cls.push('is-today');
+    if (isSelected) cls.push('is-selected');
+    const title = status === 'ok' ? 'All finalized' : status === 'bad' ? 'Has unfinalized trades' : '';
+    html += `<button type="button" class="${cls.join(' ')}" data-as-of-day="${day}" title="${title}">${day}</button>`;
+  }
+
+  instance.gridEl.innerHTML = html;
+  if (instance.monthLabelEl) {
+    instance.monthLabelEl.textContent = view.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }
+}
+
+// ─── True-up adjustment UI (legacy stubs for hidden sample markup in #panel-trueup) ──
+function showTrueupAdjustment(key) {
+  const el = document.getElementById('trueup-adj-' + key);
+  if (el) el.style.display = 'block';
+}
+function hideTrueupAdjustment(key) {
+  const el = document.getElementById('trueup-adj-' + key);
+  if (el) el.style.display = 'none';
+}
+function queueTrueupAdjustment(key) {
+  hideTrueupAdjustment(key);
+  const banner = document.getElementById('trueup-queued-banner');
+  if (banner) banner.style.display = 'flex';
+}
+function cancelTrueupAdjustment() {
+  const banner = document.getElementById('trueup-queued-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+// ─── Parent trades list (left panel) ──────────────────────────────────────────
+function highlightOrder() {
+  /* Reserved: scroll strip to selected trade */
+}
+
+/** Split mock price string e.g. "3.2650 $/MMBtu" → numeric + UOM */
+function faParentTradePriceParts(priceStr) {
+  const s = String(priceStr || '').trim();
+  const m = s.match(/^([\d.,]+)\s+(.+)$/);
+  if (m) return { num: m[1], uom: m[2].trim() };
+  if (/^[\d.,]/.test(s)) return { num: s, uom: '—' };
+  return { num: '—', uom: s || '—' };
+}
+
+/** Single month or range from contractRange label (en dash or em dash). */
+function faParentTradeTenorFromRange(contractRange) {
+  const r = String(contractRange || '').trim();
+  if (!r) return { start: '—', end: '—' };
+  const parts = r.split(/\s*[–—]\s*/).map(p => p.trim()).filter(Boolean);
+  if (parts.length >= 2) return { start: parts[0], end: parts[parts.length - 1] };
+  return { start: r, end: r };
+}
+
+/** [SYM] stripped product name — matches bracket + short-name pattern used on FA grids */
+function faParentTradeProductCellHtml(o) {
+  const symRaw = (o.short || '').split(/\s+/)[0] || '—';
+  let namePart = (o.product || '').split('·')[0].trim();
+  namePart = namePart.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  if (!namePart) namePart = (o.product || '').split('·')[0].trim() || (o.short || '');
+  const sym = allocStripEscapeHtml(symRaw);
+  const nm = allocStripEscapeHtml(namePart);
+  return '<span class="product-label fa-trades-product-label">' +
+    '<span class="bracket">[</span><span class="short-name">' + sym + '</span><span class="bracket">]</span> ' + nm +
+    '</span>';
+}
+
+/** Strip aggregate row product cell: first order in group, or bracket-only fallback by ticker key. */
+function allocStripProductHtmlForCell(ordersInCell, prodKey) {
+  if (ordersInCell.length) return faParentTradeProductCellHtml(ordersInCell[0]);
+  return (
+    '<span class="product-label fa-trades-product-label">' +
+    '<span class="bracket">[</span><span class="short-name">' +
+    allocStripEscapeHtml(prodKey) +
+    '</span><span class="bracket">]</span></span>'
+  );
+}
+
+/** Same behavior as Trades / Market Data: icon toggles search vs refine + Apply visibility. */
+function toggleRefineMode(section) {
+  const prefix = section ? section + '-' : '';
+  const icon = document.getElementById(prefix + 'refine-toggle-icon');
+  const input = document.getElementById(prefix + 'refine-input');
+  const applyBtn = document.getElementById(prefix + 'refine-apply-btn');
+  if (!icon || !input || !applyBtn) return;
+  const iconElement = icon.querySelector('i');
+  const isFilterMode = iconElement.classList.contains('fa-filter');
+  if (isFilterMode) {
+    iconElement.classList.remove('fa-filter');
+    iconElement.classList.add('fa-search');
+    input.placeholder = 'Search current results';
+    applyBtn.style.display = 'none';
+  } else {
+    iconElement.classList.remove('fa-search');
+    iconElement.classList.add('fa-filter');
+    input.placeholder = 'Refine current results';
+    applyBtn.style.display = '';
+  }
+}
+
+function renderTradesList() {
+  const fk = faTradesFilterKey();
+  if (fk !== faTradesFilterKeyCached) {
+    faTradesPageIndex = 0;
+    faTradesFilterKeyCached = fk;
+  }
+
+  const pending = orders.filter(o => o.status === 'pending').length;
+  const pendingAnchor = document.getElementById('trades-pending-badge-anchor');
+  const pendingTip = document.getElementById('trades-pending-tooltip');
+  const pendingBadge = document.getElementById('trades-pending-count');
+  if (pendingAnchor && pendingTip && pendingBadge) {
+    if (pending === 0) {
+      pendingAnchor.hidden = true;
+      pendingTip.removeAttribute('data-tooltip');
+      pendingTip.removeAttribute('aria-label');
+      pendingBadge.textContent = '';
+    } else {
+      pendingAnchor.hidden = false;
+      const tip = pending + ' unfinalized';
+      pendingTip.setAttribute('data-tooltip', tip);
+      pendingTip.setAttribute('aria-label', tip);
+      pendingBadge.textContent = String(pending);
+    }
+  }
+  const tcOrdersEl = document.getElementById('tc-orders');
+  if (tcOrdersEl) tcOrdersEl.textContent = orders.length;
+  const nbEl = document.getElementById('nav-badge-alloc');
+  if (nbEl) nbEl.textContent = pending;
+
+  renderFaAllocCalendar();
+
+  const refine = (document.getElementById('fa-trades-refine-input')?.value || '').toLowerCase().trim();
+  const visible = refine
+    ? orders.filter(o =>
+        o.id.toLowerCase().includes(refine) ||
+        o.short.toLowerCase().includes(refine) ||
+        (o.product && o.product.toLowerCase().includes(refine)) ||
+        (o.dir && o.dir.toLowerCase().includes(refine))
+      )
+    : orders;
+
+  const total = visible.length;
+  const maxPage = Math.max(0, Math.ceil(total / FA_TRADES_PAGE_SIZE) - 1);
+  faTradesPageIndex = Math.min(Math.max(0, faTradesPageIndex), maxPage);
+  const pageSlice = total
+    ? visible.slice(faTradesPageIndex * FA_TRADES_PAGE_SIZE, faTradesPageIndex * FA_TRADES_PAGE_SIZE + FA_TRADES_PAGE_SIZE)
+    : [];
+
+  const tbody = document.getElementById('fa-trades-grid-body');
+  if (!tbody) return;
+
+  if (!total) {
+    tbody.innerHTML =
+      '<tr class="fa-trades-empty-row"><td colspan="9" class="fa-trades-grid-empty">No trades match filters.</td></tr>';
+    updateFaTradesPagination(0, 0, FA_TRADES_PAGE_SIZE);
+    return;
+  }
+
+  const rows = pageSlice.map(o => {
+    const isPending = o.status === 'pending';
+    const dotColor = isPending ? 'var(--fa-pending-amber)' : 'var(--color-green)';
+    const dirColor = o.dir === 'Buy' ? 'var(--success)' : 'var(--danger)';
+    const safeId = o.id.replace(/'/g, "\\'");
+    const pp = faParentTradePriceParts(o.price);
+    const tenor = faParentTradeTenorFromRange(o.contractRange);
+    return '<tr onclick="highlightOrder(\'' + safeId + '\')" class="fa-trades-grid-row">' +
+      '<td class="fa-trades-col-id">' +
+        '<span class="fa-trades-id-row">' +
+          '<span class="fa-trades-status-dot" style="background:' + dotColor + '" aria-hidden="true"></span>' +
+          '<span class="fa-trades-id-text">' + allocStripEscapeHtml(o.id) + '</span>' +
+        '</span>' +
+      '</td>' +
+      '<td class="fa-trades-col-product">' + faParentTradeProductCellHtml(o) + '</td>' +
+      '<td class="fa-trades-col-price r fa-trades-num">' + allocStripEscapeHtml(pp.num) + '</td>' +
+      '<td class="fa-trades-col-qty r fa-trades-num">' + allocStripEscapeHtml(String(o.qty)) + '</td>' +
+      '<td class="fa-trades-col-tenor">' + allocStripEscapeHtml(tenor.start) + '</td>' +
+      '<td class="fa-trades-col-tenor">' + allocStripEscapeHtml(tenor.end) + '</td>' +
+      '<td class="fa-trades-col-book">' + allocStripEscapeHtml(o.book || '') + '</td>' +
+      '<td class="fa-trades-col-dir" style="font-size:.65rem;font-weight:600;color:' + dirColor + '">' + allocStripEscapeHtml(o.dir || '') + '</td>' +
+      '<td class="fa-trades-col-uom">' + allocStripEscapeHtml(faUomColumnDisplay(pp.uom)) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  tbody.innerHTML = rows;
+  updateFaTradesPagination(total, faTradesPageIndex, FA_TRADES_PAGE_SIZE);
+}
+
+// ─── Allocations tab: trades list + strip (single in-page view) ────────────────
+function showSection(name) {
+  void name;
+  const screenHead = document.getElementById('fa-alloc-screen-head');
+  if (screenHead) screenHead.style.display = '';
+  showAllocationsTabPanel();
+}
+
+function showAllocationsTabPanel() {
+  document.getElementById('panel-orders')?.classList.add('active');
+  renderStrip();
+  faAllocSyncSaveAllocationsButton();
+}
+
+// ─── Strip view ───────────────────────────────────────────────────────────────
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getMonthLabels(order) {
+  const r = order.contractRange;
+  if (/^\w+\s+\d{4}$/.test(r)) return [r];
+  const m = r.match(/^(\w+)\s+[–-]\s+(\w+)\s+(\d{4})$/);
+  if (m) {
+    const s = MONTH_NAMES.indexOf(m[1]), e = MONTH_NAMES.indexOf(m[2]), yr = m[3];
+    const res = [];
+    for (let i = s; i <= e; i++) res.push(MONTH_NAMES[i] + ' ' + yr);
+    return res;
+  }
+  return [r];
+}
+
+function sortMonthLabels(labels) {
+  return [...new Set(labels)].sort((a, b) => {
+    const [aM, aY] = a.split(' '), [bM, bY] = b.split(' ');
+    return aY !== bY ? parseInt(aY) - parseInt(bY) : MONTH_NAMES.indexOf(aM) - MONTH_NAMES.indexOf(bM);
+  });
+}
+
+// Group: book → monthLabel → productKey → [orders]
+function buildStripByBook(filteredOrders) {
+  const byBook = {};
+  filteredOrders.forEach(o => {
+    const prod = o.short.split(' ')[0];
+    if (!byBook[o.book]) byBook[o.book] = {};
+    getMonthLabels(o).forEach(label => {
+      if (!byBook[o.book][label]) byBook[o.book][label] = {};
+      if (!byBook[o.book][label][prod]) byBook[o.book][label][prod] = [];
+      byBook[o.book][label][prod].push(o);
+    });
+  });
+  return byBook;
+}
+
+/** True when a fill record's contract applies to this strip month row. */
+function allocStripFillContractMatchesMonth(fillContract, order, monthLabel) {
+  const fc = String(fillContract ?? '').trim();
+  if (!fc || !monthLabel) return false;
+  if (fc === monthLabel) return true;
+  const months = getMonthLabels(order);
+  if (months.length === 1 && fc === String(order.contractRange ?? '').trim()) return true;
+  return false;
+}
+
+/** Parent summary row uses read-only FCM subtotals when every order in the cell is finalized. */
+function allocStripParentRowUsesFinalizedFcmCells(ordersInCell) {
+  return ordersInCell.length > 0 && ordersInCell.every(o => o.status === 'finalized');
+}
+
+let expandedStrip = new Set();
+const stripEdits = {}; // "orderId|acctNum|monthLabel" → overridden lot count
+/** True after user changes a writable strip FCM lot input (shows Save Allocations). */
+let faAllocStripFcmDirty = false;
+
+function faAllocSyncSaveAllocationsButton() {
+  const btn = document.getElementById('fa-alloc-save-allocations');
+  if (btn) {
+    const show = faAllocStripFcmDirty;
+    btn.hidden = !show;
+    btn.disabled = false;
+    btn.title = show ? 'Mock — no action yet' : '';
+  }
+}
+
+function faAllocMarkStripFcmDirty() {
+  faAllocStripFcmDirty = true;
+  faAllocSyncSaveAllocationsButton();
+}
+
+function getStripLots(o, acctNum, monthLabel) {
+  const k = `${o.id}|${acctNum}|${monthLabel}`;
+  if (k in stripEdits) return stripEdits[k];
+  const bookKey = BOOK_LEV_KEY[o.book];
+  if (bookKey) {
+    const ticker = o.short.split(' ')[0];
+    const splits = computeTickerSplit(bookKey, ticker);
+    if (splits && acctNum in splits) return Math.round(o.lotsPerMonth * splits[acctNum]);
+  }
+  const line = o.lines.find(l => l.acctNum === acctNum);
+  return line ? Math.round(o.lotsPerMonth * line.target) : 0;
+}
+
+function setStripLots(orderId, acctNum, monthLabel, val) {
+  stripEdits[`${orderId}|${acctNum}|${monthLabel}`] = Math.max(0, parseInt(val, 10) || 0);
+  faAllocMarkStripFcmDirty();
+  renderStrip();
+}
+
+/** Parent summary row: distribute account lots across orders in the cell (by lots/mo), then refresh. */
+function setStripLotsParentGroup(orderIds, acctNum, monthLabel, val) {
+  const target = Math.max(0, parseInt(val, 10) || 0);
+  const list = orders.filter(o => orderIds.includes(o.id));
+  if (!list.length) {
+    renderStrip();
+    return;
+  }
+  const totalLots = list.reduce((s, o) => s + o.lotsPerMonth, 0);
+  if (totalLots <= 0) {
+    list.forEach(o => {
+      stripEdits[`${o.id}|${acctNum}|${monthLabel}`] = 0;
+    });
+    faAllocMarkStripFcmDirty();
+    renderStrip();
+    return;
+  }
+  let remaining = target;
+  list.forEach((o, i) => {
+    const k = `${o.id}|${acctNum}|${monthLabel}`;
+    if (i === list.length - 1) {
+      stripEdits[k] = Math.max(0, remaining);
+    } else {
+      const x = Math.round((target * o.lotsPerMonth) / totalLots);
+      stripEdits[k] = x;
+      remaining -= x;
+    }
+  });
+  faAllocMarkStripFcmDirty();
+  renderStrip();
+}
+
+function getFaStripFilterState() {
+  return { dir: '', product: '', status: '' };
+}
+
+/** Summary row keys `${book}|${monthLabel}|${prod}` for this book under current strip filters. */
+function collectAllocStripKeysForBook(book) {
+  const { dir: dirF, product: prodF, status: statF } = getFaStripFilterState();
+  const filtered = orders.filter(
+    o =>
+      (!dirF || o.dir === dirF) &&
+      (!prodF || o.product.includes(prodF)) &&
+      (!statF || o.status === statF)
+  );
+  const monthMap = buildStripByBook(filtered)[book];
+  if (!monthMap) return [];
+  const keys = [];
+  sortMonthLabels(Object.keys(monthMap)).forEach(label => {
+    const prodMap = monthMap[label];
+    Object.keys(prodMap)
+      .sort()
+      .forEach(prod => {
+        keys.push(`${book}|${label}|${prod}`);
+      });
+  });
+  return keys;
+}
+
+/** @param {string} book */
+function renderStripRowsForBook(book, monthMap, activeRules) {
+  const sortedMonths = sortMonthLabels(Object.keys(monthMap));
+  let rows = '';
+  sortedMonths.forEach((label, mIdx) => {
+    const prodMap = monthMap[label];
+    const prods = Object.keys(prodMap).sort();
+
+    prods.forEach((prod, pi) => {
+      const ordersInCell = prodMap[prod];
+      const key = `${book}|${label}|${prod}`;
+      const safeKey = key.replace(/'/g, "\\'");
+      const expanded = expandedStrip.has(key);
+      const monthSep = pi === 0 && mIdx > 0;
+
+      let total = 0;
+      const fcmTotals = activeRules.map(() => 0);
+      let wValue = 0;
+      let wUnit = null;
+      let wMix = false;
+      ordersInCell.forEach(o => {
+        total += o.lotsPerMonth;
+        activeRules.forEach((r, ri) => {
+          fcmTotals[ri] += getStripLots(o, r.acctNum, label);
+        });
+        const pm = o.price.match(/^([\d.]+)\s+(.+)$/);
+        if (pm) {
+          if (!wUnit) wUnit = pm[2];
+          else if (wUnit !== pm[2]) wMix = true;
+          wValue += parseFloat(pm[1]) * o.lotsPerMonth;
+        }
+      });
+
+      const avgPx = total > 0 && !wMix && wUnit ? wValue / total : null;
+      const avgNumHtml = allocStripAvgNumHtml(avgPx);
+      const uomHtml = allocStripUomHtml(avgPx != null && wUnit ? wUnit : null);
+      const diff = total - fcmTotals.reduce((s, v) => s + v, 0);
+
+      const hasPending = ordersInCell.some(o => o.status === 'pending');
+      const allFinalizedForFills = allocStripParentRowUsesFinalizedFcmCells(ordersInCell);
+      const fillRowsForCell = allFinalizedForFills
+        ? allocStripCollectFillsForCell(ordersInCell, label, activeRules)
+        : [];
+      const fillTradesCellHtml = allocStripFillTradesCellHtml(
+        book,
+        label,
+        prod,
+        fillRowsForCell.length,
+        monthSep
+      );
+      const statusHtml = allocStripAggregateStatusHtml(hasPending);
+
+      const ms = monthSep;
+
+      const allFinalized = allocStripParentRowUsesFinalizedFcmCells(ordersInCell);
+      const parentOrderIds = ordersInCell.map(o => o.id);
+      const fcmCells = fcmTotals
+        .map((v, i) => {
+          const r = activeRules[i];
+          if (allFinalized) {
+            return allocStripFcmSubtotalCell(v, r, ms);
+          }
+          return allocStripFcmCell(v, r, {
+            monthLabel: label,
+            monthSep: ms,
+            parentOrderIds,
+          });
+        })
+        .join('');
+
+      const productCellHtml = allocStripProductHtmlForCell(ordersInCell, prod);
+      const expandIcon = allocStripExpandIcon(expanded);
+      const msCls = allocStripMonthSepClass(ms);
+      const sepAttr = ms ? ' class="alloc-strip-month-sep"' : '';
+
+      rows += `<tr class="alloc-strip-summary-row" onclick="toggleStrip('${safeKey}')" aria-expanded="${expanded}">
+          <td colspan="2" class="alloc-strip-summary-month alloc-strip-summary-menu-month${msCls}"><span class="alloc-strip-month-toggle">${expandIcon}${label}</span></td>
+          <td${sepAttr}>${productCellHtml}</td>
+          <td class="r mono alloc-strip-summary-total${msCls}">${total}</td>
+          <td class="r alloc-strip-avg-cell${msCls}">${avgNumHtml}</td>
+          <td class="alloc-strip-col-rsep alloc-strip-uom-cell${msCls}">${uomHtml}</td>
+          ${fcmCells}
+          ${allocStripLeftoverCell(diff, ms)}
+          ${fillTradesCellHtml}
+          <td class="alloc-strip-status-cell${ms ? ' alloc-strip-month-sep' : ''}">${statusHtml}</td>
+        </tr>`;
+
+      if (expanded) {
+        ordersInCell.forEach((o, di) => {
+          const oFcmCells = allocStripFcmTradeDashCells(activeRules, false);
+          const oSum = activeRules.reduce((s, r) => s + getStripLots(o, r.acctNum, label), 0);
+          const oDiff = o.lotsPerMonth - oSum;
+          const pp = allocStripParseTradePrice(o.price);
+          const detailPriceNum =
+            pp.num != null
+              ? `<span class="mono">${allocStripEscapeHtml(pp.num)}</span>`
+              : allocStripEscapeHtml(o.price);
+          const detailUom =
+            pp.unit != null ? allocStripEscapeHtml(faUomColumnDisplay(pp.unit)) || '—' : '—';
+          rows += `<tr class="alloc-strip-detail-row ${allocStripExpStripeClass(di)}">
+              ${allocStripTradeMenuCell(o.id, false)}
+              <td class="alloc-strip-detail-id">${o.id}</td>
+              <td>${faParentTradeProductCellHtml(o)}</td>
+              <td class="r mono fa-strip-detail-lots">${o.lotsPerMonth}</td>
+              <td class="r alloc-strip-detail-price">${detailPriceNum}</td>
+              <td class="alloc-strip-col-rsep alloc-strip-uom-cell">${detailUom}</td>
+              ${oFcmCells}
+              ${allocStripLeftoverCell(oDiff, false, { tradeRow: true })}
+              <td class="alloc-strip-fill-trades-cell">-</td>
+              <td class="alloc-strip-status-cell">-</td>
+            </tr>`;
+        });
+        const tickerSplits = BOOK_LEV_KEY[book] ? computeTickerSplit(BOOK_LEV_KEY[book], prod) : null;
+        rows += `<tr class="alloc-strip-subtotal-row">
+            ${allocStripTradeMenuEmptyCell(false)}
+            <td class="alloc-strip-subtotal-label">Subtotal:</td>
+            <td>${productCellHtml}</td>
+            <td class="r mono alloc-strip-summary-total">${total}</td>
+            <td class="r alloc-strip-avg-cell">${avgNumHtml}</td>
+            <td class="alloc-strip-col-rsep alloc-strip-uom-cell">${uomHtml}</td>
+            ${activeRules.map((r, i) => allocStripFcmSubtotalCell(fcmTotals[i], r)).join('')}
+            ${allocStripLeftoverCell(diff, false)}
+            <td class="alloc-strip-fill-trades-cell"></td>
+            <td class="alloc-strip-status-cell"></td>
+          </tr>`;
+        const aeFcmCells = activeRules
+          .map((r, i) => {
+            const actualPct = total > 0 ? ((fcmTotals[i] / total) * 100).toFixed(0) : '0';
+            const expPct = tickerSplits ? (tickerSplits[r.acctNum] * 100).toFixed(0) : (r.target * 100).toFixed(0);
+            const c = COLORS[r.ci] != null ? COLORS[r.ci] : 'var(--muted)';
+            return `<td class="r mono alloc-strip-col-rsep alloc-strip-fcm-col alloc-strip-ae-fcm"><span class="fa-tooltip-wrap" data-tooltip="Actual / Expected"><span class="alloc-strip-ae-pair" style="color:${c}">${actualPct}%<span class="alloc-strip-ae-sep"> / </span>${expPct}%</span></span></td>`;
+          })
+          .join('');
+        rows += `<tr class="alloc-strip-ae-row" aria-label="Actual and expected allocation by account">
+            <td colspan="6" class="alloc-strip-col-rsep" aria-hidden="true"></td>
+            ${aeFcmCells}
+            <td class="r alloc-strip-ae-skip"></td>
+            <td class="alloc-strip-fill-trades-cell alloc-strip-ae-skip"></td>
+            <td class="alloc-strip-status-cell alloc-strip-ae-skip"></td>
+          </tr>`;
+      }
+    });
+  });
+  return rows;
+}
+
+function renderStrip() {
+  const { dir: dirF, product: prodF, status: statF } = getFaStripFilterState();
+
+  const filtered = orders.filter(
+    o =>
+      (!dirF || o.dir === dirF) &&
+      (!prodF || o.product.includes(prodF)) &&
+      (!statF || o.status === statF)
+  );
+
+  const byBook = buildStripByBook(filtered);
+  const container = document.querySelector('.fa-alloc-strip-scroll');
+  if (!container) return;
+
+  Object.keys(BOOK_RULES)
+    .filter(book => byBook[book])
+    .forEach(book => {
+      if (typeof faEnsureAllocStripBookCardDefaultCollapsed === 'function') {
+        faEnsureAllocStripBookCardDefaultCollapsed('strip|' + book);
+      }
+    });
+
+  const html = Object.keys(BOOK_RULES)
+    .filter(book => byBook[book])
+    .map(book => {
+      const activeRules = (BOOK_RULES[book] || []).filter(r => r.status !== 'retired');
+      const rows = renderStripRowsForBook(book, byBook[book], activeRules);
+      return allocStripBookSectionHtml(book, activeRules, rows);
+    })
+    .join('');
+
+  container.innerHTML = html || '<div class="alloc-strip-empty-state">No data matches the current filters.</div>';
+  if (typeof faSyncAllBookCardCollapse === 'function') faSyncAllBookCardCollapse(container);
+  faRefreshAllocStripAllExpandCollapseUi();
+  if (typeof renderTrueup === 'function') renderTrueup();
+}
+
+function toggleStrip(key) {
+  if (expandedStrip.has(key)) expandedStrip.delete(key); else expandedStrip.add(key);
+  renderStrip();
+}
+
+function faAllocStripExpandAllInBook(book) {
+  collectAllocStripKeysForBook(book).forEach(k => expandedStrip.add(k));
+  renderStrip();
+}
+
+function faAllocStripCollapseAllInBook(book) {
+  const prefix = `${book}|`;
+  [...expandedStrip].forEach(k => {
+    if (k.startsWith(prefix)) expandedStrip.delete(k);
+  });
+  renderStrip();
+}
+
+function faRefreshAllocStripExpandCollapseButtons() {
+  const root = document.querySelector('.fa-alloc-strip-scroll');
+  const expandBtn = document.getElementById('fa-alloc-strip-expand-all');
+  const collapseBtn = document.getElementById('fa-alloc-strip-collapse-all');
+  if (!expandBtn || !collapseBtn) return;
+  if (!root) {
+    expandBtn.disabled = true;
+    collapseBtn.disabled = true;
+    return;
+  }
+  const sections = root.querySelectorAll('[data-fa-book-card]');
+  const n = sections.length;
+  if (n === 0) {
+    expandBtn.disabled = true;
+    collapseBtn.disabled = true;
+    return;
+  }
+  let collapsedCount = 0;
+  sections.forEach(sec => {
+    const id = sec.getAttribute('data-fa-book-card');
+    if (id && typeof faBookCardIsCollapsed === 'function' && faBookCardIsCollapsed(id)) collapsedCount++;
+  });
+  expandBtn.disabled = collapsedCount === 0;
+  collapseBtn.disabled = collapsedCount === n;
+}
+
+/** Per-book strip summary rows: same disable pattern as top-level Expand/Collapse (book cards). */
+function faRefreshAllocStripPerBookRowButtons() {
+  const root = document.querySelector('.fa-alloc-strip-scroll');
+  if (!root) return;
+  root.querySelectorAll('[data-fa-book-card]').forEach(sec => {
+    const cardId = sec.getAttribute('data-fa-book-card') || '';
+    if (!cardId.startsWith('strip|')) return;
+    const book = cardId.slice('strip|'.length);
+    const slug = allocStripBookSlug(book);
+    const expandBtn = document.getElementById(`fa-strip-row-expand-${slug}`);
+    const collapseBtn = document.getElementById(`fa-strip-row-collapse-${slug}`);
+    if (!expandBtn || !collapseBtn) return;
+    const keys = collectAllocStripKeysForBook(book);
+    if (keys.length === 0) {
+      expandBtn.disabled = true;
+      collapseBtn.disabled = true;
+      return;
+    }
+    let expandedCount = 0;
+    keys.forEach(k => {
+      if (expandedStrip.has(k)) expandedCount++;
+    });
+    expandBtn.disabled = expandedCount === keys.length;
+    collapseBtn.disabled = expandedCount === 0;
+  });
+}
+
+function faRefreshAllocStripAllExpandCollapseUi() {
+  faRefreshAllocStripExpandCollapseButtons();
+  faRefreshAllocStripPerBookRowButtons();
+  faRefreshTrueupExpandCollapseButtons();
+}
+
+/** True-up tab: top-level book cards under #trueup-books (data-fa-book-card="trueup|…"). */
+function faRefreshTrueupExpandCollapseButtons() {
+  const root = document.getElementById('trueup-books');
+  const expandBtn = document.getElementById('fa-trueup-expand-all');
+  const collapseBtn = document.getElementById('fa-trueup-collapse-all');
+  if (!expandBtn || !collapseBtn) return;
+  if (!root) {
+    expandBtn.disabled = true;
+    collapseBtn.disabled = true;
+    return;
+  }
+  const sections = root.querySelectorAll('[data-fa-book-card]');
+  const n = sections.length;
+  if (n === 0) {
+    expandBtn.disabled = true;
+    collapseBtn.disabled = true;
+    return;
+  }
+  let collapsedCount = 0;
+  sections.forEach(sec => {
+    const id = sec.getAttribute('data-fa-book-card');
+    if (id && typeof faBookCardIsCollapsed === 'function' && faBookCardIsCollapsed(id)) collapsedCount++;
+  });
+  expandBtn.disabled = collapsedCount === 0;
+  collapseBtn.disabled = collapsedCount === n;
+}
+
+function faTrueupExpandAllBookCards() {
+  const root = document.getElementById('trueup-books');
+  if (root && typeof faExpandAllBookCardsIn === 'function') faExpandAllBookCardsIn(root);
+}
+
+function faTrueupCollapseAllBookCards() {
+  const root = document.getElementById('trueup-books');
+  if (root && typeof faCollapseAllBookCardsIn === 'function') faCollapseAllBookCardsIn(root);
+}
+
+window.faOnBookCardCollapseChanged = function (detail) {
+  faRefreshAllocStripAllExpandCollapseUi();
+};
+
+function faStripExpandAllBookCards() {
+  const root = document.querySelector('.fa-alloc-strip-scroll');
+  if (root && typeof faExpandAllBookCardsIn === 'function') faExpandAllBookCardsIn(root);
+}
+
+function faStripCollapseAllBookCards() {
+  const root = document.querySelector('.fa-alloc-strip-scroll');
+  if (root && typeof faCollapseAllBookCardsIn === 'function') faCollapseAllBookCardsIn(root);
+}
+
+function faAllocFinalizeAllClick() {
+  const pending = orders.filter(o => o.isOrder && o.status === 'pending');
+  if (!pending.length) {
+    alert('No unfinalized trades to finalize.');
+    return;
+  }
+  if (!confirm('Finalize all ' + pending.length + ' unfinalized trade' + (pending.length > 1 ? 's' : '') + '?')) return;
+  pending.forEach(o => _faAllocApplyFinalize(o));
+  renderTradesList();
+  renderStrip();
+}
+
+function faAllocUnfinalizeAllClick() {
+  const fin = orders.filter(o => o.isOrder && o.status === 'finalized');
+  if (!fin.length) {
+    alert('No finalized trades to unfinalize.');
+    return;
+  }
+  if (
+    !confirm(
+      'Unfinalize all ' +
+        fin.length +
+        ' finalized trade' +
+        (fin.length > 1 ? 's' : '') +
+        '?\n\nAllocations revert to Unfinalized. Fill trades are not automatically reversed.'
+    )
+  )
+    return;
+  fin.forEach(o => {
+    o.status = 'pending';
+    delete o.finalizedAt;
+    delete o.finalizedBy;
+    o.fills = [];
+  });
+  renderTradesList();
+  renderStrip();
+}
+
+function faAllocSaveAllocationsClick() {
+  faAllocStripFcmDirty = false;
+  faAllocSyncSaveAllocationsButton();
+  /* mock — wire save when ready */
+}
+
+function faAllocFinalizeBookClick(book) {
+  const pending = orders.filter(o => o.isOrder && o.status === 'pending' && o.book === book);
+  if (!pending.length) {
+    alert('No unfinalized trades to finalize in ' + book + '.');
+    return;
+  }
+  if (
+    !confirm(
+      'Finalize ' +
+        pending.length +
+        ' unfinalized trade' +
+        (pending.length > 1 ? 's' : '') +
+        ' in ' +
+        book +
+        '?'
+    )
+  )
+    return;
+  pending.forEach(o => _faAllocApplyFinalize(o));
+  renderTradesList();
+  renderStrip();
+}
+
+function faAllocStripMakeIndependentClick(orderId) {
+  void orderId;
+  /* mock — make independent / remove from strip when wired */
+}
+
+// ─── AUM & Ratios ─────────────────────────────────────────────────────────────
+// AUM data: acctNum → { client, fcm, aum (M), asOf, updatedBy }
+const AUM_DATA = {
+  'MS-5758778': { client: 'Apex Capital Management',  fcm: 'Morgan Stanley', aum: 450, asOf: 'Mar 1, 2026', updatedBy: 'J. Smith' },
+  'JPM-568767': { client: 'Meridian Asset Partners',  fcm: 'JP Morgan',      aum: 360, asOf: 'Mar 1, 2026', updatedBy: 'J. Smith' },
+  'GS-456456':  { client: 'Clearwater Fund Ltd.',     fcm: 'Goldman Sachs',  aum: 600, asOf: 'Mar 1, 2026', updatedBy: 'A. Chen'  },
+  'CIT-88234':  { client: 'Bravo Alpha Capital LLC',  fcm: 'Citadel Securities', aum: 520, asOf: 'Mar 1, 2026', updatedBy: 'R. Gupta' },
+  'BAR-44512':  { client: 'Thornfield Asset Mgmt',    fcm: 'Barclays',       aum: 380, asOf: 'Mar 1, 2026', updatedBy: 'R. Gupta' },
+};
+
+const AUM_BOOKS = {
+  energy: { bookName: '#GH5600' },
+  gas:    { bookName: '#GH5601' },
+  crude:  { bookName: '#GH5603' },
+};
+
+// Ticker-level leverage data for #GH5600 (ticker leverage mode).
+// Each row = one ticker; each account can have a different multiplier.
+// The 'default' row applies to any ticker not explicitly listed.
+const TICKER_LEV_DATA = {
+  energy: {
+    tickers: [
+      { symbol:'NG',  name:'Natural Gas',   lev:{ 'MS-5758778':1.2, 'JPM-568767':1.0, 'GS-456456':1.5 } },
+      { symbol:'WTI', name:'WTI Crude Oil', lev:{ 'MS-5758778':1.0, 'JPM-568767':1.2, 'GS-456456':1.0 } },
+      { symbol:'BRENT', name:'Brent Crude', lev:{ 'MS-5758778':1.1, 'JPM-568767':1.05, 'GS-456456':1.15 } },
+      { symbol:'RB',  name:'RBOB Gasoline', lev:{ 'MS-5758778':1.0, 'JPM-568767':1.0, 'GS-456456':1.1 } },
+      { symbol:'HO',  name:'Heating Oil',   lev:{ 'MS-5758778':0.95, 'JPM-568767':1.0, 'GS-456456':1.0 } },
+      { symbol:'ETH', name:'Ethanol',       lev:{ 'MS-5758778':1.0, 'JPM-568767':1.0, 'GS-456456':1.0 } },
+      { symbol:'PROP', name:'Propane',      lev:{ 'MS-5758778':1.2, 'JPM-568767':1.0, 'GS-456456':1.0 } },
+    ],
+    default: { 'MS-5758778':1.0, 'JPM-568767':1.0, 'GS-456456':1.0 },
+  },
+  gas: {
+    tickers: [
+      { symbol:'HH',  name:'Henry Hub',     lev:{ 'MS-5758778':1.5, 'GS-456456':1.0 } },
+      { symbol:'NGW', name:'NG Weeklies',   lev:{ 'MS-5758778':1.0, 'GS-456456':1.1 } },
+      { symbol:'TTF', name:'TTF Nat Gas',   lev:{ 'MS-5758778':0.9, 'GS-456456':1.2 } },
+    ],
+    default: { 'MS-5758778':1.0, 'GS-456456':1.0 },
+  },
+  crude: {
+    tickers: [
+      { symbol:'WTI', name:'WTI Crude Oil', lev:{ 'CIT-88234':1.2, 'BAR-44512':1.0, 'MS-5758778':0.8 } },
+      { symbol:'CL',  name:'Crude Light',   lev:{ 'CIT-88234':1.0, 'BAR-44512':1.0, 'MS-5758778':1.0 } },
+      { symbol:'DUB', name:'Dubai Swap',    lev:{ 'CIT-88234':1.1, 'BAR-44512':1.0, 'MS-5758778':0.95 } },
+      { symbol:'ARA', name:'ARA Gasoil',    lev:{ 'CIT-88234':1.0, 'BAR-44512':1.05, 'MS-5758778':1.0 } },
+      { symbol:'BRN', name:'Brent Cash',    lev:{ 'CIT-88234':1.15, 'BAR-44512':1.0, 'MS-5758778':1.0 } },
+    ],
+    default: { 'CIT-88234':1.0, 'BAR-44512':1.0, 'MS-5758778':1.0 },
+  },
+};
+
+// Map book name → TICKER_LEV_DATA key
+const BOOK_LEV_KEY = { '#GH5600':'energy', '#GH5601':'gas', '#GH5603':'crude' };
+
+// Returns { acctNum: splitFraction } for a given book + ticker symbol.
+// Falls back to the "All other tickers" default row if the ticker isn't configured.
+function computeTickerSplit(bookKey, tickerSym) {
+  const cfg  = TICKER_LEV_DATA[bookKey];
+  const book = AUM_BOOKS[bookKey];
+  if (!cfg || !book) return null;
+  const rules = (BOOK_RULES[book.bookName] || []).filter(r => r.status === 'active');
+  const levRow = cfg.tickers.find(t => t.symbol === tickerSym)?.lev ?? cfg.default;
+  const total  = rules.reduce((s, r) => s + (AUM_DATA[r.acctNum]?.aum || 0) * (levRow[r.acctNum] || 1), 0);
+  if (!total) return null;
+  const out = {};
+  rules.forEach(r => { out[r.acctNum] = (AUM_DATA[r.acctNum]?.aum || 0) * (levRow[r.acctNum] || 1) / total; });
+  return out;
+}
+
+function _faAllocApplyFinalize(o) {
+  o.status = 'finalized';
+  o.finalizedAt = 'Today ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  o.finalizedBy = 'J. Smith';
+  const bookKey = BOOK_LEV_KEY[o.book];
+  const ticker = o.short.split(' ')[0];
+  const splits = bookKey ? computeTickerSplit(bookKey, ticker) : null;
+  const monthLabels = getMonthLabels(o);
+  const orderIdx = orders.indexOf(o);
+  const fills = [];
+  let fillSeq = 0;
+  o.lines.forEach(l => {
+    const frac = splits ? (splits[l.acctNum] || 0) : (l.target || 0);
+    const qtyPerMonth = Math.round(o.lotsPerMonth * frac);
+    monthLabels.forEach(monthLabel => {
+      fills.push({
+        tradeId: 'TRD-' + (3000 + orderIdx * 100 + fillSeq),
+        fcm: l.fcm,
+        acctNum: l.acctNum,
+        ci: l.ci,
+        dir: o.dir,
+        qty: qtyPerMonth,
+        contract: monthLabel,
+        entryPx: parseFloat(o.price),
+        curvePx: parseFloat(o.price) * 1.04,
+        unrealPnl: Math.round(qtyPerMonth * 10000 * 0.04),
+        dayMtm: Math.round(qtyPerMonth * 1000 * 0.04),
+        src: 'vendor',
+        asOf: 'Today',
+        updatedAt: 'Just now',
+      });
+      fillSeq += 1;
+    });
+  });
+  o.fills = fills;
+}
+
+// ─── Portfolio Balance (True-up) — same behavior as true-up.html ──────────
+const _trueupLots = {}; // 'bookKey|ticker' → user-entered lot value
+
+function trueupEscapeDataTooltip(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;');
+}
+
+function trueupEscapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** One-line explanation for the active band only (matches cell coloring). */
+function trueupBandTooltip(absDrift, kind) {
+  if (absDrift < 1) {
+    if (kind === 'actual') return 'Green — Actual share is within ±1% of target';
+    if (kind === 'post') return 'Green — After this trade, projected share stays within ±1% of target';
+    return 'Green — Drift from target is within ±1%';
+  }
+  if (absDrift < 3) {
+    if (kind === 'actual') return 'Amber — Actual share is about 1–3% from target';
+    if (kind === 'post') return 'Amber — After this trade, projected share is still about 1–3% from target';
+    return 'Amber — Drift from target is about 1–3%';
+  }
+  if (kind === 'actual') return 'Red — Actual share is more than 3% from target';
+  if (kind === 'post') return 'Red — After this trade, projected share is still over 3% from target';
+  return 'Red — Drift from target is over 3%';
+}
+
+function trueupWrapColoredTip(innerHtml, tip) {
+  if (!tip) return innerHtml;
+  return `<span class="fa-tooltip-wrap fa-trueup-value-tip" data-tooltip="${trueupEscapeDataTooltip(tip)}">${innerHtml}</span>`;
+}
+
+function faTrueupResetScenario(lotKey) {
+  delete _trueupLots[lotKey];
+  renderTrueup();
+}
+
+function faTrueupCloseAllActionMenus() {
+  var root = document.getElementById('trueup-books');
+  if (!root) return;
+  root.querySelectorAll('.fa-trueup-actions-menu-dropdown').forEach(function (el) {
+    el.classList.remove('open');
+  });
+  root.querySelectorAll('.fa-trueup-actions-menu-trigger').forEach(function (b) {
+    b.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function faTrueupToggleActionsMenu(ev, btn) {
+  if (ev) ev.stopPropagation();
+  var wrap = btn.closest('.fa-trueup-actions-menu-wrap');
+  var dd = wrap && wrap.querySelector('.fa-trueup-actions-menu-dropdown');
+  if (!dd) return;
+  var isOpen = dd.classList.contains('open');
+  faTrueupCloseAllActionMenus();
+  if (!isOpen) {
+    dd.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+document.addEventListener('click', function (e) {
+  if (e.target.closest('#trueup-books .fa-trueup-actions-menu-wrap')) return;
+  faTrueupCloseAllActionMenus();
+});
+
+function renderTrueup() {
+  const el = document.getElementById('trueup-books');
+  if (!el) return;
+
+  const finData = {};
+  orders.filter(o => o.status === 'finalized').forEach(o => {
+    const ticker = o.short.split(' ')[0];
+    if (!finData[o.book]) finData[o.book] = {};
+    if (!finData[o.book][ticker]) finData[o.book][ticker] = {};
+    (o.fills || []).forEach(f => {
+      finData[o.book][ticker][f.acctNum] = (finData[o.book][ticker][f.acctNum] || 0) + f.qty * o.months;
+    });
+  });
+
+  let html = '';
+  let trueupIntroInserted = false;
+
+  Object.entries(AUM_BOOKS).forEach(([bookKey, bookMeta]) => {
+    const bookName = bookMeta.bookName;
+    const activeRules = (BOOK_RULES[bookName] || []).filter(r => r.status === 'active');
+    const configuredTickers = (TICKER_LEV_DATA[bookKey]?.tickers || []).map(t => t.symbol);
+    const finalizedTickers = Object.keys(finData[bookName] || {});
+    const allTickers = [...new Set([...configuredTickers, ...finalizedTickers])];
+    if (!allTickers.length) return;
+
+    if (!trueupIntroInserted) {
+      html +=
+        '<p class="fa-trueup-page-intro">Finalized lots vs. target by account; set next-trade size for suggested splits.</p>';
+      trueupIntroInserted = true;
+    }
+
+    const displayTitle = faBookCardDisplayTitle(bookName);
+    const acctsTrail = activeRules.map(r => r.acctNum).join(' · ');
+    const productNames = (TICKER_LEV_DATA[bookKey]?.tickers || []).map(t => t.name || t.symbol).join(' / ');
+    const productSubHtml = productNames
+      ? `<span class="fa-aum-book-sub">${productNames}</span>`
+      : '';
+    const faCardId = 'trueup|' + bookKey;
+    const bookCollapsed = typeof faBookCardIsCollapsed === 'function' && faBookCardIsCollapsed(faCardId);
+    const bookBodyId = 'fa-trueup-book-body-' + bookKey;
+    html += `<section class="content-card fa-trueup-book-card${bookCollapsed ? ' fa-book-card--collapsed' : ''}" data-fa-book-card="${faCardId}">
+      <div class="card-header fa-aum-book-card-header fa-trueup-book-card-header">
+        <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="${!bookCollapsed}" aria-controls="${bookBodyId}" aria-label="Show or hide ${displayTitle} tickers">
+          <div class="card-title fa-aum-book-card-title">
+            <span class="fa-card-title-text">${displayTitle}<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i><span class="fa-strip-card-accts">${acctsTrail}</span>${productSubHtml}</span>
+          </div>
+        </button>
+        <div class="card-actions action-toolbar fa-trueup-book-header-actions">
+          <div class="fa-trueup-book-actions" role="toolbar" aria-label="True-Up actions for ${trueupEscapeHtml(displayTitle)}">
+            <button type="button" class="btn btn-ghost" title="Mock — open AUM &amp; Ratios for This Book">AUM &amp; Ratios</button>
+            <button type="button" class="btn btn-ghost" title="Recalculate This Tab from Current Mock Data" onclick="renderTrueup()">Refresh</button>
+            <div class="fa-trueup-actions-menu-wrap">
+              <button type="button" class="btn btn-ghost fa-trueup-actions-menu-trigger" onclick="faTrueupToggleActionsMenu(event, this)" aria-expanded="false" aria-haspopup="true" aria-label="More Book Actions" title="More Actions">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+              </button>
+              <div class="fa-trueup-actions-menu-dropdown" role="menu" aria-label="More Book Actions">
+                <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Book Settings</button>
+                <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Export</button>
+                <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">History</button>
+                <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Run True-Up</button>
+                <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Sign Off</button>
+                <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Notify</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="${bookBodyId}" class="card-body fa-trueup-book-card-body" ${bookCollapsed ? 'hidden' : ''}>`;
+
+    allTickers.forEach(ticker => {
+      const finLots = (finData[bookName] || {})[ticker] || {};
+      const totalFin = Object.values(finLots).reduce((s, v) => s + v, 0);
+      const splits = computeTickerSplit(bookKey, ticker) || {};
+      const lotKey = bookKey + '|' + ticker;
+      const newLots = Math.max(1, parseInt(_trueupLots[lotKey]) || 10);
+
+      const suggested = {};
+      activeRules.forEach(r => {
+        const needed = (totalFin + newLots) * (splits[r.acctNum] || 0) - (finLots[r.acctNum] || 0);
+        suggested[r.acctNum] = Math.max(0, Math.round(needed));
+      });
+      let diff = newLots - activeRules.reduce((s, r) => s + suggested[r.acctNum], 0);
+      if (diff !== 0) {
+        const ranked = activeRules.map(r => {
+          const needed = (totalFin + newLots) * (splits[r.acctNum] || 0) - (finLots[r.acctNum] || 0);
+          return { acct: r.acctNum, frac: Math.max(0, needed) % 1 };
+        }).sort((a, b) => b.frac - a.frac);
+        for (let i = 0; Math.abs(diff) > 0 && i < ranked.length * 2; i++) {
+          const acct = ranked[i % ranked.length].acct;
+          if (diff > 0) { suggested[acct]++; diff--; }
+          else if (suggested[acct] > 0) { suggested[acct]--; diff++; }
+        }
+      }
+
+      const rows = activeRules.map(r => {
+        const acct = r.acctNum;
+        const d = AUM_DATA[acct] || {};
+        const fin = finLots[acct] || 0;
+        const tgtPct = (splits[acct] || 0) * 100;
+        const actPct = totalFin > 0 ? fin / totalFin * 100 : null;
+        const drift = actPct != null ? actPct - tgtPct : null;
+        const driftColor = drift == null ? 'var(--faint)' : Math.abs(drift) < 1 ? 'var(--success)' : Math.abs(drift) < 3 ? 'var(--warning)' : 'var(--danger)';
+        const sug = suggested[acct] || 0;
+        const sugPct = newLots > 0 ? sug / newLots * 100 : 0;
+        const postTotal = totalFin + newLots;
+        const postPct = postTotal > 0 ? (fin + sug) / postTotal * 100 : 0;
+        const postDrift = postPct - tgtPct;
+        const postColor = Math.abs(postDrift) < 1 ? 'var(--success)' : Math.abs(postDrift) < 3 ? 'var(--warning)' : 'var(--danger)';
+        const sign = v => v >= 0 ? '+' : '';
+        const sugDelta = sugPct - tgtPct;
+        const sugHighlight = Math.abs(sugDelta) > 0.5 ? 'color:var(--primary);font-weight:600' : '';
+        const actInner = actPct != null ? `${actPct.toFixed(1)}%` : '—';
+        const actTip = actPct == null
+          ? 'Muted — No finalized lots for this account'
+          : trueupBandTooltip(Math.abs(drift), 'actual');
+        const driftInner = drift != null ? `${sign(drift)}${drift.toFixed(1)}%` : '—';
+        const driftTip = drift == null
+          ? 'Muted — No finalized position'
+          : trueupBandTooltip(Math.abs(drift), 'drift');
+        const sugInner = `${sug}<span class="fa-trueup-suggested-pct">(${sugPct.toFixed(0)}%)</span>`;
+        const sugTip = Math.abs(sugDelta) > 0.5
+          ? 'Blue — Suggested share of the next trade is more than 0.5% off target'
+          : '';
+        const postInner = `${sign(postDrift)}${postDrift.toFixed(1)}%`;
+        const postTip = trueupBandTooltip(Math.abs(postDrift), 'post');
+        return `<tr>
+          <td><div class="fund-chip"><div class="fund-dot" style="background:${COLORS[r.ci]}"></div><span style="font-weight:500">${d.client||r.fcm}</span></div></td>
+          <td class="mono" style="font-size:.69rem;color:var(--muted)">${acct}</td>
+          <td class="r mono">${tgtPct.toFixed(1)}%</td>
+          <td class="r mono">${fin}</td>
+          <td class="r mono" style="color:${actPct==null?'var(--faint)':driftColor}">${trueupWrapColoredTip(actInner, actTip)}</td>
+          <td class="r mono" style="color:${driftColor}">${trueupWrapColoredTip(driftInner, driftTip)}</td>
+          <td class="r mono" style="${sugHighlight}">${trueupWrapColoredTip(sugInner, sugTip)}</td>
+          <td class="r mono" style="color:${postColor}">${trueupWrapColoredTip(postInner, postTip)}</td>
+          <td class="fa-trueup-table-spacer" aria-hidden="true"></td>
+        </tr>`;
+      }).join('');
+
+      const sugTotal = activeRules.reduce((s, r) => s + (suggested[r.acctNum]||0), 0);
+      const lotsMeta = totalFin > 0 ? `${totalFin} lots finalized` : 'no finalized trades';
+      const tickerTitleYellow = ['NG', 'WTI', 'HH'].includes(ticker) ? ' fa-trueup-ticker-symbol--yellow' : '';
+      const tickerCfg = (TICKER_LEV_DATA[bookKey]?.tickers || []).find(t => t.symbol === ticker);
+      const prodName = tickerCfg?.name || ticker;
+      const tickerTitleInner =
+        '<span class="product-label fa-trueup-ticker-product-label" style="display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+        '<span class="bracket">[</span><span class="short-name">' + trueupEscapeHtml(ticker) + '</span><span class="bracket">]</span> ' +
+        '<span class="fa-trueup-ticker-product-name">' + trueupEscapeHtml(prodName) + '</span>' +
+        '</span>';
+      const lotKeyJson = JSON.stringify(lotKey);
+      html += `
+      <section class="content-card content-card--flush-body fa-trueup-ticker-card">
+        <div class="card-header fa-trueup-ticker-card-header">
+          <div class="card-title fa-trueup-ticker-card-title">
+            <span class="fa-card-title-text fa-trueup-ticker-symbol${tickerTitleYellow}">${tickerTitleInner}</span>
+            <span class="fa-trueup-ticker-card-meta">${lotsMeta}</span>
+          </div>
+          <div class="card-actions action-toolbar fa-trueup-ticker-card-actions">
+            <div class="fa-trueup-next-trade-group">
+              <span class="fa-trueup-next-trade-group__prepend">Next trade</span>
+              <input type="number" class="fa-trueup-next-trade-group__input" min="1" step="1" inputmode="numeric" value="${newLots}"
+                aria-label="Next trade lot count for ${trueupEscapeHtml(ticker)}"
+                oninput="_trueupLots['${lotKey}']=this.value;renderTrueup()">
+              <span class="fa-trueup-next-trade-group__append">lots</span>
+            </div>
+            <div class="fa-trueup-product-actions" role="toolbar" aria-label="Product actions for ${trueupEscapeHtml(ticker)}">
+              <button type="button" class="btn btn-ghost" title="Clear Custom Size; Next Trade Defaults to 10 Lots" onclick="faTrueupResetScenario(${lotKeyJson})">Reset Scenario</button>
+              <button type="button" class="btn btn-ghost" title="Mock — apply Suggested Splits to a Trade / Allocation">Apply Splits</button>
+              <div class="fa-trueup-actions-menu-wrap">
+                <button type="button" class="btn btn-ghost fa-trueup-actions-menu-trigger" onclick="faTrueupToggleActionsMenu(event, this)" aria-expanded="false" aria-haspopup="true" aria-label="More Product Actions" title="More Actions">
+                  <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="fa-trueup-actions-menu-dropdown" role="menu" aria-label="More Product Actions">
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Open Trades</button>
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus(); renderTrueup()">Recalculate</button>
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Explain Drift</button>
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Note</button>
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Reconciled</button>
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">Export</button>
+                  <button type="button" role="menuitem" class="action-btn" onclick="faTrueupCloseAllActionMenus()">History</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body fa-trueup-ticker-card-body">
+          <table class="data-table fa-trueup-accts-table">
+            <colgroup>
+              <col class="fa-trueup-col-account" style="width:300px">
+              <col class="fa-trueup-col-acct" style="width:92px">
+              <col class="fa-trueup-col-pct" style="width:76px">
+              <col class="fa-trueup-col-lots" style="width:76px">
+              <col class="fa-trueup-col-pct" style="width:76px">
+              <col class="fa-trueup-col-drift" style="width:72px">
+              <col class="fa-trueup-col-suggested" style="width:124px">
+              <col class="fa-trueup-col-post" style="width:84px">
+              <col class="fa-trueup-col-spacer">
+            </colgroup>
+            <thead><tr>
+              <th>Account</th>
+              <th>Acct #</th>
+              <th class="r">Target %</th>
+              <th class="r">Fin. Lots</th>
+              <th class="r">Actual %</th>
+              <th class="r">Drift</th>
+              <th class="r">Suggested (${newLots}L)</th>
+              <th class="r">Post-trade %</th>
+              <th class="fa-trueup-table-spacer" scope="col" aria-hidden="true"></th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr class="fa-trueup-pinned-total-row">
+              <td colspan="6" class="fa-trueup-pinned-total-label">Total suggested:</td>
+              <td class="r mono fa-trueup-pinned-total-value">${sugTotal}L</td>
+              <td class="fa-trueup-pinned-total-cell"></td>
+              <td class="fa-trueup-table-spacer" aria-hidden="true"></td>
+            </tr></tfoot>
+          </table>
+        </div>
+      </section>`;
+    });
+
+    html += `</div></section>`;
+  });
+
+  el.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--muted);font-size:.8rem">No finalized trades yet.</div>';
+  if (typeof faSyncAllBookCardCollapse === 'function') faSyncAllBookCardCollapse(el);
+  if (typeof faRefreshTrueupExpandCollapseButtons === 'function') faRefreshTrueupExpandCollapseButtons();
+}
+
+faAsOfPickerInstance = initAsOfPicker({
+  triggerId: 'fa-alloc-as-of-trigger',
+  popoverId: 'fa-alloc-as-of-popover',
+  gridId: 'fa-alloc-as-of-grid',
+  monthLabelId: 'fa-alloc-as-of-month-label',
+  prevId: 'fa-alloc-as-of-prev',
+  nextId: 'fa-alloc-as-of-next',
+  monthPrevId: 'fa-alloc-as-of-month-prev',
+  monthNextId: 'fa-alloc-as-of-month-next',
+  initialDate: MOCKUP_TODAY,
+  renderCalendar: renderFaAllocCalendar
+});
+
+renderTradesList();
+showSection('allocations');
+renderTrueup();
+</script>
+<script>
+(function initFaAllocOrdersSplitResize() {
+  const targetPanel = document.getElementById('panel-orders');
+  if (!targetPanel) return;
+  const split = targetPanel.querySelector('.split');
+  const leftPane = targetPanel.querySelector('.split-left');
+  const rightPane = targetPanel.querySelector('.split-right');
+  const handle = targetPanel.querySelector('#fa-orders-resize-handle');
+  if (!split || !leftPane || !rightPane || !handle) return;
+
+  let isResizing = false;
+  let startX = 0;
+  let startLeftWidth = 0;
+
+  function onMove(event) {
+    if (!isResizing) return;
+    const deltaX = event.clientX - startX;
+    const splitWidth = split.getBoundingClientRect().width;
+    const minLeft = 220;
+    const maxLeft = Math.max(minLeft, splitWidth - 340);
+    const next = Math.max(minLeft, Math.min(maxLeft, startLeftWidth + deltaX));
+    leftPane.style.width = next + 'px';
+    leftPane.style.flex = '0 0 ' + next + 'px';
+    rightPane.style.flex = '1 1 auto';
+    event.preventDefault();
+  }
+
+  function onUp() {
+    if (!isResizing) return;
+    isResizing = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+
+  handle.addEventListener('mousedown', function (event) {
+    isResizing = true;
+    startX = event.clientX;
+    startLeftWidth = leftPane.getBoundingClientRect().width;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    event.preventDefault();
+  });
+})();
+</script>
+<script>
+(function initFaAllocTabsTrueupRefresh() {
+  var stack = document.querySelector('.fa-alloc-tabbed-section[data-tabs-stack]');
+  if (!stack) return;
+
+  function faApplyFundAllocTabFromHash() {
+    if (typeof window.activateTabsStackPanel !== 'function') return;
+    var h = (location.hash || '').replace(/^#/, '').toLowerCase();
+    var panel =
+      h === 'trueup' || h === 'true-up'
+        ? 'trueup'
+        : h === 'allocations' || h === 'alloc'
+          ? 'allocations'
+          : '';
+    if (!panel) return;
+    window.activateTabsStackPanel(panel, stack);
+    if (panel === 'trueup' && typeof renderTrueup === 'function') {
+      requestAnimationFrame(function () {
+        renderTrueup();
+      });
+    }
+  }
+
+  stack.addEventListener('click', function (e) {
+    if (!e.target.closest('.tabs-stack__tab')) return;
+    requestAnimationFrame(function () {
+      var tu = document.getElementById('fa-tab-panel-trueup');
+      if (tu && tu.classList.contains('active') && typeof renderTrueup === 'function') renderTrueup();
+    });
+  });
+
+  function deferred() {
+    setTimeout(faApplyFundAllocTabFromHash, 0);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', deferred);
+  } else {
+    deferred();
+  }
+  window.addEventListener('load', deferred, { once: true });
+  window.addEventListener('hashchange', faApplyFundAllocTabFromHash);
+})();
+</script>
+</body>
+</html>

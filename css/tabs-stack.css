@@ -1,0 +1,244 @@
+/**
+ * tabs-stack — BEM tabbed card; Market Data detail tabs share the same rules via
+ * comma selectors (.detail-tabs-row, .detail-tabs, .curves-tab). Panel layout for
+ * MD stays in layout.css (.detail-section.with-tabs .curves-tab-content).
+ */
+
+/* ── Card shell: layout.css .detail-section + .with-tabs overflow ── */
+.tabs-stack {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-section.with-tabs {
+    overflow: visible;
+}
+
+/* ── Tab row: layout.css detail-tabs-row (first row inside .tabs-stack matches MD overlap) ── */
+.tabs-stack__bar,
+.detail-tabs-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-bg-tertiary);
+    padding: 0 var(--spacing-xl);
+    height: 40px;
+    position: relative;
+    overflow: visible;
+}
+
+.detail-tabs-row,
+.tabs-stack > .tabs-stack__bar {
+    margin-top: -1px;
+    border-top: 1px solid var(--color-border-light);
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 0;
+}
+
+.tabs-stack__bar::after,
+.detail-tabs-row::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--color-border-light);
+    z-index: 0;
+}
+
+.tabs-stack__tabs,
+.detail-tabs {
+    display: flex;
+    margin-left: -16px;
+}
+
+/* .actions sets display:flex; it can override the default [hidden] rule — hide inactive groups */
+.tabs-stack__actions[hidden] {
+    display: none !important;
+}
+
+.tabs-stack__tab,
+.curves-tab {
+    padding: 10px var(--spacing-2xl);
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    margin-top: -1px;
+    outline: none;
+    height: 40px;
+    box-sizing: border-box;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+button.tabs-stack__tab,
+button.curves-tab {
+    appearance: none;
+    -webkit-appearance: none;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-top: -1px;
+    font: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-align: inherit;
+    color: inherit;
+}
+
+button.tabs-stack__tab.active,
+button.curves-tab.active {
+    margin-bottom: -1px;
+}
+
+.tabs-stack__tab:hover,
+.tabs-stack__tab:focus,
+.tabs-stack__tab:focus-visible,
+.tabs-stack__tab:active,
+.curves-tab:hover,
+.curves-tab:focus,
+.curves-tab:focus-visible,
+.curves-tab:active {
+    outline: none;
+    box-shadow: none;
+}
+
+button.tabs-stack__tab:not(.active):active,
+button.curves-tab:not(.active):active {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
+
+.tabs-stack__tab.active:hover,
+.tabs-stack__tab.active:focus,
+.tabs-stack__tab.active:focus-visible,
+.tabs-stack__tab.active:active,
+.curves-tab.active:hover,
+.curves-tab.active:focus,
+.curves-tab.active:focus-visible,
+.curves-tab.active:active {
+    color: var(--color-gray-800);
+    background: var(--color-bg-primary);
+    border-color: var(--color-border-light);
+    outline: none;
+    box-shadow: none;
+}
+
+.tabs-stack__tab.active,
+.curves-tab.active {
+    color: var(--color-gray-800);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-bottom: 0;
+    font-weight: 600;
+    z-index: 1;
+    margin-bottom: -1px;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.tabs-stack__tab.disabled,
+.curves-tab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.tabs-stack__tab.disabled::before,
+.curves-tab.disabled::before {
+    content: attr(data-disabled-hint);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background: var(--color-gray-800);
+    color: white;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+    z-index: 10000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.tabs-stack__tab.disabled:not([data-disabled-hint])::before,
+.curves-tab.disabled:not([data-disabled-hint])::before {
+    content: 'This tab is not available';
+}
+
+.tabs-stack__tab.disabled::after,
+.curves-tab.disabled::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--color-gray-800);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+    z-index: 10000;
+}
+
+.tabs-stack__tab.disabled:hover::before,
+.tabs-stack__tab.disabled:hover::after,
+.curves-tab.disabled:hover::before,
+.curves-tab.disabled:hover::after {
+    opacity: 1;
+}
+
+.tabs-stack__tab:first-child,
+.curves-tab:first-child {
+    margin-left: -1px;
+    margin-top: -1px;
+}
+
+/* ── White content region: layout.css .detail-section.with-tabs .detail-section-content ── */
+.tabs-stack__panels {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: var(--spacing-xl);
+    overflow: visible;
+    background: var(--color-bg-primary);
+}
+
+.tabs-stack__panel {
+    background: var(--color-bg-primary);
+    width: 100%;
+    height: 100%;
+    display: none !important;
+    flex-direction: row;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+}
+
+.tabs-stack__panel.active {
+    display: flex !important;
+    background: var(--color-bg-primary);
+}

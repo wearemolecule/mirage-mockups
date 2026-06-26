@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Edit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<link rel="stylesheet" href="../css/trade-edit.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+<script defer src="../js/tabs-stack.js"></script>
+<script defer src="../js/trade-edit.js"></script>
+<script defer src="../js/trade-edit-legs.js"></script>
+<script defer src="../js/trade-edit-transfer.js"></script>
+<script defer src="../js/trade-edit-audit.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.3/highlight.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.3/languages/json.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer src="../js/trade-edit-source.js"></script>
+</head>
+<body class="trade-edit-page app-sidebar-enabled">
+<div class="app-header-mount"></div>
+
+<main class="main-content te-main">
+    <div class="te-toolbar">
+        <div class="te-toolbar-left">
+            <a href="trades.html" class="te-back-btn" aria-label="Back to Trades">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <h1 class="page-title te-page-title">TRADE <span id="te-trade-id">83273</span></h1>
+        </div>
+        <div class="te-toolbar-actions action-toolbar">
+            <button type="button" class="action-btn">Confirm</button>
+            <button type="button" class="action-btn">Unlock</button>
+            <button type="button" class="action-btn">Valuations</button>
+            <button type="button" class="action-btn">Related Products</button>
+            <button type="button" class="action-btn">Attachments</button>
+            <button type="button" class="action-btn te-delete-btn" disabled>Delete</button>
+        </div>
+    </div>
+
+    <div class="trade-entry-edit-summary-card">
+        <div class="trade-edit-quick-view" data-testid="trade-edit-quick-view" id="te-quick-view">
+            <div class="trade-edit-quick-view__commodity" aria-hidden="false" title="Power">
+                <i class="fas fa-bolt trade-edit-quick-view__commodity-icon" aria-hidden="true"></i>
+            </div>
+            <div class="trade-edit-quick-view__content">
+                <div class="trade-edit-quick-view__main">
+                    <div class="trade-edit-quick-view__narrative-row">
+                        <p class="trade-edit-quick-view__narrative">
+                            <i class="fas fa-lock trade-edit-lock-icon trade-edit-quick-view__narrative-lock-icon" aria-hidden="true"></i>
+                            <span class="trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-direction trade-edit-quick-view__narrative-direction--buy" id="te-narrative-direction">Buy</span>
+                            <span class="trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-value trade-edit-quick-view__narrative-value--quantity" id="te-narrative-quantity">150 MWh</span>
+                            <span class="trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-connector">of</span>
+                            <span class="ticker-wrapper trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-product">
+                                <span class="short-name" id="te-product-short">M.XH2P</span><span class="long-name trade-edit-quick-view__narrative-product-name" id="te-product-long">PJM ATSI Zone Day Ahead On Peak Hourly Forward</span>
+                            </span>
+                            <span class="trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-connector">from</span>
+                            <span class="ticker-wrapper trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-counterparty">
+                                <span class="short-name" id="te-counterparty-short">DIRECT</span><span class="long-name" id="te-counterparty-long">Direct Energy</span>
+                            </span>
+                            <span class="trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-connector">on</span>
+                            <span class="trade-edit-quick-view__narrative-part trade-edit-quick-view__narrative-value trade-edit-quick-view__narrative-value--date" id="te-narrative-date">05/28/2026</span>
+                        </p>
+                    </div>
+                    <div class="trade-edit-quick-view__meta">
+                        <span class="trade-edit-quick-view__meta-segment trade-edit-quick-view__meta-item trade-edit-quick-view__meta-segment--with-icon trade-edit-quick-view__meta-item--id">
+                            <i class="fas fa-snowflake fa-fw trade-edit-quick-view__meta-icon" aria-hidden="true" title="M.ID"></i>
+                            <span class="trade-edit-quick-view__meta-id-value" id="te-meta-mid">9205695</span>
+                        </span>
+                        <span class="trade-edit-quick-view__meta-segment trade-edit-quick-view__meta-segment--text-only trade-edit-quick-view__meta-segment--settlement trade-edit-quick-view__meta-item">
+                            <span>Physical</span>
+                        </span>
+                        <span class="trade-edit-quick-view__meta-segment trade-edit-quick-view__meta-segment--text-only trade-edit-quick-view__trade-date">
+                            <span class="trade-edit-quick-view__meta-label">Traded</span> <span id="te-trade-date">05/28/2026</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="trade-edit-quick-view__aside">
+                    <div class="trade-edit-quick-view__type-tags">
+                        <span class="trade-edit-quick-view__type-tag">Forward</span>
+                        <span class="trade-edit-quick-view__type-tag">#Demo</span>
+                    </div>
+                    <div class="trade-edit-quick-view__logged">
+                        <span class="trade-edit-quick-view__meta-label">Created at</span> 4:15am 5/17/2026
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs-stack te-tabs" data-tabs-stack data-tabs-stack-sync-hash data-tabs-stack-default="legs">
+        <div class="tabs-stack__bar">
+            <div class="tabs-stack__tabs" role="tablist" aria-label="Trade edit sections">
+                <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="trade">Trade</button>
+                <button type="button" class="tabs-stack__tab active" role="tab" aria-selected="true" data-tab-panel="legs">Legs</button>
+                <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="source">Source</button>
+                <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="transfer">Transfer</button>
+                <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="audit">Audit</button>
+            </div>
+            <div class="tabs-stack__actions actions action-toolbar" data-tab-panel="trade" hidden>
+                <button type="button" class="action-btn">Fees</button>
+            </div>
+        </div>
+        <div class="tabs-stack__panels">
+            <div class="tabs-stack__panel" role="tabpanel" data-tab-panel="trade" hidden></div>
+            <div class="tabs-stack__panel active te-legs-panel" role="tabpanel" data-tab-panel="legs" id="te-legs-panel">
+                <div class="te-legs-layout">
+                    <div class="refine-row te-legs-refine-row">
+                        <div class="refine-input-group">
+                            <span class="refine-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                            <input type="text" class="refine-input" id="te-legs-refine-input" placeholder="Search current results" aria-label="Refine legs">
+                        </div>
+                        <div class="refine-right">
+                            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button type="button" class="icon-btn te-legs-refine-across-line-btn" title="Column options" aria-label="Column options"><i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                    <div class="table-container te-legs-table-container">
+                        <table class="data-table trades-grid te-legs-grid">
+                            <colgroup>
+                                <col class="te-legs-col-menu">
+                                <col class="te-legs-col-period">
+                                <col class="te-legs-col-date">
+                                <col class="te-legs-col-match">
+                                <col class="te-legs-col-qty">
+                                <col class="te-legs-col-price">
+                                <col class="te-legs-col-notes">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="trades-col-menu" aria-label="Actions"></th>
+                                    <th class="te-legs-col-period">Period</th>
+                                    <th class="te-legs-col-date trades-col-date">Settlement Date</th>
+                                    <th class="te-legs-col-match">Match</th>
+                                    <th class="te-legs-col-qty trades-col-num">Qty</th>
+                                    <th class="te-legs-col-price trades-col-num">Settlement Price</th>
+                                    <th class="te-legs-col-notes">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="te-legs-grid-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-row te-legs-pagination">
+                        <div></div>
+                        <div class="pagination-info">
+                            <span class="pagination-count-text" id="te-legs-pagination-text">1 to 10 of 96</span>
+                            <div class="pagination-controls">
+                                <button type="button" class="page-btn" disabled aria-label="First page"><i class="fas fa-angle-double-left"></i></button>
+                                <button type="button" class="page-btn" disabled aria-label="Previous page"><i class="fas fa-angle-left"></i></button>
+                                <span class="pagination-page-text" id="te-legs-pagination-page">Page 1 of 10</span>
+                                <button type="button" class="page-btn" aria-label="Next page"><i class="fas fa-angle-right"></i></button>
+                                <button type="button" class="page-btn" aria-label="Last page"><i class="fas fa-angle-double-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tabs-stack__panel te-source-panel" role="tabpanel" data-tab-panel="source" hidden>
+                <div class="te-source" id="te-source-root" aria-label="Trade capture source messages"></div>
+            </div>
+            <div class="tabs-stack__panel te-transfer-panel" role="tabpanel" data-tab-panel="transfer" hidden>
+                <div class="te-transfer-shell">
+                    <div class="te-transfer-layout">
+                        <section class="content-card te-transfer-form-card" aria-label="Transfer details">
+                            <div class="card-header te-transfer-form-card-header">
+                                <div class="card-title" id="te-transfer-current-book">#Demo</div>
+                            </div>
+                            <div class="card-body te-transfer-form-card-body">
+                                <div class="te-transfer-form-fields">
+                                    <div class="form-group te-transfer-field">
+                                        <label class="form-label" for="te-transfer-qty">Quantity</label>
+                                        <div class="te-transfer-input-accent mol-validation mol-validation--required mol-validation--valid" id="te-transfer-qty-wrap">
+                                            <input type="number" class="form-input te-transfer-input" id="te-transfer-qty" value="150" min="0" step="any" inputmode="decimal" aria-required="true">
+                                            <span class="te-transfer-input-suffix" aria-hidden="true">MWh</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group te-transfer-field">
+                                        <label class="form-label" for="te-transfer-destination">Destination</label>
+                                        <div class="te-transfer-combobox" id="te-transfer-destination-combobox">
+                                            <div class="te-transfer-input-accent mol-validation mol-validation--required" id="te-transfer-destination-wrap">
+                                                <input type="text" class="form-input te-transfer-input" id="te-transfer-destination" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="te-transfer-destination-list" aria-required="true" autocomplete="off" placeholder="Search books...">
+                                            </div>
+                                            <div class="te-transfer-combobox__dropdown" id="te-transfer-destination-list" role="listbox" hidden></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="content-card te-transfer-grid-card" aria-label="Transfer Breakdown">
+                            <div class="card-header te-transfer-grid-card-header">
+                                <div class="card-title">Transfer Breakdown</div>
+                            </div>
+                            <div class="card-body te-transfer-grid-card-body">
+                                <p class="te-transfer-grid-desc">Contract-day quantities allocated in this transfer.</p>
+                                <div class="te-transfer-grid-layout">
+                                    <div class="refine-row te-transfer-refine-row">
+                                        <div class="refine-input-group">
+                                            <span class="refine-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="refine-input" id="te-transfer-refine-input" placeholder="Start typing to search..." aria-label="Refine transfer rows">
+                                        </div>
+                                        <div class="refine-right">
+                                            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh"><i class="fas fa-sync-alt"></i></button>
+                                            <button type="button" class="icon-btn" title="Column options" aria-label="Column options"><i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="table-container te-transfer-table-container">
+                                        <div class="te-transfer-grid-empty" id="te-transfer-grid-empty" hidden>No matching contract days.</div>
+                                        <table class="data-table trades-grid te-transfer-grid">
+                                            <colgroup>
+                                                <col class="te-transfer-col-day">
+                                                <col class="te-transfer-col-contract-qty">
+                                                <col class="te-transfer-col-unit-qty">
+                                                <col class="te-transfer-col-spacer">
+                                            </colgroup>
+                                            <thead>
+                                                <tr>
+                                                    <th class="te-transfer-col-day trades-col-date">Contract Day</th>
+                                                    <th class="te-transfer-col-contract-qty trades-col-num">Contract Quantity</th>
+                                                    <th class="te-transfer-col-unit-qty trades-col-num">Unit Quantity</th>
+                                                    <th class="te-transfer-col-spacer" aria-hidden="true"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="te-transfer-grid-body"></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="pagination-row te-transfer-pagination" id="te-transfer-pagination">
+                                        <div></div>
+                                        <div class="pagination-info">
+                                            <span class="pagination-count-text" id="te-transfer-pagination-text"></span>
+                                            <div class="pagination-controls">
+                                                <button type="button" class="page-btn" disabled aria-label="First page"><i class="fas fa-angle-double-left"></i></button>
+                                                <button type="button" class="page-btn" disabled aria-label="Previous page"><i class="fas fa-angle-left"></i></button>
+                                                <span class="pagination-page-text" id="te-transfer-pagination-page"></span>
+                                                <button type="button" class="page-btn" disabled aria-label="Next page"><i class="fas fa-angle-right"></i></button>
+                                                <button type="button" class="page-btn" disabled aria-label="Last page"><i class="fas fa-angle-double-right"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="te-transfer-actions">
+                        <div class="te-transfer-feedback" id="te-transfer-feedback" role="status" aria-live="polite" hidden></div>
+                        <div class="te-transfer-actions__buttons">
+                            <button type="button" class="action-btn" id="te-transfer-reset" disabled>Reset</button>
+                            <button type="button" class="action-btn primary" id="te-transfer-apply" disabled>Transfer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tabs-stack__panel te-audit-panel" role="tabpanel" data-tab-panel="audit" hidden>
+                <div class="te-audit" id="te-audit-thread" aria-label="Trade audit history"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal-overlay te-leg-edit-modal" id="te-leg-edit-modal" hidden>
+    <div class="modal te-leg-edit-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="te-leg-edit-modal-title">
+        <div class="modal-header">
+            <span class="modal-title" id="te-leg-edit-modal-title">June 1 2026 IE 0300</span>
+        </div>
+        <div class="modal-body te-leg-edit-modal__body">
+            <div class="form-group">
+                <label class="form-label" for="te-leg-settlement-date">Settlement Date</label>
+                <input type="date" class="form-input" id="te-leg-settlement-date">
+            </div>
+
+            <div class="form-group te-leg-match-group">
+                <div class="content-card te-leg-match-card">
+                    <div class="card-header">
+                        <div class="card-title">Matching</div>
+                    </div>
+                    <div class="card-body te-leg-match-card-body">
+                        <div class="search-input-wrapper te-leg-match-search">
+                            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                            <input type="text" class="filter-input search-input" id="te-leg-match-search" placeholder="Search by ID..." aria-label="Search by ID">
+                        </div>
+                        <div class="te-leg-match-panel">
+                            <div class="te-leg-match-placeholder" id="te-leg-match-placeholder">Search for a trade to view legs</div>
+                            <div class="te-leg-match-results" id="te-leg-match-results" hidden>
+                                <div class="te-leg-match-summary" id="te-leg-match-summary"></div>
+                                <div class="te-leg-match-table-wrap">
+                                    <table class="data-table trades-grid te-leg-match-table">
+                                        <colgroup>
+                                            <col class="te-leg-match-radio-col">
+                                            <col class="te-leg-match-col-month">
+                                            <col class="te-leg-match-col-date">
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th class="te-leg-match-radio-col" aria-label="Select"></th>
+                                                <th>Contract Month</th>
+                                                <th class="trades-col-date">Realization Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="te-leg-match-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group te-leg-edit-modal__notes-group">
+                <label class="form-label" for="te-leg-notes">Notes</label>
+                <textarea class="form-input te-leg-notes-input" id="te-leg-notes" rows="4" placeholder="Add notes…"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn cancel" id="te-leg-edit-cancel">Cancel</button>
+            <button type="button" class="modal-btn primary" id="te-leg-edit-save">Save</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

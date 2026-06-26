@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Actualization — Pipeline Maps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/actualization.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+<script defer src="actualization-app.js"></script>
+</head>
+<body class="act-standalone-shell app-sidebar-enabled act-pipeline-map-page" data-app-header-account="Buffalo">
+<div class="app-header-mount"></div>
+<div class="main main-content act-main-shell">
+  <div class="page-header act-page-header-row">
+    <div class="act-title-line page-header__title-row">
+      <h1 class="page-title act-page-title">Pipeline Maps</h1>
+    </div>
+  </div>
+  <div class="content-area act-content-area act-pipeline-map-content">
+    <div class="filter-row">
+      <div class="filter-group">
+        <span class="filter-label">Pipeline</span>
+        <select class="filter-input" id="map-pipeline-select" aria-label="Pipeline">
+          <option value="ngpl" selected>NGPL</option>
+          <option value="gts">GTS</option>
+          <option value="mwp">MWP</option>
+          <option value="sgp">SGP</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Map Type</span>
+        <select class="filter-input" id="map-type-select" aria-label="Map type">
+          <option value="ferc">FERC System Map</option>
+          <option value="receipt">Receipt Points</option>
+          <option value="delivery">Delivery Points</option>
+        </select>
+      </div>
+    </div>
+
+    <section class="content-card act-map-card">
+      <div class="card-header">
+        <div class="card-title" id="map-card-title">NGPL — FERC System Map</div>
+        <div class="card-actions action-toolbar">
+          <button type="button" class="action-btn" id="map-open-btn">Open PDF</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <iframe
+          id="map-iframe"
+          src="NGPL_FERC_Web_Map.pdf?v=2"
+          class="act-map-iframe"
+          title="NGPL FERC Web Map">
+        </iframe>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

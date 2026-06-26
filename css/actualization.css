@@ -1,0 +1,2325 @@
+/**
+ * Actualization screens — layout, mockup tokens, and screen-specific UI.
+ */
+
+/* Map mockup inline var() names to shared design tokens */
+.act-standalone-shell {
+  --gray-025: var(--color-bg-tertiary);
+  --gray-050: var(--color-gray-50);
+  --gray-100: var(--color-gray-100);
+  --gray-200: var(--color-gray-200);
+  --gray-300: var(--color-gray-300);
+  --gray-400: var(--color-text-muted);
+  --gray-500: var(--color-text-secondary);
+  --gray-600: var(--color-text-tertiary);
+  --gray-700: var(--color-text-primary);
+  --gray-800: var(--color-gray-800);
+  --gray-900: var(--color-gray-800);
+  --blue: #3b82ec;
+  --blue-dark: #1659c7;
+  --blue-light: #e8f0fd;
+  --green: var(--color-green);
+  --green-bg: #f0fdf4;
+  --green-text: #166534;
+  --amber: #f0ad4e;
+  --amber-bg: #fffbeb;
+  --amber-text: #92400e;
+  --red: #d9534f;
+  --red-bg: #fef2f2;
+  --red-text: #991b1b;
+  --purple: var(--color-purple);
+  --border: var(--color-border-light);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+}
+
+/* ── Shell layout ── */
+body.act-standalone-shell.app-with-sidebar > .app-main > .main.act-main-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--spacing-lg) var(--spacing-3xl);
+}
+
+.act-title-line {
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+}
+
+.act-page-title::after {
+  content: none;
+}
+
+.act-ai-powered-note {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.act-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.act-content-area--ai-review {
+  overflow: hidden;
+  gap: 0;
+  min-height: 0;
+}
+
+.act-ai-review-page .act-title-line {
+  align-items: baseline;
+}
+
+/* ── Nominations + Allocations tab shells ── */
+.act-nominations-content,
+.act-allocations-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.act-nominations-content .filter-group .act-nom-filter-location,
+.act-allocations-content .filter-group .act-nom-filter-location {
+  min-width: 160px;
+}
+
+.act-nominations-content .act-nominations-tabs.tabs-stack,
+.act-allocations-content .act-allocations-tabs.tabs-stack {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.act-nominations-tabs .tabs-stack__bar,
+.act-allocations-tabs .tabs-stack__bar {
+  flex-shrink: 0;
+}
+
+.act-nominations-tabs .tabs-stack__actions,
+.act-allocations-tabs .tabs-stack__actions {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.act-nominations-tabs .tabs-stack__panels,
+.act-allocations-tabs .tabs-stack__panels {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.act-nominations-tabs .tabs-stack__panel.act-nominations-tab-panel,
+.act-allocations-tabs .tabs-stack__panel.act-allocations-tab-panel {
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-height: 0;
+  height: auto;
+  overflow: hidden;
+}
+
+.act-nominations-tabs .tabs-stack__panel.act-nominations-tab-panel .act-nom-grid-wrap,
+.act-allocations-tabs .tabs-stack__panel.act-allocations-tab-panel .act-alloc-grid-wrap {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+}
+
+.act-nominations-content .act-nom-grid-wrap .act-nom-table.data-table,
+.act-allocations-content .act-alloc-grid-wrap .act-alloc-table.data-table {
+  background: var(--color-bg-primary);
+}
+
+.act-nominations-page .act-nom-page-header-line,
+.act-allocations-page .act-nom-page-header-line {
+  width: 100%;
+  align-items: center;
+}
+
+.act-nominations-page .act-nom-page-title.page-title::after,
+.act-allocations-page .act-nom-page-title.page-title::after {
+  content: none;
+}
+
+.act-nominations-page .act-nom-page-title,
+.act-allocations-page .act-nom-page-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  margin: 0;
+  min-width: 0;
+  text-transform: uppercase;
+}
+
+.act-nominations-page .act-nom-title-for,
+.act-allocations-page .act-nom-title-for {
+  font-weight: 400;
+}
+
+.act-nominations-page .act-nom-pipeline-select,
+.act-allocations-page .act-nom-pipeline-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0 1.1rem 0 0;
+  margin: 0;
+  font: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-gray-800);
+  line-height: inherit;
+  cursor: pointer;
+  min-width: 0;
+  max-width: min(100%, 12rem);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 14px;
+}
+
+.act-nominations-page .act-nom-pipeline-select:hover,
+.act-allocations-page .act-nom-pipeline-select:hover {
+  color: var(--blue-dark);
+}
+
+.act-nominations-page .act-nom-pipeline-select:focus-visible,
+.act-allocations-page .act-nom-pipeline-select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--blue) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Gas day strip — Mirage AsOfSelect / FA alloc date strip analog */
+.act-nominations-page .act-nom-date-strip,
+.act-allocations-page .act-nom-date-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  background: var(--gray-100);
+  border-radius: 6px;
+  margin-left: auto;
+  box-sizing: border-box;
+  min-height: var(--page-header-title-row-min-height, 32px);
+}
+
+.act-nominations-page .act-nom-date-chev,
+.act-allocations-page .act-nom-date-chev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--gray-700);
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.act-nominations-page .act-nom-date-chev svg,
+.act-allocations-page .act-nom-date-chev svg {
+  width: 14px;
+  height: 14px;
+}
+
+.act-nominations-page .act-nom-date-chev:hover,
+.act-allocations-page .act-nom-date-chev:hover {
+  color: var(--gray-800);
+  background: color-mix(in srgb, var(--gray-300) 35%, transparent);
+}
+
+.act-nominations-page .act-nom-date-chev:focus-visible,
+.act-allocations-page .act-nom-date-chev:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--blue) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.act-nominations-page .act-nom-date-trigger,
+.act-allocations-page .act-nom-date-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.act-nominations-page .act-nom-date-trigger-main,
+.act-allocations-page .act-nom-date-trigger-main {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.act-nominations-page .act-nom-date-trigger:hover .act-nom-date-trigger-main,
+.act-allocations-page .act-nom-date-trigger:hover .act-nom-date-trigger-main {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.act-nominations-page .act-nom-date-input,
+.act-allocations-page .act-nom-date-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.act-nominations-content .act-nom-grid-filters,
+.act-allocations-content .act-alloc-grid-filters {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  margin-top: var(--spacing-md);
+  margin-bottom: 0;
+}
+
+.act-nominations-content .act-stats-strip,
+.act-allocations-content .act-stats-strip {
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-bottom: var(--spacing-lg);
+  border: none;
+  border-bottom: 1px dotted #cbcbd2;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+/* ── Toolbar (pipeline map, etc.) ── */
+.act-standalone-shell .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.act-standalone-shell .toolbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ── Buttons & forms (scoped) ── */
+.act-standalone-shell .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.775rem;
+  font-weight: 400;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  background: #fff;
+  color: var(--gray-700);
+}
+
+.act-standalone-shell .btn-secondary {
+  background: #fff;
+  border-color: var(--gray-400);
+  color: var(--gray-700);
+}
+
+.act-standalone-shell .btn-secondary:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-500);
+}
+
+.act-standalone-shell .btn-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.act-standalone-shell .btn-primary:hover {
+  background: var(--blue-dark);
+}
+
+.act-standalone-shell .btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.act-standalone-shell .btn-icon {
+  padding: 0.3rem 0.5rem;
+}
+
+.act-standalone-shell .btn-group {
+  display: inline-flex;
+}
+
+.act-standalone-shell .btn-group .btn + .btn {
+  margin-left: -1px;
+  border-radius: 0;
+}
+
+.act-standalone-shell .btn-group .btn:first-child {
+  border-radius: 3px 0 0 3px;
+}
+
+.act-standalone-shell .btn-group .btn:last-child {
+  border-radius: 0 3px 3px 0;
+}
+
+.act-standalone-shell .form-control,
+.act-standalone-shell .form-select {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.775rem;
+  font-family: inherit;
+  border: 1px solid var(--gray-400);
+  border-radius: 0;
+  background: #fff;
+  color: var(--gray-700);
+  height: 30px;
+}
+
+.act-standalone-shell .form-control:focus,
+.act-standalone-shell .form-select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+.act-standalone-shell .input-group {
+  display: inline-flex;
+}
+
+.act-standalone-shell .input-group .form-control {
+  border-radius: 3px 0 0 3px;
+  border-right: none;
+}
+
+.act-standalone-shell .input-group .btn {
+  border-radius: 0 3px 3px 0;
+}
+
+/* ── Cards ── */
+.act-standalone-shell .card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inner .card panels only — do not override .content-card headers (components.css) */
+.act-standalone-shell .card .card-header {
+  padding: 0.65rem 0.85rem 0;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.act-standalone-shell .card .card-header .card-title {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  padding-bottom: 0.5rem;
+  flex: 1;
+}
+
+.act-standalone-shell .card > .card-body {
+  padding: 0;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.act-standalone-shell .card > .card-hint {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+}
+
+.act-standalone-shell .grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+.act-nominations-tabs .tabs-stack__panel .grid-wrap,
+.act-allocations-tabs .tabs-stack__panel .grid-wrap {
+  min-height: 0;
+}
+
+/* ── Stats strip ── */
+.act-stats-strip {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.act-stat-cell {
+  flex: 1;
+  padding: 0.55rem 1rem;
+  border-right: 1px solid var(--gray-200);
+}
+
+.act-stat-cell:last-child {
+  border-right: none;
+}
+
+.act-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.act-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  font-variant-numeric: tabular-nums;
+}
+
+.act-stat-value--green { color: var(--color-green); }
+.act-stat-value--red { color: var(--color-red); }
+.act-stat-value--amber { color: var(--color-orange); }
+
+.act-stat-sub {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.act-alloc-callout {
+  display: none;
+  flex-shrink: 0;
+  background: var(--gray-050);
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.75rem;
+  color: var(--gray-700);
+}
+
+.act-nominations-content .act-loc-detail-inner,
+.act-allocations-content .act-loc-detail-inner {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  overflow: hidden;
+}
+
+.act-allocations-content .act-alloc-loc-note {
+  margin: 0;
+  padding: 0.55rem var(--table-grid-cell-pad-x) 0.5rem;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.act-allocations-content .act-alloc-loc-note--error {
+  color: var(--color-text-secondary);
+}
+
+.act-allocations-content .act-alloc-loc-note--error strong {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.act-allocations-content .act-alloc-method-cell {
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.act-allocations-content .act-alloc-table td.act-alloc-method-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: var(--table-grid-row-min-height);
+  line-height: var(--table-grid-row-min-height);
+}
+
+.act-allocations-content .act-alloc-table .act-alloc-method {
+  display: inline;
+  line-height: inherit;
+}
+
+.act-allocations-content .act-alloc-table .act-alloc-method-sub {
+  display: none;
+}
+
+.act-allocations-content .act-alloc-method-sub {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.act-allocations-content .act-alloc-method-sub--warn {
+  color: var(--color-red);
+}
+
+/* Unmatched path rows — trades-style menu + bulk select */
+.act-allocations-content .act-alloc-grid-wrap {
+  position: relative;
+}
+
+.act-allocations-content col.act-alloc-col-menu { width: 24px; }
+.act-allocations-content col.act-alloc-col-checkbox { width: 35px; }
+
+.act-allocations-content .act-alloc-path-table--selectable .trades-col-menu {
+  width: 24px;
+  min-width: 24px;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  overflow: visible;
+  white-space: normal;
+}
+
+.act-allocations-content .act-alloc-path-table--selectable thead .trades-col-menu {
+  background: var(--color-gray-100);
+}
+
+.act-allocations-content .act-alloc-path-table--selectable tbody .trades-col-menu {
+  background: var(--color-gray-100);
+}
+
+.act-allocations-content .act-alloc-path-table--selectable .trades-col-checkbox {
+  width: 35px;
+  min-width: 35px;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  white-space: normal;
+}
+
+.act-allocations-content .act-alloc-path-table--selectable .act-alloc-path-menu-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.act-allocations-content .act-alloc-path-table--selectable .trades-row-menu-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  border-radius: var(--radius-sm, 3px);
+}
+
+.act-allocations-content .act-alloc-path-table--selectable .trades-row-menu-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-text-primary);
+}
+
+.act-allocations-content .act-alloc-path-menu-dropdown {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: 6px;
+  transform: translateY(-50%);
+  min-width: 132px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  display: none;
+  padding: 4px 0;
+}
+
+.act-allocations-content .act-alloc-path-menu-dropdown.open {
+  display: block;
+}
+
+.act-allocations-content .act-alloc-path-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.act-allocations-content .act-alloc-path-menu-item:hover {
+  background: var(--color-gray-50);
+}
+
+.act-allocations-content .act-alloc-path-table--selectable tbody tr.act-alloc-path-selectable.selected {
+  background: color-mix(in srgb, var(--color-blue) 8%, var(--color-bg-primary));
+}
+
+.act-allocations-content .act-alloc-path-selection-bar {
+  bottom: 16px;
+  z-index: 30;
+}
+
+/* ── Tables ── */
+.act-standalone-shell .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--table-grid-font-size);
+}
+
+.act-standalone-shell .data-table thead th {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  background: var(--color-gray-200);
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: var(--table-grid-header-height);
+  vertical-align: middle;
+  line-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+
+.act-standalone-shell .data-table tbody tr {
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background 0.1s;
+}
+
+.act-standalone-shell .data-table tbody tr:hover {
+  background: var(--color-gray-50);
+}
+
+.act-standalone-shell .data-table td {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  color: var(--color-text-primary);
+  min-height: var(--table-grid-row-min-height);
+  height: var(--table-grid-row-min-height);
+  vertical-align: middle;
+  line-height: var(--table-grid-row-min-height);
+  box-sizing: border-box;
+}
+
+.act-standalone-shell .data-table thead th.num,
+.act-standalone-shell .data-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.act-nominations-content .data-table td.num,
+.act-nominations-content .loc-detail .path-table td.num {
+  font-weight: 400;
+}
+
+.act-standalone-shell .data-table td.muted {
+  color: var(--color-text-secondary);
+  font-size: inherit;
+}
+
+.act-nominations-content .act-nom-table {
+  width: 100%;
+  min-width: 860px;
+  table-layout: fixed;
+}
+
+.act-nominations-content col.act-nom-col-loc { width: 112px; }
+.act-nominations-content col.act-nom-col-qty { width: 88px; }
+.act-nominations-content col.act-nom-col-paths { width: 52px; }
+.act-nominations-content .act-nom-table col.act-nom-col-name { width: 240px; }
+.act-nominations-content .act-nom-table col.act-nom-col-status {
+  width: auto;
+  min-width: 68px;
+}
+
+.act-nominations-content .act-nom-table td.act-nom-loc-name,
+.act-nominations-content .loc-detail .path-table td.act-nom-loc-name {
+  text-transform: none;
+}
+
+.act-nominations-content .act-nom-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.act-nominations-content .act-nom-table .act-loc-toggle {
+  max-width: 100%;
+}
+
+.act-nominations-content .loc-detail > .act-loc-detail-cell,
+.act-allocations-content .loc-detail > .act-loc-detail-cell {
+  padding: 0 0.5rem 0.5rem;
+  width: 100%;
+  background: var(--color-gray-200);
+}
+
+.act-nominations-content .loc-detail .path-table .act-path-row .k-col {
+  white-space: nowrap;
+}
+
+.act-nominations-content .loc-detail .path-table tbody tr.act-path-row--delivery-first {
+  border-top: 1px solid var(--color-border-medium);
+}
+
+.act-nominations-content tr.loc-detail[hidden],
+.act-allocations-content tr.loc-detail[hidden] {
+  display: none;
+}
+
+.act-path-more {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+/* ── Badges ── */
+.act-standalone-shell .badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15em 0.55em;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.act-standalone-shell .badge-success { background: var(--green-bg); color: var(--green-text); }
+.act-standalone-shell .badge-warning { background: var(--amber-bg); color: var(--amber-text); }
+.act-standalone-shell .badge-danger { background: var(--red-bg); color: var(--red-text); }
+.act-standalone-shell .badge-secondary { background: var(--gray-100); color: var(--gray-600); }
+
+/* ── Expandable location rows (inline Nominations + Allocations) ── */
+.act-nominations-content tr.loc-row,
+.act-allocations-content tr.loc-row {
+  cursor: pointer;
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"],
+.act-nominations-content tr.loc-row[aria-expanded="true"] > td,
+.act-allocations-content tr.loc-row[aria-expanded="true"],
+.act-allocations-content tr.loc-row[aria-expanded="true"] > td {
+  background: var(--color-gray-200);
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"] > td,
+.act-allocations-content tr.loc-row[aria-expanded="true"] > td {
+  border-top: 1px solid var(--color-gray-400);
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"]:has(+ tr.loc-detail:not([hidden])),
+.act-allocations-content tr.loc-row[aria-expanded="true"]:has(+ tr.loc-detail:not([hidden])) {
+  border-bottom: none;
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"]:has(+ tr.loc-detail:not([hidden])) > td,
+.act-allocations-content tr.loc-row[aria-expanded="true"]:has(+ tr.loc-detail:not([hidden])) > td {
+  border-bottom: none;
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"] + tr.loc-detail > .act-loc-detail-cell,
+.act-allocations-content tr.loc-row[aria-expanded="true"] + tr.loc-detail > .act-loc-detail-cell {
+  border-bottom: 1px solid var(--color-gray-400);
+}
+
+.act-nominations-content .act-nom-table:has(> tbody > tr.loc-row[aria-expanded="true"]:first-child) thead th,
+.act-allocations-content .act-alloc-table:has(> tbody > tr.loc-row[aria-expanded="true"]:first-child) thead th {
+  border-bottom: 1px solid var(--color-gray-400);
+}
+
+.act-nominations-content .act-nom-table tbody tr.loc-row:has(+ tr.loc-detail[hidden] + tr.loc-row[aria-expanded="true"]) > td,
+.act-nominations-content .act-nom-table tbody tr.loc-row:has(+ tr.loc-row[aria-expanded="true"]) > td,
+.act-nominations-content .act-nom-table tbody tr.loc-detail:not([hidden]):has(+ tr.loc-row[aria-expanded="true"]) > .act-loc-detail-cell,
+.act-allocations-content .act-alloc-table tbody tr.loc-row:has(+ tr.loc-detail[hidden] + tr.loc-row[aria-expanded="true"]) > td,
+.act-allocations-content .act-alloc-table tbody tr.loc-row:has(+ tr.loc-row[aria-expanded="true"]) > td,
+.act-allocations-content .act-alloc-table tbody tr.loc-detail:not([hidden]):has(+ tr.loc-row[aria-expanded="true"]) > .act-loc-detail-cell {
+  border-bottom: 1px solid var(--color-gray-400);
+}
+
+.act-nominations-content tr.loc-row:not([aria-expanded="true"]):hover,
+.act-nominations-content tr.loc-row:not([aria-expanded="true"]):hover > td,
+.act-allocations-content tr.loc-row:not([aria-expanded="true"]):hover,
+.act-allocations-content tr.loc-row:not([aria-expanded="true"]):hover > td {
+  background: var(--color-gray-50);
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"]:hover,
+.act-nominations-content tr.loc-row[aria-expanded="true"]:hover > td,
+.act-allocations-content tr.loc-row[aria-expanded="true"]:hover,
+.act-allocations-content tr.loc-row[aria-expanded="true"]:hover > td {
+  background: var(--color-gray-200);
+}
+
+.act-nominations-content .act-loc-toggle,
+.act-allocations-content .act-loc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.act-nominations-content .act-nom-expand-chevron,
+.act-allocations-content .act-nom-expand-chevron {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.act-nominations-content tr.loc-row[aria-expanded="true"] .act-nom-expand-chevron,
+.act-allocations-content tr.loc-row[aria-expanded="true"] .act-nom-expand-chevron {
+  color: var(--blue);
+}
+
+/* ── Allocations grid (mirrors Nominations location/path patterns) ── */
+.act-allocations-content .data-table td.num,
+.act-allocations-content .loc-detail .path-table td.num ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td.num  {
+  font-weight: 400;
+}
+
+.act-allocations-content .act-alloc-table {
+  width: 100%;
+  min-width: 980px;
+  table-layout: fixed;
+}
+
+.act-allocations-content col.act-nom-col-loc { width: 112px; }
+.act-allocations-content col.act-nom-col-qty { width: 88px; }
+.act-allocations-content col.act-alloc-col-pipeline { width: 64px; }
+.act-allocations-content col.act-alloc-col-method { width: 96px; }
+.act-allocations-content .act-alloc-table col.act-nom-col-name { width: 220px; }
+.act-allocations-content .act-alloc-table col.act-nom-col-status {
+  width: auto;
+  min-width: 68px;
+}
+
+.act-allocations-content .act-alloc-table td.act-nom-loc-name,
+.act-allocations-content .loc-detail .path-table td.act-nom-loc-name ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td.act-nom-loc-name  {
+  text-transform: none;
+}
+
+.act-allocations-content .act-alloc-table td:not(.act-loc-detail-cell) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.act-allocations-content .act-alloc-table td.act-loc-detail-cell {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  vertical-align: top;
+}
+
+.act-allocations-content .act-alloc-table .act-loc-toggle {
+  max-width: 100%;
+}
+
+.act-allocations-content .loc-detail .path-table .act-path-row .k-col ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table .act-path-row .k-col  {
+  white-space: nowrap;
+}
+
+.act-allocations-content .loc-detail .path-table tbody tr.act-path-row--delivery-first ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody tr.act-path-row--delivery-first  {
+  border-top: 1px solid var(--color-border-medium);
+}
+
+.act-standalone-shell .act-allocations-content .k-col {
+  font-family: inherit;
+  color: var(--color-blue);
+}
+
+.act-standalone-shell .act-allocations-content .act-loc-code {
+  font-family: inherit;
+  color: var(--color-text-tertiary);
+}
+
+.act-allocations-content .loc-detail .path-table.act-path-table ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table.act-path-table  {
+  table-layout: fixed;
+  width: 100%;
+  border-top: none;
+}
+
+/* Inline expand only — demoted sub-header under parent loc row */
+.act-allocations-content .loc-detail .path-table thead th {
+  /* Outer .data-table thead th is sticky; grid-tables .data-table th matches nested th too */
+  position: static;
+  top: auto;
+  z-index: auto;
+  background: transparent;
+  height: auto;
+  line-height: 1.3;
+  padding: 0.65rem var(--table-grid-cell-pad-x) 0.35rem;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+.act-allocations-content .loc-detail .path-table tbody tr ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody tr  {
+  cursor: default;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background 0.15s;
+}
+
+.act-allocations-content .loc-detail .path-table tbody tr:nth-child(odd) ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody tr:nth-child(odd)  {
+  background: var(--color-bg-primary);
+}
+
+.act-allocations-content .loc-detail .path-table tbody tr:nth-child(even) ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody tr:nth-child(even)  {
+  background: var(--color-bg-secondary);
+}
+
+.act-allocations-content .loc-detail .path-table tbody tr:hover ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody tr:hover  {
+  background: var(--color-gray-50);
+}
+
+.act-allocations-content .loc-detail .path-table tbody tr:last-child ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody tr:last-child  {
+  border-bottom: none;
+}
+
+.act-allocations-content .loc-detail .path-table td ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td  {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.act-allocations-content .loc-detail .path-table td.trades-col-menu,
+.act-allocations-content .loc-detail .path-table td.trades-col-checkbox,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td.trades-col-menu,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td.trades-col-checkbox {
+  overflow: visible;
+  white-space: normal;
+}
+
+.act-allocations-content .loc-detail .path-table td.act-alloc-path-menu-td ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td.act-alloc-path-menu-td  {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.act-allocations-content .loc-detail .path-table thead th:first-child:not(.act-path-dir-col),
+.act-allocations-content .loc-detail .path-table tbody td:first-child:not(.act-path-dir-col),
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table thead th:first-child:not(.act-path-dir-col),
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table tbody td:first-child:not(.act-path-dir-col) {
+  padding-left: var(--table-grid-cell-pad-x);
+}
+
+.act-allocations-content .loc-detail .path-table col.act-path-col-svc ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table col.act-path-col-svc  { width: 220px; }
+.act-allocations-content .loc-detail .path-table col.act-nom-col-name ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table col.act-nom-col-name  { width: 168px; }
+.act-allocations-content .loc-detail .path-table col.act-alloc-col-settle ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table col.act-alloc-col-settle  { width: 120px; }
+.act-allocations-content .loc-detail .path-table col.act-nom-col-status ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table col.act-nom-col-status  {
+  width: auto;
+  min-width: 68px;
+}
+
+.act-allocations-content .loc-detail .path-table .act-path-empty ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table .act-path-empty  {
+  color: transparent;
+  background-color: var(--color-bg-primary);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--color-border-light) 0,
+    var(--color-border-light) 1px,
+    var(--color-bg-primary) 0,
+    var(--color-bg-primary) 50%
+  );
+  background-size: 6px 6px;
+}
+
+.act-allocations-content .act-alloc-method,
+.act-allocations-content .act-alloc-settle {
+  font-size: inherit;
+  color: var(--color-text-secondary);
+}
+
+.act-allocations-content .act-alloc-settle--missing {
+  color: var(--color-red);
+}
+
+.act-standalone-shell .path-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--table-grid-font-size);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.act-standalone-shell .path-table thead th {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  background: var(--color-gray-50);
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.act-standalone-shell .path-table thead th.num { text-align: right; }
+.act-standalone-shell .path-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+.act-standalone-shell .path-table tbody tr:last-child { border-bottom: none; }
+.act-standalone-shell .path-table tbody tr:hover { background: var(--gray-050); }
+.act-standalone-shell .path-table td { padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x); color: var(--color-text-primary); }
+.act-standalone-shell .path-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.act-standalone-shell .path-table td.muted { color: var(--color-text-secondary); font-size: inherit; }
+.act-standalone-shell .k-col {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.act-standalone-shell .act-nominations-content .k-col {
+  font-family: inherit;
+  color: var(--color-blue);
+}
+
+.act-standalone-shell .act-nominations-content .act-loc-code {
+  font-family: inherit;
+  color: var(--color-text-tertiary);
+}
+
+.act-standalone-shell .act-nominations-content .k-col.act-path-more {
+  color: var(--color-text-muted);
+}
+
+/* ── Pipeline map ── */
+.act-pipeline-map-content {
+  gap: var(--spacing-md);
+}
+
+.act-pipeline-map-content > .filter-row {
+  flex-shrink: 0;
+}
+
+.act-pipeline-map-content #map-pipeline-select {
+  min-width: 100px;
+}
+
+.act-pipeline-map-content #map-type-select {
+  min-width: 168px;
+}
+
+.act-map-card.content-card {
+  flex: 1;
+  min-height: 0;
+}
+
+.act-map-card.content-card > .card-body {
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.act-map-iframe {
+  width: 100%;
+  flex: 1;
+  min-height: 480px;
+  border: none;
+}
+
+/* Path tables reuse parent qty column widths; cap leading cols so Loc Name doesn't eat slack */
+.act-nominations-content .loc-detail .path-table.act-path-table {
+  table-layout: fixed;
+  width: 100%;
+  border-top: none;
+}
+
+/* Path column labels — inline expand only; demoted sub-header under parent loc row */
+.act-nominations-content .loc-detail .path-table thead th {
+  position: static;
+  top: auto;
+  z-index: auto;
+  background: transparent;
+  height: auto;
+  line-height: 1.3;
+  padding: 0.65rem var(--table-grid-cell-pad-x) 0.35rem;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+.act-nominations-content .loc-detail .path-table tbody tr {
+  cursor: default;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background 0.15s;
+}
+
+.act-nominations-content .loc-detail .path-table tbody tr:nth-child(odd) {
+  background: var(--color-bg-primary);
+}
+
+.act-nominations-content .loc-detail .path-table tbody tr:nth-child(even) {
+  background: var(--color-bg-secondary);
+}
+
+.act-nominations-content .loc-detail .path-table tbody tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.act-nominations-content .loc-detail .path-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.act-nominations-content .loc-detail .path-table td {
+  height: var(--table-grid-row-min-height);
+  line-height: var(--table-grid-row-min-height);
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.act-nominations-content .loc-detail .path-table thead th:first-child:not(.act-path-dir-col),
+.act-nominations-content .loc-detail .path-table tbody td:first-child:not(.act-path-dir-col) {
+  padding-left: var(--table-grid-cell-pad-x);
+}
+
+.act-nominations-content .loc-detail .path-table col.act-path-col-svc { width: 220px; }
+.act-nominations-content .loc-detail .path-table col.act-nom-col-name { width: 240px; }
+/* Extra width on wide displays goes to Status, not Loc Name */
+.act-nominations-content .loc-detail .path-table col.act-nom-col-status {
+  width: auto;
+  min-width: 68px;
+}
+
+.act-nominations-content .loc-detail .path-table .act-path-empty {
+  color: transparent;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  background-color: transparent;
+  background-size: 6px 6px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--color-border-light) 0,
+    var(--color-border-light) 1px,
+    transparent 0,
+    transparent 50%
+  );
+}
+
+.act-nominations-content .loc-detail .path-table thead th:nth-child(11),
+.act-nominations-content .loc-detail .path-table tbody td:nth-child(11) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.act-nominations-content .loc-detail .path-table td .badge,
+.act-allocations-content .loc-detail .path-table td .badge ,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td .badge  {
+  max-width: 100%;
+}
+
+/* Nominations + Allocations status — colored label + dot (no pill) */
+.act-nominations-content .badge,
+.act-allocations-content .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.act-nominations-content .badge::before,
+.act-allocations-content .badge::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+}
+
+.act-nominations-content .badge-success,
+.act-allocations-content .badge-success {
+  background: transparent;
+  color: var(--color-green);
+}
+
+.act-nominations-content .badge-warning,
+.act-allocations-content .badge-warning {
+  background: transparent;
+  color: var(--color-orange);
+}
+
+.act-nominations-content .badge-danger,
+.act-allocations-content .badge-danger {
+  background: transparent;
+  color: var(--color-red);
+}
+
+.act-nominations-content .badge-secondary,
+.act-allocations-content .badge-secondary {
+  background: transparent;
+  color: var(--color-orange);
+}
+
+/* ── AI Review ── */
+.act-yaml-card.content-card {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.act-yaml-card-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.act-yaml-card .act-yaml-filename {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.act-yaml-card .act-yaml-status {
+  font-size: 0.65rem;
+  color: #b42318;
+  padding: 0.1rem 0.45rem;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.act-yaml-card .act-yaml-meta {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.act-yaml-card-body {
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+.act-yaml-card-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.act-yaml-card-split.is-resizing .act-yaml-view,
+.act-yaml-card-split.is-resizing .act-yaml-chat-panel {
+  transition: none !important;
+}
+
+.act-yaml-view {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #1e1e2e;
+}
+
+.act-yaml-chat-resize-handle {
+  display: none;
+}
+
+.act-yaml-card-body.chat-open .act-yaml-chat-resize-handle.is-visible {
+  display: flex;
+}
+
+.act-yaml-content {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem 1.5rem;
+  font-family: 'DM Mono', 'JetBrains Mono', monospace;
+  font-size: 0.715rem;
+  line-height: 1.72;
+  color: #cdd6f4;
+  margin: 0;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.act-yaml-chat-panel {
+  display: none;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-light);
+}
+
+.act-yaml-card-body.chat-open .act-yaml-chat-panel.is-open {
+  display: flex;
+}
+
+/* ── Review chat panel (Mirage tokens) ── */
+.act-yaml-chat-panel .act-chat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg-tertiary);
+  flex-shrink: 0;
+}
+
+.act-yaml-chat-panel .act-chat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.act-yaml-chat-panel .act-chat-mcp-badge {
+  font-size: 10px;
+  padding: 0.1rem 0.45rem;
+  background: var(--color-bg-secondary);
+  color: var(--color-purple);
+  border: 1px solid var(--color-border-light);
+  border-radius: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.act-yaml-chat-panel .act-chat-header-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.act-yaml-chat-panel .act-chat-model {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-family: inherit;
+}
+
+.act-yaml-chat-panel .act-chat-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.act-yaml-chat-panel .act-chat-close:hover {
+  color: var(--color-text-secondary);
+}
+
+.act-yaml-chat-panel .act-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  min-height: 0;
+  background: var(--color-bg-primary);
+}
+
+.act-yaml-chat-panel .chat-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.act-yaml-chat-panel .chat-user {
+  align-items: flex-end;
+}
+
+.act-yaml-chat-panel .chat-assistant {
+  align-items: flex-start;
+}
+
+.act-yaml-chat-panel .chat-bubble {
+  padding: 0.52rem 0.72rem;
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  line-height: 1.62;
+  max-width: 96%;
+}
+
+.act-yaml-chat-panel .chat-bubble-user {
+  background: var(--color-bg-selected);
+  color: var(--color-text-primary);
+  border: 1px solid color-mix(in srgb, var(--color-blue) 28%, var(--color-border-light));
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+}
+
+.act-yaml-chat-panel .chat-bubble-assistant {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
+}
+
+.act-yaml-chat-panel .chat-bubble p {
+  margin: 0;
+}
+
+.act-yaml-chat-panel .chat-bubble p + p {
+  margin-top: 0.38rem;
+}
+
+.act-yaml-chat-panel .chat-bubble code {
+  font-size: 11px;
+  background: var(--color-bg-secondary);
+  padding: 0.08em 0.3em;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Mono', monospace;
+  color: var(--color-text-tertiary);
+}
+
+.act-yaml-chat-panel .chat-bubble ul,
+.act-yaml-chat-panel .chat-bubble ol {
+  padding-left: 1.1rem;
+  margin: 0;
+}
+
+.act-yaml-chat-panel .chat-bubble li {
+  margin-bottom: 0.12rem;
+}
+
+.act-yaml-chat-panel .chat-time {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+  text-align: right;
+}
+
+.act-yaml-chat-panel .chat-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+  margin-bottom: 0.18rem;
+}
+
+.act-yaml-chat-panel .chat-claude-icon {
+  color: var(--color-purple);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.act-yaml-chat-panel .chat-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.act-yaml-chat-panel .tool-call-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 0.2rem 0.5rem;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.28rem;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.act-yaml-chat-panel .tool-call-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.act-yaml-chat-panel .tool-call-ok {
+  color: var(--color-green);
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 0.35rem;
+}
+
+.act-yaml-chat-panel .act-chat-config-block {
+  margin: 0.45rem 0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 11px;
+  line-height: 1.8;
+  font-family: 'DM Mono', monospace;
+}
+
+.act-yaml-chat-panel .act-chat-config-label {
+  color: var(--color-text-muted);
+  display: inline-block;
+  width: 7.5rem;
+}
+
+.act-yaml-chat-panel .act-chat-config-value--emphasis {
+  color: var(--color-blue);
+  font-weight: 600;
+}
+
+.act-yaml-chat-panel .chat-text-danger {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.act-yaml-chat-panel .chat-text-success {
+  color: var(--color-green);
+  font-weight: 600;
+}
+
+.act-yaml-chat-panel .chat-text-warning {
+  color: var(--color-orange);
+  font-weight: 500;
+}
+
+.act-yaml-chat-panel .chat-note {
+  margin-top: 0.45rem;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.act-yaml-chat-panel .chat-change-list {
+  margin: 0.35rem 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  font-size: 12px;
+}
+
+.act-yaml-chat-panel .act-chat-input-row {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-tertiary);
+  display: flex;
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.act-yaml-chat-panel .act-chat-input {
+  flex: 1;
+  min-width: 0;
+  height: var(--action-btn-height, 29px);
+  font-size: 12px;
+  padding: 0 var(--spacing-lg);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+}
+
+.act-yaml-chat-panel .act-chat-input:focus {
+  outline: none;
+  border-color: var(--color-blue);
+}
+
+.act-yaml-chat-panel .act-chat-send-btn {
+  flex-shrink: 0;
+  min-width: var(--action-btn-height, 29px);
+  padding: 0;
+}
+
+.act-yaml-chat-panel .act-amendment-panel {
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-yellow-tint);
+  flex-shrink: 0;
+}
+
+.act-yaml-chat-panel .act-amendment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.act-yaml-chat-panel .act-amendment-label {
+  font-size: 12px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.act-yaml-chat-panel .act-amendment-meta {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.act-yaml-chat-panel .act-amendment-diff {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 1.65;
+  padding: 0.6rem 0.9rem;
+  margin: 0;
+  color: var(--color-gray-100);
+  background: var(--color-gray-800);
+  overflow-x: auto;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.act-yaml-chat-panel .act-amendment-diff .diff-context {
+  color: var(--color-gray-400);
+}
+
+.act-yaml-chat-panel .diff-removed {
+  display: block;
+  background: color-mix(in srgb, var(--color-red) 18%, transparent);
+  color: var(--color-rose);
+}
+
+.act-yaml-chat-panel .diff-added {
+  display: block;
+  background: color-mix(in srgb, var(--color-green) 20%, transparent);
+  color: #c5ddb0;
+}
+
+.act-yaml-chat-panel .act-amendment-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-primary);
+  align-items: center;
+}
+
+.act-yaml-chat-panel .act-amendment-actions-right {
+  margin-left: auto;
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.act-yaml-chat-panel .act-amendment-summary {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.act-yaml-chat-panel .chat-bubble--success {
+  background: color-mix(in srgb, var(--color-green) 12%, var(--color-bg-primary));
+  border-color: color-mix(in srgb, var(--color-green) 30%, var(--color-border-light));
+}
+
+.act-yaml-chat-panel .chat-bubble--success > p:first-child strong {
+  color: var(--color-green);
+}
+
+.act-yaml-content .y-comment { color: #585b70; }
+.act-yaml-content .y-key { color: #89b4fa; }
+.act-yaml-content .y-str { color: #a6e3a1; }
+.act-yaml-content .y-num { color: #f9e2af; }
+.act-yaml-content .y-null { color: #f38ba8; }
+.act-yaml-content .y-bool { color: #fab387; }
+.act-yaml-content .y-status-ok { color: #a6e3a1; font-weight: 600; }
+.act-yaml-content .y-status-warn { color: #f9e2af; font-weight: 600; }
+.act-yaml-content .y-status-err { color: #f38ba8; font-weight: 600; }
+
+/* ── Nominations detail panel (nominations-detail.html) — Market Data shell parity ── */
+.act-nominations-detail-page .act-nominations-tab-panel {
+  flex: 1;
+  min-height: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-filters.filter-panel {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: var(--spacing-md) 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-filters.filter-panel.hidden {
+  margin: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-filters .act-nom-grid-filters {
+  margin: 0;
+}
+
+.act-nominations-detail-page .act-nom-panels-container {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.act-nominations-detail-page .act-nom-panels-container:has(.detail-panel:not(.hidden)) {
+  gap: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-layout.content-bottom {
+  flex: 1;
+  min-height: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-layout .table-wrapper {
+  flex: 1;
+  min-height: 0;
+  transition: flex var(--transition-slow) ease-in-out;
+}
+
+.act-nominations-detail-page .act-nom-detail-layout.content-bottom.panel-visible .table-wrapper {
+  flex: 0 0 25%;
+}
+
+.act-nominations-detail-page .act-nom-detail-layout.is-resizing .table-wrapper,
+.act-nominations-detail-page .act-nom-detail-layout.is-resizing .act-nom-detail-panel {
+  transition: none !important;
+}
+
+.act-nominations-detail-page .act-nom-detail-panel.detail-panel {
+  transition: flex var(--transition-slow) ease-in-out, transform var(--transition-slow) ease-in-out, opacity var(--transition-slow) ease-in-out;
+  padding-top: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-panel.detail-panel.hidden {
+  flex: 0 0 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-panel.detail-panel:not(.hidden) {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 300px;
+  max-width: none;
+  padding-top: 0;
+}
+
+.act-nominations-detail-page #act-nom-detail-panel .detail-panel-header {
+  margin-bottom: 0;
+  padding: 0 0 var(--spacing-lg) 0;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.act-nominations-detail-page #act-nom-detail-summary .act-nom-summary-cut {
+  color: var(--color-red);
+  font-weight: 500;
+}
+
+.act-nominations-detail-page #act-nom-detail-summary .badge {
+  font-size: 11px;
+  vertical-align: baseline;
+}
+
+.act-nominations-detail-page #act-nom-detail-summary .badge::before {
+  content: none;
+}
+
+.act-nominations-detail-page .act-nom-detail-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.act-nominations-detail-page .act-nom-main-refine-row,
+.act-nominations-detail-page .act-nom-detail-refine-row {
+  flex-shrink: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host.table-container {
+  flex: 1;
+  min-height: 0;
+  border-top: none;
+}
+
+.act-nominations-detail-page #act-nom-panel-resize-handle {
+  display: none;
+}
+
+.act-nominations-detail-page #act-nom-panel-resize-handle.is-visible {
+  display: flex;
+}
+
+.act-nominations-detail-page .act-nom-table col.act-nom-col-name {
+  width: 220px;
+}
+
+.act-nominations-detail-page .act-nom-table tbody tr.loc-row.selected,
+.act-nominations-detail-page .act-nom-table tbody tr.loc-row.selected > td,
+.act-nominations-detail-page .act-nom-table tbody tr.loc-row.selected:hover,
+.act-nominations-detail-page .act-nom-table tbody tr.loc-row.selected:hover > td {
+  background: var(--color-bg-selected);
+  border-top: none;
+}
+
+.act-nominations-detail-page .act-path-qty-col::before {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.act-nominations-detail-page .act-path-qty-col--receipt::before {
+  content: '←';
+  color: var(--color-green);
+}
+
+.act-nominations-detail-page .act-path-qty-col--delivery::before {
+  content: '→';
+  color: var(--color-red);
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .path-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 1248px;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .path-table.data-table thead th,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table.data-table thead th {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  background: var(--color-gray-200);
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: var(--table-grid-header-height);
+  vertical-align: middle;
+  line-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .path-table.data-table thead th.num,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table.data-table thead th.num {
+  text-align: right;
+}
+
+.act-nominations-content .loc-detail .path-table col.act-path-col-dir,
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-path-col-dir,
+.act-allocations-content .loc-detail .path-table col.act-path-col-dir,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table col.act-path-col-dir {
+  width: 36px;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-nom-col-loc { width: 112px; }
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-path-col-svc { width: 220px; }
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-nom-col-name { width: 240px; }
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-nom-col-qty { width: 88px; }
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-nom-col-paths { width: 52px; }
+.act-nominations-detail-page .act-nom-detail-path-host .path-table col.act-nom-col-status {
+  width: auto;
+  min-width: 68px;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .path-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .data-table tbody tr {
+  cursor: default;
+}
+
+.act-nominations-content .loc-detail .path-table td.act-path-dir-col,
+.act-nominations-detail-page .act-nom-detail-path-host .path-table td.act-path-dir-col,
+.act-allocations-content .loc-detail .path-table td.act-path-dir-col,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table td.act-path-dir-col {
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.act-nominations-content .loc-detail .path-table thead th.act-path-dir-col,
+.act-nominations-detail-page .act-nom-detail-path-host .path-table thead th.act-path-dir-col,
+.act-allocations-content .loc-detail .path-table thead th.act-path-dir-col,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table thead th.act-path-dir-col {
+  width: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.act-nominations-content .loc-detail .path-table .act-path-dir-col + .k-col,
+.act-nominations-content .loc-detail .path-table .act-path-dir-col + th,
+.act-nominations-detail-page .act-nom-detail-path-host .path-table .act-path-dir-col + .k-col,
+.act-nominations-detail-page .act-nom-detail-path-host .path-table .act-path-dir-col + th,
+.act-allocations-content .loc-detail .path-table .act-path-dir-col + .k-col,
+.act-allocations-content .loc-detail .path-table .act-path-dir-col + th,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table .act-path-dir-col + .k-col,
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table .act-path-dir-col + th {
+  padding-left: 5px;
+}
+
+.act-nominations-content .loc-detail .path-table .act-path-row--receipt .act-path-dir-col::before,
+.act-nominations-detail-page .act-nom-detail-path-host .act-path-row--receipt .act-path-dir-col::before,
+.act-allocations-content .loc-detail .path-table .act-path-row--receipt .act-path-dir-col::before,
+.act-allocations-detail-page .act-alloc-detail-path-host .act-path-row--receipt .act-path-dir-col::before {
+  content: '←';
+  color: var(--color-green);
+  font-weight: 600;
+}
+
+.act-nominations-content .loc-detail .path-table .act-path-row--delivery .act-path-dir-col::before,
+.act-nominations-detail-page .act-nom-detail-path-host .act-path-row--delivery .act-path-dir-col::before,
+.act-allocations-content .loc-detail .path-table .act-path-row--delivery .act-path-dir-col::before,
+.act-allocations-detail-page .act-alloc-detail-path-host .act-path-row--delivery .act-path-dir-col::before {
+  content: '→';
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.act-nominations-content .act-nom-table thead th.act-path-qty-col--receipt:not(.act-path-qty-col--dir-header)::before,
+.act-nominations-detail-page .act-nom-table thead th.act-path-qty-col--receipt:not(.act-path-qty-col--dir-header)::before {
+  content: '←\00a0';
+  color: var(--color-green);
+  font-weight: 600;
+}
+
+.act-nominations-content .act-nom-table thead th.act-path-qty-col--delivery:not(.act-path-qty-col--dir-header)::before,
+.act-nominations-detail-page .act-nom-table thead th.act-path-qty-col--delivery:not(.act-path-qty-col--dir-header)::before {
+  content: '→\00a0';
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.act-nominations-content .act-nom-table thead th.act-path-qty-col--dir-header::before,
+.act-nominations-detail-page .act-nom-table thead th.act-path-qty-col--dir-header::before {
+  content: none;
+}
+
+.act-nominations-content .act-nom-table thead th.act-path-qty-col,
+.act-nominations-detail-page .act-nom-table thead th.act-path-qty-col {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .act-path-row .k-col {
+  white-space: nowrap;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host tr.act-path-row--delivery-first td {
+  border-top: 1px solid var(--color-border-medium);
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .act-path-empty {
+  color: transparent;
+  background-color: var(--color-bg-primary);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--color-border-light) 0,
+    var(--color-border-light) 1px,
+    var(--color-bg-primary) 0,
+    var(--color-bg-primary) 50%
+  );
+  background-size: 6px 6px;
+}
+
+.act-nominations-detail-page .act-nom-detail-path-host .data-table td .badge {
+  font-size: inherit;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 500;
+}
+
+/* ── Allocations detail panel (allocations-detail.html) — nominations-detail parity ── */
+.act-allocations-detail-page .act-allocations-tabs .tabs-stack__panel.act-allocations-tab-panel {
+  flex-direction: column;
+}
+
+.act-allocations-detail-page .act-allocations-tabs .tabs-stack__panel.act-allocations-tab-panel .act-alloc-panels-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.act-allocations-detail-page .act-alloc-detail-filters.filter-panel {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: var(--spacing-md) 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-filters.filter-panel.hidden {
+  margin: 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-filters .act-alloc-grid-filters {
+  margin: 0;
+}
+
+.act-allocations-detail-page .act-alloc-panels-container {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.act-allocations-detail-page .act-alloc-panels-container:has(.detail-panel:not(.hidden)) {
+  gap: 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-layout.content-bottom {
+  flex: 1;
+  min-height: 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-layout .table-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  transition: flex var(--transition-slow) ease-in-out;
+}
+
+.act-allocations-detail-page .act-alloc-detail-layout.content-bottom.panel-visible .table-wrapper {
+  flex: 0 0 25%;
+}
+
+.act-allocations-detail-page .act-alloc-detail-layout.is-resizing .table-wrapper,
+.act-allocations-detail-page .act-alloc-detail-layout.is-resizing .act-alloc-detail-panel {
+  transition: none !important;
+}
+
+.act-allocations-detail-page .act-alloc-detail-panel.detail-panel {
+  transition: flex var(--transition-slow) ease-in-out, transform var(--transition-slow) ease-in-out, opacity var(--transition-slow) ease-in-out;
+  padding-top: 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-panel.detail-panel.hidden {
+  flex: 0 0 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-panel.detail-panel:not(.hidden) {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 300px;
+  max-width: none;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.act-allocations-detail-page #act-alloc-detail-panel .detail-panel-header {
+  margin-bottom: 0;
+  padding: 0 0 var(--spacing-lg) 0;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.act-allocations-detail-page #act-alloc-detail-summary .act-alloc-summary-variance {
+  color: var(--color-red);
+  font-weight: 500;
+}
+
+.act-allocations-detail-page #act-alloc-detail-summary .badge {
+  font-size: 11px;
+  vertical-align: baseline;
+}
+
+.act-allocations-detail-page #act-alloc-detail-summary .badge::before {
+  content: none;
+}
+
+.act-allocations-detail-page .act-alloc-detail-message {
+  flex-shrink: 0;
+  margin: 0 0 var(--spacing-md);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.act-allocations-detail-page .act-alloc-detail-message--error {
+  border-top: 1px dotted var(--color-border-medium);
+  padding-top: var(--spacing-md);
+}
+
+.act-allocations-detail-page .act-alloc-detail-message--error strong {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.act-allocations-detail-page .act-alloc-detail-message--info {
+  color: var(--color-text-secondary);
+  border-top: 1px dotted var(--color-border-medium);
+  padding-top: var(--spacing-md);
+}
+
+.act-allocations-detail-page .act-alloc-detail-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.act-allocations-detail-page .act-alloc-main-refine-row,
+.act-allocations-detail-page .act-alloc-detail-refine-row {
+  flex-shrink: 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-grid-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.act-allocations-detail-page .act-alloc-detail-grid-wrap .act-alloc-path-selection-bar {
+  bottom: 12px;
+  z-index: 30;
+}
+
+.act-allocations-detail-page .act-alloc-detail-pagination {
+  flex-shrink: 0;
+}
+
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 1008px;
+}
+
+.act-allocations-detail-page .act-alloc-detail-path-host .act-alloc-path-table--selectable thead .trades-col-menu {
+  background: var(--color-gray-100);
+}
+
+.act-allocations-detail-page .act-alloc-detail-path-host .path-table.act-alloc-path-table--selectable {
+  min-width: 1048px;
+}
+
+.act-allocations-detail-page .act-alloc-detail-path-host.table-container {
+  flex: 1;
+  min-height: 0;
+  border-top: none;
+  overflow: auto;
+}
+
+.act-allocations-detail-page #act-alloc-panel-resize-handle {
+  display: none;
+}
+
+.act-allocations-detail-page #act-alloc-panel-resize-handle.is-visible {
+  display: flex;
+}
+
+.act-allocations-detail-page .act-alloc-table tbody tr.loc-row {
+  cursor: pointer;
+}
+
+.act-allocations-detail-page .act-alloc-table tbody tr.loc-row.selected,
+.act-allocations-detail-page .act-alloc-table tbody tr.loc-row.selected > td,
+.act-allocations-detail-page .act-alloc-table tbody tr.loc-row.selected:hover,
+.act-allocations-detail-page .act-alloc-table tbody tr.loc-row.selected:hover > td {
+  background: var(--color-bg-selected);
+  border-top: none;
+}

@@ -1,0 +1,86 @@
+---
+description: Follow shared Mirage mockup UI patterns; no one-off CSS unless requested
+alwaysApply: true
+---
+
+# Mockup UI — use established patterns
+
+**Default to the design system.** Only deviate when the user explicitly asks for a variant.
+
+## Source of truth (check in this order)
+
+1. **`css/components.css`** — cards, filters, tables, buttons, `.card-header`, `.card-title`, `.filter-panel`
+2. **`css/layout.css`** — `.panels-container`, `.table-wrapper`, page layout
+3. **Sibling screen in the same product area** — e.g. CI Portfolio for CI grids; Trades for title date filter
+4. **Product CSS** — `css/fund-allocations.css` (FA shell), `css/trades.css`, `css/certificate-inventory.css`
+
+If something looks wrong, **compare a reference screen first** — do not invent local fixes.
+
+## Do not go rogue
+
+- **No one-off font sizes, padding, or spacing** when a shared class or sibling screen already defines the pattern
+- **No duplicated CSS blocks** — extend existing selectors (`body.ci-portfolio-page …, body.ci-registry-page …`) or link the stylesheet that already owns the pattern
+- **No renames of shared patterns** — e.g. use `trade-date-filter` + `trades.css`, not a copy like `ci-title-date-filter`
+- **Override only what the layout requires** — e.g. filter panel inside a card may need transparent bg / no side borders; still use standard bottom spacing
+
+## Common patterns (not optional one-offs)
+
+| Element | Standard |
+|--------|----------|
+| **Card title** | `.card-title` — 16px, 600 (`components.css`). Not filters-card 13px. |
+| **Card header height** | `.fa-main-shell .card-header`: `min-height: 40px`, `padding: 0 1em`. Use when the header has no ~29px action buttons (summary-only headers collapse without this). |
+| **Filter panel spacing** | Global `.filter-panel` padding + page rule **`padding-bottom: var(--spacing-lg)`** only (Portfolio, Invoicing). Do not zero bottom padding. |
+| **Title date filter** | Trades `trade-date-filter` classes + `css/trades.css` (Registry Activity included there). |
+| **Page header** | `.page-header` > `.page-header__title-row` (or product alias with same class, e.g. `.fa-alloc-title-line.page-header__title-row`, `.act-title-line.page-header__title-row`). Fixed **32px** min row height + **12px** bottom margin via `components.css` — required on **every** screen, with or without as-of picker / date strip / title filter. |
+| **As-of picker** | Shared `as-of-picker` in page header title row (`css/as-of-picker.css`, `js/as-of-picker.js`). Use `initAsOfPicker()`; FA may pass custom `renderCalendar` for allocation-status cells. Not a filter-card date input. |
+| **CI grids** | Share Portfolio grid / status / row-menu rules in `certificate-inventory.css`; row menu opens to the right (Trades/Invoicing pattern). |
+| **Table inset** | `panels-container` uses `padding: 1em`. If nested in a card without panels-container, use `1em` — not ad hoc `--spacing-lg` unless matching an existing screen. |
+
+## Copy — Title Case for labels, card titles, and table headers
+
+Use **Title Case** for user-visible label text in mockups (not sentence case).
+
+**Applies to:**
+- `.form-label` (modals, forms, detail panels)
+- `.filter-label` (filter rows)
+- `.card-title` and `.fa-card-title-text` (card headers, collapsible filter cards, pane titles)
+- Card titles rendered in JS (`card-title` HTML strings)
+- **Table column headers** — `<th>` in HTML and grid head strings in JS (`ciRegistryHeadHtml`, `renderHead`, etc.)
+
+**Title Case means:** capitalize each principal word. Match sibling screens (Portfolio, Trades, FA).
+
+| ✅ | ❌ |
+|----|-----|
+| Activity Log | Activity log |
+| Serial Numbers | Serial numbers |
+| Serial Range | Serial range |
+| Counterparty / Beneficiary | Counterparty / beneficiary |
+| Fuel Type | Fuel type |
+| As Of | As of |
+| Find Trade | Find trade |
+| Submitted | submitted |
+
+**Exceptions (keep as-is):**
+- **Page titles** (`.page-title`, `h1`) — often ALL CAPS per Mirage chrome; follow the reference screen
+- **Proper nouns, acronyms, units** — e.g. `MWh`, `Registry`, `PJM-GATS`
+- **Phrases with slashes or parentheses** — e.g. `Linked / Unlinked`, `Volume (MWh)`, `Cost Basis ($/MWh)`
+- **Empty or icon-only `<th>`** — e.g. kabob menu column with `aria-label` only
+
+When adding or editing HTML/JS strings, scan labels, card titles, and **table headers** before finishing.
+
+## Typography — no monospace unless requested
+
+**Default: sans-serif** (Figtree via page `<link>`, `font-family: inherit` in components). Grids, forms, filters, and card copy use the standard UI font.
+
+**Do not use monospace** unless the user explicitly asks for it or you are matching an existing screen that already uses mono for that element.
+
+Avoid:
+- `font-family: monospace` / `ui-monospace` / Menlo / Consolas on tables, cells, labels, or headers
+- Inline `style="font-family: monospace"` on mockup HTML
+- Adding `.mono` or `--font-mono` outside FA areas that already define them
+
+FA-only: `.mono` and `var(--font-mono)` exist in `fund-allocations.css` for specific allocation/true-up cases — do not spread that pattern to Certificate Inventory, Trades chrome, Invoicing, etc. without instruction.
+
+## When a layout differs from the reference
+
+Document **why** in a short CSS comment and keep the diff minimal (e.g. “filter inside card — transparent panel only”). Prefer markup that matches the reference (filter-panel + panels-container) unless the user chose a different structure.

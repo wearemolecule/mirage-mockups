@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Allocation settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Figtree:wght@300;400;500;600;700&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/fund-allocations.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+</head>
+<body class="fa-standalone-shell app-sidebar-enabled">
+
+<div class="app-header-mount"></div>
+
+<div class="main main-content fa-main-shell">
+
+  <div id="fa-settings-screen-head" class="fa-alloc-screen-head">
+    <div class="page-header fa-alloc-page-header-row">
+      <div class="fa-alloc-title-line page-header__title-row">
+        <h1 class="page-title fa-alloc-for-title">Fund Allocations Settings</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area fa-settings-unified-wrap" id="fa-settings-page-anchor">
+          <div class="content-area fa-settings-layout">
+        
+            <div class="fa-settings-page-split" id="fa-settings-page-split">
+            <div class="fa-settings-split-pane fa-settings-split-pane--top" id="fa-settings-split-pane-accounts">
+            <!-- ══ Client Accounts (nested card) ══ -->
+            <section class="content-card fa-aum-client-accounts-card">
+              <div class="card-header fa-aum-client-accounts-card-header">
+                <div class="fa-aum-client-accounts-title-line">
+                  <div class="card-title"><span class="fa-card-title-text">Client Accounts</span></div>
+                  <span class="fa-aum-last-update-inline">Last AUM update <strong>Mar 1, 2026 · J. Smith</strong></span>
+                </div>
+                <div class="card-actions action-toolbar">
+                  <button type="button" class="action-btn" onclick="openFaAumAddAccountModal()">New Client Account</button>
+                  <div class="action-dropdown" id="fa-aum-client-default-leverage-menu">
+                    <button type="button" class="action-btn action-dropdown__trigger" aria-haspopup="true" aria-controls="fa-aum-client-default-leverage-panel">
+                      Manage Default Leverage
+                      <i class="fas fa-caret-down" style="margin-left:6px;font-size:10px" aria-hidden="true"></i>
+                    </button>
+                    <div class="action-dropdown__menu" id="fa-aum-client-default-leverage-panel" role="menu" aria-label="Default Leverage Actions">
+                      <button type="button" class="action-btn action-dropdown__item" role="menuitem" onclick="faSettingsViewDefaultLeverage()">View Default Leverage</button>
+                      <button type="button" class="action-btn action-dropdown__item" role="menuitem" onclick="faSettingsDownloadLeverageTemplate()">Download Template</button>
+                      <button type="button" class="action-btn action-dropdown__item" role="menuitem" onclick="faSettingsUploadLeverage()">Upload Leverage</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body fa-aum-client-accounts-card-body">
+                <div class="fa-aum-client-accounts-table-scroll">
+                <table class="data-table fa-aum-client-accounts-table">
+                  <colgroup>
+                    <col class="fa-aum-ca-col-client" />
+                    <col class="fa-aum-ca-col-acct" />
+                    <col class="fa-aum-ca-col-fcm" />
+                    <col class="fa-aum-ca-col-aum" />
+                    <col class="fa-aum-ca-col-asof" />
+                    <col class="fa-aum-ca-col-updated" />
+                  </colgroup>
+                  <thead><tr>
+                    <th>Client Name</th>
+                    <th>Account #</th>
+                    <th>FCM / Custodian</th>
+                    <th class="r">AUM ($M)</th>
+                    <th class="r">As of</th>
+                    <th class="fa-aum-ca-col-updated">Last Updated By</th>
+                  </tr></thead>
+                  <tbody id="aum-accounts-body"></tbody>
+                </table>
+                </div>
+              </div>
+            </section>
+            </div>
+        
+            <div class="fa-settings-split-resizer" id="fa-settings-split-resizer" role="separator" aria-orientation="horizontal" aria-label="Resize Client Accounts and Mapping Rules panels" tabindex="0" title="Drag to resize panels">
+              <span class="fa-settings-split-resizer-grip" aria-hidden="true"><i class="fas fa-grip-lines"></i></span>
+            </div>
+        
+            <div class="fa-settings-split-pane fa-settings-split-pane--bottom">
+            <!-- ══ Mapping Rules (outer card + per-book nested cards) ══ -->
+            <section class="content-card fa-settings-mapping-card">
+              <div class="card-header fa-settings-mapping-card-header">
+                <div class="fa-settings-mapping-card-header-main-row">
+                  <div class="card-title"><span class="fa-card-title-text">Mapping Rules</span></div>
+                  <div class="card-actions action-toolbar fa-settings-mapping-card-actions">
+                    <button type="button" class="action-btn fa-settings-mapping-card-action-btn" onclick="openNewBookModal()">New Book Rule</button>
+                    <div class="fa-expand-collapse-all-group" role="group" aria-label="Expand or collapse all mapping rules books">
+                      <button type="button" class="action-btn fa-settings-mapping-card-action-btn fa-expand-collapse-all-btn" id="fa-settings-mapping-books-expand-all" onclick="faSettingsMappingBooksExpandAll()" aria-label="Expand all mapping rules books" title="Expand all mapping rules books"><i class="fas fa-angles-down" aria-hidden="true"></i></button>
+                      <button type="button" class="action-btn fa-settings-mapping-card-action-btn fa-expand-collapse-all-btn" id="fa-settings-mapping-books-collapse-all" onclick="faSettingsMappingBooksCollapseAll()" aria-label="Collapse all mapping rules books" title="Collapse all mapping rules books"><i class="fas fa-angles-up" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="fa-settings-mapping-intro-block">
+                  <ul class="fa-settings-mapping-intro-list">
+                    <li>Per book, weights follow <strong>(AUM × leverage) ÷ Σ</strong> across accounts. Set AUM in <strong>Client Accounts</strong> and leverage in the grids; fixed ratio targets are edited via <strong>Edit Book Rule</strong>.</li>
+                    <li><strong>1.0×</strong> is neutral for each account. Other values raise or lower that account’s share of the ticker versus straight AUM weights.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="card-body fa-settings-mapping-card-body" id="fa-settings-mapping-books-root">
+                <section class="content-card content-card--flush-body fa-aum-book-card fa-book-card--collapsed" data-aum-book="energy" data-fa-book-card="aum|energy">
+                  <div class="card-header fa-aum-book-card-header">
+                    <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="false" aria-controls="fa-aum-book-body-energy" aria-label="Show or hide #GH5600 allocation grid">
+                      <div class="card-title fa-aum-book-card-title">
+                        <span class="fa-card-title-text">#GH5600<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i><span class="fa-strip-card-accts">MS-5758778 · JPM-568767 · GS-456456</span><span class="fa-aum-book-sub">Natural Gas / WTI</span></span>
+                      </div>
+                    </button>
+                    <div class="card-actions action-toolbar">
+                      <button type="button" class="action-btn" onclick="openFaAumNewTickerModal('energy')">New Ticker Leverage</button>
+                      <button type="button" class="action-btn fa-aum-book-mode-btn" id="fa-aum-use-all-defaults-energy" onclick="faAumUseAllDefaultsClick('energy')">Use All Defaults</button>
+                      <button type="button" class="action-btn fa-aum-book-mode-btn" id="fa-aum-use-all-adjusted-energy" onclick="faAumUseAllAdjustedClick('energy')">Use All Adjusted</button>
+                      <button type="button" class="action-btn fa-mapping-edit-book-btn" onclick="openEditBookRuleModal('#GH5600')">Edit Book Rule</button>
+                    </div>
+                  </div>
+                  <div id="fa-aum-book-body-energy" class="card-body fa-aum-book-card-body" hidden>
+                    <div id="fa-aum-fcm-key-energy" class="fa-aum-fcm-key-host"></div>
+                    <table class="data-table trades-grid" id="aum-table-energy">
+                      <colgroup>
+                        <col class="fa-aum-col-menu" />
+                        <col class="fa-aum-col-ticker" />
+                        <col class="fa-aum-col-split" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-spacer" />
+                      </colgroup>
+                      <thead>
+                        <tr class="fa-aum-grid-subhead">
+                          <th class="trades-col-menu" aria-hidden="true"></th>
+                          <th class="fa-aum-ticker-col" style="text-align:left;font-weight:500;color:var(--color-text-tertiary, var(--muted))">Ticker</th>
+                          <th class="fa-aum-split-col" style="font-weight:400;color:var(--color-text-tertiary, var(--muted))">Effective Split</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-spacer-th" aria-hidden="true"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="aum-body-energy"></tbody>
+                    </table>
+                  </div>
+                </section>
+        
+                <section class="content-card content-card--flush-body fa-aum-book-card fa-book-card--collapsed" data-aum-book="gas" data-fa-book-card="aum|gas">
+                  <div class="card-header fa-aum-book-card-header">
+                    <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="false" aria-controls="fa-aum-book-body-gas" aria-label="Show or hide #GH5601 allocation grid">
+                      <div class="card-title fa-aum-book-card-title">
+                        <span class="fa-card-title-text">#GH5601<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i><span class="fa-strip-card-accts">MS-5758778 · GS-456456</span><span class="fa-aum-book-sub">Henry Hub</span></span>
+                      </div>
+                    </button>
+                    <div class="card-actions action-toolbar">
+                      <button type="button" class="action-btn" onclick="openFaAumNewTickerModal('gas')">New Ticker Leverage</button>
+                      <button type="button" class="action-btn fa-aum-book-mode-btn" id="fa-aum-use-all-defaults-gas" onclick="faAumUseAllDefaultsClick('gas')">Use All Defaults</button>
+                      <button type="button" class="action-btn fa-aum-book-mode-btn" id="fa-aum-use-all-adjusted-gas" onclick="faAumUseAllAdjustedClick('gas')">Use All Adjusted</button>
+                      <button type="button" class="action-btn fa-mapping-edit-book-btn" onclick="openEditBookRuleModal('#GH5601')">Edit Book Rule</button>
+                    </div>
+                  </div>
+                  <div id="fa-aum-book-body-gas" class="card-body fa-aum-book-card-body" hidden>
+                    <div id="fa-aum-fcm-key-gas" class="fa-aum-fcm-key-host"></div>
+                    <table class="data-table trades-grid" id="aum-table-gas">
+                      <colgroup>
+                        <col class="fa-aum-col-menu" />
+                        <col class="fa-aum-col-ticker" />
+                        <col class="fa-aum-col-split" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-spacer" />
+                      </colgroup>
+                      <thead>
+                        <tr class="fa-aum-grid-subhead">
+                          <th class="trades-col-menu" aria-hidden="true"></th>
+                          <th class="fa-aum-ticker-col" style="text-align:left;font-weight:500;color:var(--color-text-tertiary, var(--muted))">Ticker</th>
+                          <th class="fa-aum-split-col" style="font-weight:400;color:var(--color-text-tertiary, var(--muted))">Effective Split</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-spacer-th" aria-hidden="true"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="aum-body-gas"></tbody>
+                    </table>
+                  </div>
+                </section>
+        
+                <section class="content-card content-card--flush-body fa-aum-book-card fa-book-card--collapsed" data-aum-book="crude" data-fa-book-card="aum|crude">
+                  <div class="card-header fa-aum-book-card-header">
+                    <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="false" aria-controls="fa-aum-book-body-crude" aria-label="Show or hide #GH5603 allocation grid">
+                      <div class="card-title fa-aum-book-card-title">
+                        <span class="fa-card-title-text">#GH5603<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i><span class="fa-strip-card-accts">CIT-88234 · BAR-44512 · MS-5758778</span><span class="fa-aum-book-sub">WTI Crude Oil</span></span>
+                      </div>
+                    </button>
+                    <div class="card-actions action-toolbar">
+                      <button type="button" class="action-btn" onclick="openFaAumNewTickerModal('crude')">New Ticker Leverage</button>
+                      <button type="button" class="action-btn fa-aum-book-mode-btn" id="fa-aum-use-all-defaults-crude" onclick="faAumUseAllDefaultsClick('crude')">Use All Defaults</button>
+                      <button type="button" class="action-btn fa-aum-book-mode-btn" id="fa-aum-use-all-adjusted-crude" onclick="faAumUseAllAdjustedClick('crude')">Use All Adjusted</button>
+                      <button type="button" class="action-btn fa-mapping-edit-book-btn" onclick="openEditBookRuleModal('#GH5603')">Edit Book Rule</button>
+                    </div>
+                  </div>
+                  <div id="fa-aum-book-body-crude" class="card-body fa-aum-book-card-body" hidden>
+                    <div id="fa-aum-fcm-key-crude" class="fa-aum-fcm-key-host"></div>
+                    <table class="data-table trades-grid" id="aum-table-crude">
+                      <colgroup>
+                        <col class="fa-aum-col-menu" />
+                        <col class="fa-aum-col-ticker" />
+                        <col class="fa-aum-col-split" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-lev" /><col class="fa-aum-col-wtd" />
+                        <col class="fa-aum-col-spacer" />
+                      </colgroup>
+                      <thead>
+                        <tr class="fa-aum-grid-subhead">
+                          <th class="trades-col-menu" aria-hidden="true"></th>
+                          <th class="fa-aum-ticker-col" style="text-align:left;font-weight:500;color:var(--color-text-tertiary, var(--muted))">Ticker</th>
+                          <th class="fa-aum-split-col" style="font-weight:400;color:var(--color-text-tertiary, var(--muted))">Effective Split</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-lev-col" scope="col" title="Leverage" style="text-align:center;border-left:1px solid var(--border);font-weight:500;color:var(--muted)">Lev</th>
+                          <th class="fa-aum-wtd-col" scope="col" title="Weighted exposure (AUM × leverage)" style="text-align:right;font-weight:500;color:var(--muted)">Wtd</th>
+                          <th class="fa-aum-spacer-th" aria-hidden="true"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="aum-body-crude"></tbody>
+                    </table>
+                  </div>
+                </section>
+        
+              </div>
+            </section>
+            </div>
+        
+            </div>
+
+          </div>
+
+  </div>
+
+</div>
+
+<div id="modal-edit-sma" class="modal-overlay" style="display:none" onclick="closeEditSMAModal()">
+  <div class="modal-card" style="width:420px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-weight:600;font-size:.88rem">Edit SMA Line</div>
+      <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeEditSMAModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-field" style="grid-column:1/-1">
+        <label class="form-label">SMA / FCM Name</label>
+        <input class="form-input" id="es-fcm" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Account #</label>
+        <input class="form-input" id="es-acct" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Ratio %</label>
+        <input class="form-input" id="es-ratio" type="number" min="0" max="100" step="0.1" />
+      </div>
+      <div class="form-field" style="grid-column:1/-1">
+        <label class="form-label">Effective From</label>
+        <input class="form-input" id="es-from" type="text" placeholder="e.g. Jan 1, 2026" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" onclick="closeEditSMAModal()">Cancel</button>
+      <button type="button" class="modal-btn primary" onclick="saveEditedSMALine()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-new-book" class="modal-overlay" style="display:none" onclick="closeNewBookModal()">
+  <div class="modal-card modal-card--new-book" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title-nb" id="nb-modal-title">New Book Mapping</div>
+      <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeNewBookModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fa-nb-top-grid">
+        <div class="form-field">
+          <label class="form-label" for="nb-ref">Book reference</label>
+          <div class="fa-nb-input-accent fa-nb-input-accent--ref mol-validation mol-validation--required">
+            <span class="fa-nb-input-accent__bar" aria-hidden="true"></span>
+            <span class="fa-nb-ref-prefix" aria-hidden="true">#</span>
+            <input class="form-input" id="nb-ref" autocomplete="off" inputmode="text" aria-required="true" />
+          </div>
+        </div>
+      </div>
+      <section class="content-card fa-nb-sma-card">
+        <div class="card-header">
+          <span class="fa-nb-sma-card__heading">SMA Account Lines</span>
+          <button type="button" class="action-btn" onclick="addNBLine()">New SMA Line</button>
+        </div>
+        <div class="fa-nb-sma-card__body">
+          <div class="fa-nb-lines-head">
+            <span>SMA / FCM Name</span>
+            <span>Account #</span>
+            <span aria-hidden="true"></span>
+          </div>
+          <div id="nb-lines" class="fa-nb-lines-scroll"></div>
+        </div>
+      </section>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" onclick="closeNewBookModal()">Cancel</button>
+      <button type="button" class="modal-btn primary" id="nb-modal-submit" onclick="submitNewBookModal()">Create Book</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-fa-aum-new-ticker" class="modal-overlay" style="display:none" onclick="closeFaAumNewTickerModal()">
+  <div class="modal-card modal-card--fa-aum-new-ticker" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title-nb" id="fa-aum-nt-title">New Ticker Leverage</div>
+      <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeFaAumNewTickerModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fa-aum-nt-book-key" value="" />
+      <div class="fa-aum-nt-symbol-row">
+        <div class="form-field">
+          <label class="form-label" for="fa-aum-nt-symbol">Symbol</label>
+          <div class="fa-nb-input-accent mol-validation mol-validation--required">
+            <span class="fa-nb-input-accent__bar" aria-hidden="true"></span>
+            <input type="text" class="form-input" id="fa-aum-nt-symbol" maxlength="8" autocomplete="off" inputmode="text" aria-required="true" placeholder="e.g. NG" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="fa-aum-nt-name">Name</label>
+          <div class="fa-nb-input-accent mol-validation mol-validation--required">
+            <span class="fa-nb-input-accent__bar" aria-hidden="true"></span>
+            <input type="text" class="form-input" id="fa-aum-nt-name" autocomplete="off" aria-required="true" placeholder="e.g. Natural Gas" />
+          </div>
+        </div>
+      </div>
+      <section class="content-card fa-nb-sma-card fa-aum-nt-lev-card">
+        <div class="card-header">
+          <span class="fa-nb-sma-card__heading">Leverage &amp; Weighted Exposure</span>
+        </div>
+        <div class="fa-nb-sma-card__body fa-aum-nt-lev-card__body">
+          <div class="fa-aum-nt-lev-head">
+            <span>Client Account</span>
+            <span class="fa-aum-nt-lev-head__lvg">Lvg</span>
+            <span class="fa-aum-nt-lev-head__wtd">Wtd</span>
+          </div>
+          <div id="fa-aum-nt-accounts-scroll" class="fa-aum-nt-accounts-scroll" role="group" aria-label="Per-account leverage and weighted exposure"></div>
+        </div>
+      </section>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" onclick="closeFaAumNewTickerModal()">Cancel</button>
+      <button type="button" class="modal-btn primary" onclick="submitFaAumNewTickerModal()">Create Ticker</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-fa-aum-view-default-leverage" class="modal-overlay fa-aum-view-default-lev-overlay" style="display:none" onclick="closeFaAumViewDefaultLeverageModal()">
+  <div class="modal-card modal-card--fa-aum-view-default-leverage" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title-nb">Default Leverage</div>
+      <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeFaAumViewDefaultLeverageModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body fa-aum-view-default-lev-modal-body">
+      <div class="fa-aum-view-default-lev-scroll">
+        <table class="data-table fa-aum-view-default-lev-table">
+          <thead id="fa-aum-view-default-lev-thead"></thead>
+          <tbody id="fa-aum-view-default-lev-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn primary" onclick="closeFaAumViewDefaultLeverageModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-fa-aum-add-account" class="modal-overlay fa-aum-add-account-overlay" style="display:none" onclick="closeFaAumAddAccountModal()">
+  <div class="modal-card modal-card--fa-aum-add-account" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title-nb">New Client Account</div>
+      <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeFaAumAddAccountModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body fa-aum-add-account-modal-body">
+      <div class="form-field">
+        <label class="form-label" for="fa-aum-aa-client">Client Name</label>
+        <input type="text" class="form-input mol-validation mol-validation--required" id="fa-aum-aa-client" name="fa-aum-aa-client" autocomplete="organization" aria-required="true" placeholder="e.g. Meridian Asset Partners" />
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="fa-aum-aa-acct">Account #</label>
+        <input type="text" class="form-input mol-validation mol-validation--required" id="fa-aum-aa-acct" name="fa-aum-aa-acct" autocomplete="off" aria-required="true" placeholder="e.g. JPM-568767" />
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="fa-aum-aa-fcm">FCM / Custodian</label>
+        <input type="text" class="form-input mol-validation mol-validation--required" id="fa-aum-aa-fcm" name="fa-aum-aa-fcm" autocomplete="off" aria-required="true" placeholder="e.g. JP Morgan" />
+      </div>
+      <div class="fa-aum-add-account-row-split">
+        <div class="form-field">
+          <label class="form-label" for="fa-aum-aa-aum">AUM ($M)</label>
+          <input type="number" class="form-input mol-validation mol-validation--required" id="fa-aum-aa-aum" name="fa-aum-aa-aum" min="0" step="0.01" inputmode="decimal" aria-required="true" placeholder="e.g. 450" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="fa-aum-aa-asof">As of</label>
+          <input type="date" class="form-input mol-validation mol-validation--required" id="fa-aum-aa-asof" name="fa-aum-aa-asof" aria-required="true" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" onclick="closeFaAumAddAccountModal()">Cancel</button>
+      <button type="button" class="modal-btn primary" onclick="saveFaAumAddAccount()">Create Client Account</button>
+    </div>
+  </div>
+</div>
+
+<script src="book-card-collapse.js"></script>
+<script src="mapping-rules-app.js"></script>
+<script src="aum-ratios-embedded.js"></script>
+
+</body>
+</html>

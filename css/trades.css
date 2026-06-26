@@ -1,0 +1,358 @@
+/* Title-integrated date filter (Trades + Certificate Inventory Registry Activity) */
+
+body.trades-page .page-title,
+body.ci-registry-page .page-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35em;
+}
+
+body.trades-page .page-title::after,
+body.ci-registry-page .page-title::after {
+    content: none;
+}
+
+body.trades-page .page-title-from,
+body.ci-registry-page .page-title-for {
+    font-weight: 400;
+}
+
+body.trades-page .trade-date-filter,
+body.ci-registry-page .trade-date-filter {
+    position: relative;
+    display: inline-flex;
+    font-weight: 400;
+}
+
+body.trades-page .trade-date-filter__trigger,
+body.ci-registry-page .trade-date-filter__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: inherit;
+    text-transform: uppercase;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+body.trades-page .trade-date-filter__trigger:hover .trade-date-filter__label,
+body.ci-registry-page .trade-date-filter__trigger:hover .trade-date-filter__label {
+    color: var(--color-gray-700);
+}
+
+body.trades-page .trade-date-filter__caret,
+body.ci-registry-page .trade-date-filter__caret {
+    font-size: 14px;
+    color: var(--color-gray-500);
+    transition: transform var(--transition-base);
+}
+
+body.trades-page .trade-date-filter.is-open .trade-date-filter__caret,
+body.ci-registry-page .trade-date-filter.is-open .trade-date-filter__caret {
+    transform: rotate(180deg);
+}
+
+body.trades-page .trade-date-filter__popover,
+body.ci-registry-page .trade-date-filter__popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 200;
+    min-width: 260px;
+    padding: 12px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+body.trades-page .trade-date-filter__popover::before,
+body.ci-registry-page .trade-date-filter__popover::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 24px;
+    width: 12px;
+    height: 12px;
+    background: var(--color-bg-primary);
+    border-top: 1px solid var(--color-border-medium);
+    border-left: 1px solid var(--color-border-medium);
+    transform: rotate(45deg);
+}
+
+body.trades-page .trade-date-filter__presets,
+body.ci-registry-page .trade-date-filter__presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+body.trades-page .trade-date-filter__preset,
+body.ci-registry-page .trade-date-filter__preset {
+    min-height: 32px;
+    padding: 6px 8px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-500);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-base);
+}
+
+body.trades-page .trade-date-filter__preset:hover,
+body.ci-registry-page .trade-date-filter__preset:hover {
+    background: var(--color-gray-600);
+}
+
+body.trades-page .trade-date-filter__preset.active,
+body.ci-registry-page .trade-date-filter__preset.active {
+    background: var(--color-red);
+}
+
+body.trades-page .trade-date-filter__preset[data-preset="60"],
+body.ci-registry-page .trade-date-filter__preset[data-preset="60"] {
+    grid-column: 1;
+}
+
+body.trades-page .trade-date-filter__preset[data-preset="all"],
+body.ci-registry-page .trade-date-filter__preset[data-preset="all"] {
+    grid-column: 2;
+}
+
+body.trades-page .trade-date-filter__divider,
+body.ci-registry-page .trade-date-filter__divider {
+    margin: 12px 0 10px;
+    border-top: 1px dotted var(--color-border-medium);
+}
+
+body.trades-page .trade-date-filter__custom,
+body.ci-registry-page .trade-date-filter__custom {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+body.trades-page .trade-date-filter__range-input,
+body.ci-registry-page .trade-date-filter__range-input {
+    flex: 1;
+    min-width: 0;
+}
+
+body.trades-page .trade-date-filter__range-input input,
+body.ci-registry-page .trade-date-filter__range-input input {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    padding: 6px 10px 6px 12px;
+    border: 1px solid var(--color-border-light);
+    border-left: 3px solid var(--color-green);
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-100);
+    font-family: inherit;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+body.trades-page .trade-date-filter__range-input input:focus,
+body.ci-registry-page .trade-date-filter__range-input input:focus {
+    outline: none;
+    background: var(--color-bg-primary);
+    border-color: var(--color-blue);
+    border-left-color: var(--color-green);
+}
+
+body.trades-page .trade-date-filter__ok-btn,
+body.ci-registry-page .trade-date-filter__ok-btn {
+    flex-shrink: 0;
+    min-width: 44px;
+    height: 32px;
+    padding: 0 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-gray-500);
+    color: #fff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-base);
+}
+
+body.trades-page .trade-date-filter__ok-btn:hover,
+body.ci-registry-page .trade-date-filter__ok-btn:hover {
+    background: var(--color-gray-600);
+}
+
+/* Filter panel — card layout (Trades-specific overrides) */
+body.trades-page #curves-content:has(.filter-multi-select-wrap.is-open) {
+    overflow: visible;
+}
+
+body.trades-page #curves-content:has(.filter-multi-select-wrap.is-open) > .panels-container {
+    position: relative;
+    z-index: 1;
+}
+
+body.trades-page .filter-multi-select-wrap.is-open {
+    z-index: 100;
+}
+
+body.trades-page .filter-panel .filter-row,
+body.trades-page .filter-panel .server-filter-row {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+/* Multi-select filter control (mock) */
+body.trades-page .filter-multi-select-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+body.trades-page .filter-group .filter-multi-select-wrap {
+    display: flex;
+}
+
+body.trades-page .filter-multi-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-width: 120px;
+    height: 32px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    cursor: pointer;
+    user-select: none;
+    font-family: inherit;
+    text-align: left;
+}
+
+body.trades-page .filter-panel .filter-multi-select {
+    height: var(--filters-card-control-height);
+}
+
+body.trades-page .filter-group .filter-multi-select {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+body.trades-page .filter-multi-select--wide {
+    min-width: 160px;
+    max-width: 220px;
+}
+
+body.trades-page .filter-multi-select__menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 200;
+    min-width: 100%;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    padding: 4px 0;
+}
+
+body.trades-page .filter-multi-select__option {
+    display: block;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--color-text-primary);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+}
+
+body.trades-page .filter-multi-select__option:hover {
+    background: var(--color-gray-100);
+}
+
+body.trades-page .filter-multi-select-wrap.is-open .filter-multi-select__caret {
+    transform: rotate(180deg);
+}
+
+body.trades-page .filter-multi-select__placeholder {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--color-gray-400);
+    text-align: left;
+}
+
+body.trades-page .filter-multi-select__caret {
+    flex-shrink: 0;
+    color: var(--color-gray-500);
+    font-size: 12px;
+    transition: transform var(--transition-base);
+}
+
+body.trades-page .filter-multi-select:disabled,
+body.trades-page .filter-multi-select.filter-multi-select--disabled,
+body.trades-page .filter-group--disabled .filter-multi-select {
+    background: var(--color-gray-100);
+    cursor: not-allowed;
+}
+
+body.trades-page .filter-group--disabled .filter-multi-select__placeholder {
+    color: var(--color-gray-400);
+}
+
+/* Filter empty vs active states */
+body.trades-page .filter-panel .filter-group.filter-group--active .filter-label {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    border-color: var(--color-blue);
+}
+
+body.trades-page .filter-panel .filter-group.filter-group--active .filter-input,
+body.trades-page .filter-panel .filter-group.filter-group--active .filter-multi-select:not(.filter-multi-select--disabled) {
+    background: var(--color-bg-primary);
+    border-color: var(--color-blue);
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+body.trades-page .filter-panel .filter-group.filter-group--active .filter-multi-select:not(.filter-multi-select--disabled) .filter-multi-select__placeholder {
+    color: var(--color-text-primary);
+}
+
+body.trades-page .filter-panel .filter-group.filter-group--disabled .filter-label {
+    color: var(--color-gray-400);
+}
+
+body.trades-page .filter-panel .filter-group.filter-group--disabled .filter-input,
+body.trades-page .filter-panel .filter-group.filter-group--disabled .filter-multi-select {
+    background: var(--color-gray-100);
+    border-color: var(--color-border-light);
+    color: var(--color-gray-400);
+    cursor: not-allowed;
+}
+
+body.trades-page .trade-date-filter__trigger--active .trade-date-filter__label,
+body.ci-registry-page .trade-date-filter__trigger--active .trade-date-filter__label {
+    color: var(--color-blue);
+}
+
+body.trades-page .trade-date-filter__trigger--active .trade-date-filter__caret,
+body.ci-registry-page .trade-date-filter__trigger--active .trade-date-filter__caret {
+    color: var(--color-blue);
+}

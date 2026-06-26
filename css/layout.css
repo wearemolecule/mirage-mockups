@@ -1,0 +1,685 @@
+/* ============================================
+   LAYOUT - Main Content & Containers
+   ============================================ */
+.main-content {
+    padding: var(--spacing-lg) var(--spacing-3xl);
+    height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#curves-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#volatilities-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#volatilities-content .panels-container {
+    height: 100%;
+}
+
+#volatilities-content .panels-container:has(.detail-panel:not(.hidden)) {
+    gap: 24px !important;
+}
+
+#volatilities-content .content-bottom {
+    height: 100%;
+}
+
+#volatilities-content .table-wrapper {
+    width: 100% !important;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease-in-out;
+}
+
+#volatilities-content .table-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.panels-container {
+    background: var(--color-bg-primary);
+    border-left: 1px solid var(--color-border-light);
+    border-right: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+    padding: 1em;
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    gap: 1em;
+}
+
+.panels-container:has(.detail-panel:not(.hidden)),
+.panels-container:has(.content-bottom:has(.detail-panel:not(.hidden))) {
+    gap: 24px !important;
+}
+
+.content-bottom {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    gap: 1em;
+}
+
+.content-bottom:has(.detail-panel.hidden) {
+    gap: 0;
+}
+
+.content-bottom:has(.detail-panel:not(.hidden)),
+.content-bottom.panel-visible,
+#curves-content .content-bottom:has(.detail-panel:not(.hidden)),
+#curves-content .content-bottom.panel-visible,
+#volatilities-content .content-bottom:has(.detail-panel:not(.hidden)),
+#volatilities-content .content-bottom.panel-visible {
+    gap: 0; /* No gap, resize handle provides spacing */
+}
+
+.table-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+    transition: width 0.3s ease-in-out;
+    margin: 0;
+}
+
+/* When detail panel is visible, apply constraints */
+.content-bottom:has(.detail-panel:not(.hidden)) .table-wrapper,
+.content-bottom.panel-visible .table-wrapper {
+    min-width: 300px;
+    max-width: calc(100% - 24px - 300px); /* Account for resize handle and min detail panel width */
+}
+
+/* When detail panel is hidden, table should take full width */
+.content-bottom:has(.detail-panel.hidden) .table-wrapper {
+    width: 100%;
+    max-width: 100%;
+}
+
+.content-bottom:has(.detail-panel:not(.hidden)) .table-container,
+.content-bottom.panel-visible .table-container {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+/* ============================================
+   PANELS - Detail Panel
+   ============================================ */
+.detail-panel {
+    width: 75%;
+    background: var(--color-bg-primary);
+    border: 0;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl) 0 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    min-height: 0;
+    transform: translateX(100%);
+    opacity: 0;
+    margin: 0;
+    transition: transform var(--transition-slow) ease-in-out, opacity var(--transition-slow) ease-in-out, width var(--transition-slow) ease-in-out, padding var(--transition-slow) ease-in-out;
+}
+
+.detail-panel.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+}
+
+.detail-panel:not(.hidden) {
+    transform: translateX(0);
+    opacity: 1;
+    width: calc(75% - 12px); /* Account for half of resize handle width */
+    padding: var(--spacing-xl) 0 0 0;
+    border: 0;
+    min-width: 300px;
+    max-width: calc(100% - 24px - 300px); /* Account for resize handle and min table width */
+}
+
+.detail-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+#detail-panel .detail-panel-header {
+    border-left: 5px solid var(--source-color, #9898a5);
+    padding-left: 1em;
+}
+
+.detail-panel-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    flex: 1;
+}
+
+.detail-panel-title .contract-date {
+    font-weight: 400;
+}
+
+.detail-panel-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--spacing-lg);
+    border: 1px solid var(--color-border-medium);
+    border-radius: 50%;
+}
+
+.detail-panel-close i {
+    color: var(--color-text-primary);
+}
+
+.detail-panel-close:hover {
+    background: #c30000;
+    border-color: #c30000;
+    color: white;
+}
+
+.detail-panel-close:hover i {
+    color: white;
+}
+
+.curve-summary {
+    margin-top: 8px;
+}
+
+.curve-summary-meta {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.trade-summary {
+    margin-top: 8px;
+}
+
+.trade-summary-meta {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.detail-section {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-section:first-of-type {
+    flex-shrink: 1;
+    flex-grow: 0;
+    flex-basis: auto;
+    min-height: 0;
+    width: 100%;
+}
+
+/* When Source is collapsed - it should NOT grow, only show header */
+.detail-section.source-collapsed {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    max-height: fit-content !important;
+    width: 100% !important;
+}
+
+.detail-section:first-of-type .detail-section-content.collapsed {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    flex-shrink: 1;
+    flex-grow: 0;
+}
+
+.detail-section:first-of-type .detail-section-header {
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+/* Source content when expanded - use ID for higher specificity */
+#source-content:not(.collapsed) {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 16px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    display: block !important;
+    position: relative !important;
+}
+
+/* Ensure detail-section-content doesn't expand beyond section */
+.detail-section:first-of-type .detail-section-content {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+/* When Source is expanded, allow it to grow to fit content */
+.detail-section.source-expanded {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 360px !important;
+    max-height: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-self: flex-start;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+
+/* Fallback for when expanded but class not yet applied */
+.detail-section:first-of-type:not(.source-collapsed) {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 360px !important;
+    max-height: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-self: flex-start;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+
+/* Source section chart placeholder */
+#source-content .chart-placeholder,
+.detail-section:first-of-type .chart-placeholder,
+.detail-section:first-of-type .detail-section-content:not(.collapsed) .chart-placeholder {
+    width: 1200px !important;
+    height: 250px !important;
+    flex-shrink: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    min-width: 1200px !important;
+    min-height: 250px !important;
+    max-width: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Marks section - default */
+.detail-section:nth-of-type(2) {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+/* When Source is collapsed, Marks should have flex-grow: 2 */
+.detail-section.marks-expanded {
+    flex: 2 1 0 !important;
+    min-height: 0 !important;
+}
+
+/* Trades screen: Trades Form section (same flex as marks-expanded) */
+.detail-section.trades-form-section {
+    flex: 2 1 0 !important;
+    min-height: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-section.trades-form-section .detail-section-content {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+.detail-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: var(--color-bg-tertiary);
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.detail-section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.detail-section-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.detail-section-btn {
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
+.detail-section-btn:hover {
+    text-decoration: underline;
+}
+
+.detail-section-content {
+    padding: var(--spacing-xl);
+    flex-shrink: 1;
+    min-height: 0;
+    background: var(--color-bg-tertiary);
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Marks Section with Tabs - White background and equal padding */
+.detail-section.with-tabs .detail-section-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: var(--spacing-xl) !important;
+    overflow: visible;
+    background: var(--color-bg-primary) !important;
+}
+
+/* Ensure tab content also respects the white background */
+.detail-section.with-tabs .curves-tab-content {
+    background: var(--color-bg-primary);
+    width: 100%;
+    height: 100%;
+    display: none !important;
+    flex-direction: row;
+    gap: 0; /* No gap, resize handle provides spacing */
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+}
+
+.detail-section.with-tabs .curves-tab-content.active {
+    display: flex !important;
+    background: var(--color-bg-primary);
+}
+
+/* When no tabs, always show surfaces tab content */
+.detail-section:not(.with-tabs) .curves-tab-content {
+    display: flex !important;
+    background: var(--color-bg-primary);
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    gap: 0; /* No gap, resize handle provides spacing */
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+}
+
+/* Hide volatilities tab content when no tabs */
+.detail-section:not(.with-tabs) #options-tab-content {
+    display: none !important;
+}
+
+.detail-section-content.collapsed {
+    display: none !important;
+}
+
+.detail-section-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    padding: 0;
+    margin-left: var(--spacing-md);
+}
+
+.marks-search-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px var(--spacing-xl);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-light);
+    gap: var(--spacing-lg);
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.marks-search-input-group {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+}
+
+.marks-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-lg);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: 12px;
+}
+
+.marks-search-input {
+    flex: 1;
+    border: 1px solid var(--color-border-medium);
+    border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background: var(--color-bg-primary);
+    font-size: 13px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-family: inherit;
+    min-width: 0;
+}
+
+.marks-search-input:focus {
+    outline: none;
+    border-color: var(--color-border-medium);
+}
+
+.marks-search-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.marks-search-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.marks-grid-chart-container {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+    height: 100%;
+    overflow: visible;
+}
+
+/* Column containers - shared base properties */
+.curves-left-column {
+    flex: 0 0 calc(50% - 12px);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    align-self: stretch;
+    height: 100%;
+    overflow: hidden;
+    min-width: 200px;
+    max-width: calc(80% - 12px);
+}
+
+.curves-right-column {
+    flex: 0 0 calc(50% - 12px);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    align-self: stretch;
+    height: 100%;
+    overflow: hidden;
+    min-width: 200px;
+    max-width: calc(80% - 12px);
+}
+
+.volatilities-right-column {
+    flex: 0 0 calc(50% - 12px);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    align-self: stretch;
+    height: 100%;
+    overflow: visible; /* Allow controls to show */
+    min-width: 200px;
+    max-width: calc(80% - 12px);
+}
+
+/* Resize Handle (shared for columns and panel) */
+.column-resize-handle,
+.panel-resize-handle {
+    width: 24px;
+    flex-shrink: 0;
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    position: relative;
+    user-select: none;
+    transition: background var(--transition-base);
+}
+
+.column-resize-handle {
+    background: var(--color-bg-primary);
+}
+
+.panel-resize-handle {
+    background: transparent;
+}
+
+
+.column-resize-handle i,
+.panel-resize-handle i {
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+
+/* Chart column containers */
+.curves-right-column,
+.volatilities-right-column {
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    box-sizing: border-box;
+    position: relative;
+    overflow: visible;
+}
+
+/* Volatilities chart controls */
+.volatilities-chart-controls,
+.curves-chart-controls {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+.call-put-toggle {
+    display: flex;
+    gap: 0;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.toggle-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-bg-primary);
+    border: none;
+    border-right: 1px solid var(--color-border-medium);
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-family: inherit;
+}
+
+.toggle-btn:last-child {
+    border-right: none;
+}
+
+.toggle-btn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.toggle-btn.active {
+    background: var(--color-gray-400);
+    color: white;
+}
+
+.toggle-btn.active:hover {
+    background: #7f7f8f;
+}
+

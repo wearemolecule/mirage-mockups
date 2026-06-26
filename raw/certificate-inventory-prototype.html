@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Molecule · Certificate Inventory — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1a365d; --navy-700:#13294a; --navy-600:#1d3e68; --navy-50:#eef2f8;
+    --ink:#1f2733; --muted:#5a6573; --faint:#8a94a3;
+    --line:#e4e8ee; --line-soft:#eef1f5;
+    --bg:#f4f5f7; --surface:#ffffff; --surface-2:#fafbfc; --surface-3:#f6f8fa;
+    --g-bg:#e7f4ec; --g-tx:#127a46; --g-dot:#1a9d5f;
+    --a-bg:#fdf3dd; --a-tx:#8a5a00; --a-dot:#e29009;
+    --b-bg:#e8f0fb; --b-tx:#1a4fa0; --b-dot:#2b6fd6;
+    --r-bg:#fbe9e9; --r-tx:#a5282c; --r-dot:#d6453a;
+    --n-bg:#eef0f3; --n-tx:#626d7a; --n-dot:#9aa4b0;
+    --radius:8px; --radius-sm:6px;
+    --sh-card:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.05);
+    --sh-pop:0 12px 28px rgba(16,24,40,.18),0 2px 6px rgba(16,24,40,.10);
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;background:var(--bg);}
+  button{font-family:inherit;}
+  ::selection{background:#cfe0f5;}
+
+  #app{display:flex;height:100vh;min-width:1040px;overflow:hidden;}
+
+  /* sidebar */
+  .sidebar{width:74px;background:var(--navy);flex:0 0 74px;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;}
+  .sidebar .logo{width:34px;height:34px;margin-bottom:18px;}
+  .nav-item{width:58px;padding:9px 0 7px;border-radius:9px;display:flex;flex-direction:column;align-items:center;gap:5px;color:#9db4d4;cursor:pointer;transition:.15s;background:none;border:none;}
+  .nav-item svg{width:21px;height:21px;stroke:#9db4d4;fill:none;stroke-width:1.7;}
+  .nav-item span{font-size:10px;font-weight:500;}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:#cfe0f5;}
+  .nav-item.active{background:rgba(255,255,255,.13);color:#fff;}
+  .nav-item.active svg{stroke:#fff;}
+  .sidebar .spacer{flex:1;}
+  .avatar{width:30px;height:30px;border-radius:50%;background:#2f5488;color:#cfe0f5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);}
+  .topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:16px;flex:0 0 60px;}
+  .topbar .crumb{font-size:11.5px;color:var(--faint);font-family:var(--mono);}
+  .topbar h2{font-size:19px;font-weight:600;letter-spacing:-.015em;margin:-2px 0 0;}
+  .gf{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .gfield{display:flex;align-items:center;gap:7px;height:34px;padding:0 11px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12.5px;cursor:pointer;}
+  .gfield:hover{border-color:#c9d2de;}
+  .gfield .lbl{color:var(--faint);font-size:11px;}
+  .gfield svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.7;}
+  .gfield.year{font-weight:600;}
+  .gicon{width:34px;height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .gicon:hover{border-color:#c9d2de;}
+  .gicon svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.7;}
+
+  .tabs{height:44px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:stretch;padding:0 24px;gap:4px;flex:0 0 44px;}
+  .tab{display:flex;align-items:center;gap:8px;padding:0 14px;font-size:13.5px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;}
+  .tab:hover{color:var(--ink);}
+  .tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:600;}
+  .tab .badge{background:var(--r-bg);color:var(--r-tx);font-size:11px;font-weight:600;padding:1px 7px;border-radius:20px;font-family:var(--mono);}
+  .tab.active .badge{background:var(--navy);color:#fff;}
+
+  .page{flex:1;min-height:0;display:none;flex-direction:column;position:relative;}
+  .page.show{display:flex;}
+
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:10px;padding:12px 24px;flex-wrap:wrap;}
+  .btn{height:34px;padding:0 13px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;}
+  .btn:hover{border-color:#c9d2de;background:var(--surface-2);}
+  .btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .btn.primary{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .btn.primary:hover{background:var(--navy-600);}
+  .btn.primary[disabled]{opacity:.45;cursor:not-allowed;}
+  .btn.ghost{border-color:transparent;background:transparent;color:var(--muted);}
+  .btn.ghost:hover{background:var(--surface-3);}
+  .btn .ts{color:var(--faint);font-size:10.5px;font-weight:400;margin-left:2px;font-family:var(--mono);}
+  .btn.primary .ts{color:#a9c2e6;}
+  .sep{width:1px;height:24px;background:var(--line);margin:0 2px;}
+  .toggle{display:inline-flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);margin-left:auto;}
+  .sw{width:118px;height:30px;border-radius:8px;background:var(--surface-3);border:1px solid var(--line);position:relative;display:flex;cursor:pointer;}
+  .sw .opt{flex:1;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:var(--faint);z-index:1;}
+  .sw .knob{position:absolute;width:57px;height:26px;border-radius:6px;background:#fff;box-shadow:var(--sh-card);top:1px;left:1px;transition:.18s cubic-bezier(.4,0,.2,1);}
+  .sw[data-view="grouped"] .knob{left:60px;}
+  .sw[data-view="individual"] .opt:first-child{color:var(--navy);}
+  .sw[data-view="grouped"] .opt:last-child{color:var(--navy);}
+
+  .chips{display:flex;align-items:center;gap:8px;padding:0 24px 12px;flex-wrap:wrap;}
+  .chip{height:30px;padding:0 10px;border-radius:16px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;}
+  .chip:hover{border-color:#c9d2de;}
+  .chip svg{width:12px;height:12px;stroke:var(--faint);fill:none;stroke-width:2;}
+  .chip.on{background:var(--navy-50);border-color:#c9d6ea;color:var(--navy);font-weight:500;}
+  .chip .x{color:var(--faint);margin-left:2px;font-weight:600;}
+  .chip-label{font-size:11px;color:var(--faint);font-family:var(--mono);margin-right:2px;}
+
+  .gridwrap{margin:0 24px 16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:auto;flex:1;min-height:0;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{background:var(--surface-3);text-align:left;font-weight:600;color:var(--muted);font-size:11px;letter-spacing:.03em;text-transform:uppercase;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:default;}
+  th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);}
+  th.sortable{cursor:pointer;} th.sortable:hover{color:var(--ink);}
+  tbody td{padding:0 12px;height:46px;border-bottom:1px solid var(--line-soft);white-space:nowrap;vertical-align:middle;}
+  tbody tr:hover td{background:var(--surface-2);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.serial{font-family:var(--mono);font-size:11.5px;color:var(--navy-600);}
+  td.mono{font-family:var(--mono);font-size:11.5px;}
+  .sub{color:var(--faint);font-size:11px;}
+  .link{color:var(--navy);font-weight:500;font-family:var(--mono);font-size:11.5px;cursor:pointer;}
+  .link:hover{text-decoration:underline;}
+  .dash{color:var(--faint);}
+  tr.forecast td{background:repeating-linear-gradient(45deg,#fffdf6,#fffdf6 6px,#fdf7e8 6px,#fdf7e8 12px);}
+  tr.forecast td:first-child{box-shadow:inset 3px 0 0 var(--a-dot);}
+  tr.forecast:hover td{background:#fdf6e6;}
+  tr.exception td{background:#fdf4f4;}
+  tr.exception td:first-child{box-shadow:inset 3px 0 0 var(--r-dot);}
+  tr.retired td{color:var(--faint);}
+  tr.retired td.serial{text-decoration:line-through;color:var(--faint);}
+  .rowact{display:flex;gap:4px;justify-content:flex-end;}
+  .kebab{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--faint);cursor:pointer;border:none;background:none;}
+  .kebab:hover{background:var(--surface-3);color:var(--ink);}
+  .kebab svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+  td.check{width:34px;padding-left:14px;} th.check{width:34px;padding-left:14px;}
+  .cbx{width:15px;height:15px;border:1.5px solid #c2cad6;border-radius:4px;cursor:pointer;}
+  .chev{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;transition:transform .15s;cursor:pointer;}
+  tr.expanded .chev{transform:rotate(90deg);}
+  tr.childrow td{background:var(--surface-3)!important;height:38px;}
+  tr.childrow td.serial{padding-left:30px;}
+
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;border-radius:20px;font-size:11px;font-weight:600;}
+  .pill .d{width:7px;height:7px;border-radius:50%;}
+  .pill.green{background:var(--g-bg);color:var(--g-tx);} .pill.green .d{background:var(--g-dot);}
+  .pill.amber{background:var(--a-bg);color:var(--a-tx);} .pill.amber .d{background:var(--a-dot);}
+  .pill.blue{background:var(--b-bg);color:var(--b-tx);} .pill.blue .d{background:var(--b-dot);}
+  .pill.red{background:var(--r-bg);color:var(--r-tx);} .pill.red .d{background:var(--r-dot);}
+  .pill.gray{background:var(--n-bg);color:var(--n-tx);} .pill.gray .d{background:var(--n-dot);}
+  .tech{display:inline-flex;align-items:center;gap:6px;}
+  .tdot{width:8px;height:8px;border-radius:2px;}
+  .tdot.Solar{background:#e0920a;} .tdot.Wind{background:#2b8fd6;} .tdot.Hydro{background:#1aa3a3;} .tdot.Biomass{background:#6a9a3a;}
+  .miniact{display:inline-flex;gap:5px;}
+  .mb{font-size:10.5px;color:var(--navy);border:1px solid #d4def0;background:var(--navy-50);border-radius:5px;padding:2px 7px;font-weight:500;cursor:pointer;}
+  .mb:hover{background:#e2ebf8;}
+  .rangecell{font-family:var(--mono);font-size:11.5px;color:var(--navy-600);}
+
+  .footbar{height:42px;flex:0 0 42px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:18px;font-size:12px;color:var(--muted);}
+  .footbar .fstat{display:inline-flex;align-items:center;gap:7px;}
+  .footbar .fstat b{color:var(--ink);font-variant-numeric:tabular-nums;font-family:var(--mono);font-weight:600;}
+  .footbar .fdot{width:8px;height:8px;border-radius:50%;}
+  .footbar .attn{margin-left:auto;color:var(--r-tx);font-weight:600;cursor:pointer;}
+  .footbar .attn:hover{text-decoration:underline;}
+
+  /* inbox */
+  .filterbar{display:flex;align-items:center;gap:10px;padding:12px 24px;flex-wrap:wrap;}
+  .split{flex:1;min-height:0;display:flex;border-top:1px solid var(--line);}
+  .queue{width:38%;flex:0 0 38%;border-right:1px solid var(--line);overflow:auto;background:var(--surface-2);}
+  .qhead{padding:11px 20px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--line);background:var(--surface-3);display:flex;align-items:center;gap:8px;position:sticky;top:0;}
+  .qhead .qn{margin-left:auto;font-family:var(--mono);color:var(--ink);}
+  .qitem{padding:13px 20px;border-bottom:1px solid var(--line-soft);cursor:pointer;border-left:3px solid transparent;}
+  .qitem:hover{background:#fff;}
+  .qitem.sel{background:#fff;border-left-color:var(--navy);}
+  .qtop{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+  .src{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;}
+  .src.innovo{background:#e8f0fb;color:#1a4fa0;} .src.manual{background:#eef0f3;color:#626d7a;} .src.auto{background:#e7f4ec;color:#127a46;}
+  .qtop .age{margin-left:auto;font-size:11px;color:var(--faint);font-family:var(--mono);}
+  .qsum{font-size:13px;font-weight:500;margin-bottom:8px;}
+  .conf{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);}
+  .confbar{flex:1;max-width:120px;height:5px;border-radius:4px;background:var(--line);overflow:hidden;}
+  .confbar i{display:block;height:100%;}
+  .conf .pct{font-family:var(--mono);font-weight:600;}
+  .detail{flex:1;min-width:0;overflow:auto;padding:18px 22px;display:flex;flex-direction:column;gap:16px;}
+  .attrcard{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;background:var(--surface-2);}
+  .attrcard .ahead{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .attrcard h3{margin:0;font-size:14px;font-weight:600;}
+  .attrgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px 18px;}
+  .attr .k{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;}
+  .attr .v{font-size:13px;font-weight:500;}
+  .attr .v.mono{font-family:var(--mono);font-size:11.5px;}
+  .sechead{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:8px;}
+  .sechead .hint{font-family:var(--mono);color:var(--faint);font-weight:500;text-transform:none;}
+  .match{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;}
+  .match.top{border-color:#bfe3cd;background:#f4fbf6;}
+  .match .star{color:var(--a-dot);}
+  .match .mtrade{font-family:var(--mono);font-weight:600;color:var(--navy);font-size:12.5px;}
+  .match .mmeta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .match .mright{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .confwrap{text-align:right;} .confwrap .pct{font-family:var(--mono);font-weight:700;font-size:14px;} .confwrap .lbl{font-size:10px;color:var(--faint);}
+  .targets{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .target{border:1px solid var(--line);border-radius:var(--radius);padding:13px 14px;background:#fff;display:flex;gap:11px;align-items:flex-start;cursor:pointer;}
+  .target:hover{border-color:#c9d2de;}
+  .target.on{border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-50);}
+  .target .ti{width:32px;height:32px;border-radius:8px;background:var(--navy-50);display:flex;align-items:center;justify-content:center;flex:0 0 32px;}
+  .target .ti svg{width:17px;height:17px;stroke:var(--navy);fill:none;stroke-width:1.8;}
+  .target .tt{font-size:13px;font-weight:600;} .target .td{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.35;}
+  .picker{border:1px solid #c9d6ea;border-radius:var(--radius);background:var(--navy-50);padding:12px;}
+  .picker .psearch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--faint);}
+  .picker .psearch svg{width:14px;height:14px;stroke:var(--faint);fill:none;stroke-width:2;}
+  .presult{display:flex;align-items:center;gap:10px;padding:9px 10px;background:#fff;border:1px solid var(--line);border-radius:7px;margin-top:8px;font-size:12px;cursor:pointer;}
+  .presult:hover{border-color:var(--navy);}
+  .presult .ptrade{font-family:var(--mono);font-weight:600;color:var(--navy);}
+  .presult .pq{margin-left:auto;font-family:var(--mono);color:var(--muted);}
+  .actionbar{height:56px;flex:0 0 56px;border-top:1px solid var(--line);background:var(--surface);display:flex;align-items:center;padding:0 22px;gap:10px;}
+  .actionbar .right{margin-left:auto;display:flex;gap:8px;}
+  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:10px;}
+  .empty svg{width:44px;height:44px;stroke:#c8d3e0;fill:none;stroke-width:1.5;}
+
+  /* registry steps */
+  .steps{display:inline-flex;align-items:center;}
+  .step{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:14px;}
+  .step .sd{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .step.done{background:var(--g-bg);color:var(--g-tx);}
+  .step.cur{background:var(--b-bg);color:var(--b-tx);}
+  .step.wait{background:var(--n-bg);color:var(--n-tx);}
+  .step.fail{background:var(--r-bg);color:var(--r-tx);}
+  .arrow{color:#c8d0db;margin:0 2px;font-size:11px;}
+  .spinner{width:12px;height:12px;border:2px solid var(--b-dot);border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .errtip{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--r-tx);font-weight:500;cursor:help;}
+  .errtip svg{width:13px;height:13px;stroke:var(--r-dot);fill:none;stroke-width:2;}
+  .btn.retry{height:28px;padding:0 10px;font-size:11.5px;border-color:#e8b9b9;color:var(--r-tx);}
+  .btn.tiny{height:28px;padding:0 10px;font-size:11.5px;}
+  .ck svg{width:15px;height:15px;stroke:var(--g-dot);fill:none;stroke-width:2.4;}
+
+  /* overlays */
+  #overlay{position:fixed;inset:0;display:none;z-index:50;}
+  #overlay.show{display:block;}
+  .scrim{position:absolute;inset:0;background:rgba(19,28,45,.34);animation:fade .15s ease;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .slideover{position:absolute;top:0;right:0;height:100%;width:392px;background:#fff;border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(16,24,40,.16);display:flex;flex-direction:column;animation:slidein .2s cubic-bezier(.4,0,.2,1);}
+  @keyframes slidein{from{transform:translateX(40px);opacity:.6}to{transform:translateX(0);opacity:1}}
+  .so-head{height:56px;flex:0 0 56px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--line);}
+  .so-head h3{margin:0;font-size:15px;font-weight:600;}
+  .x{margin-left:auto;color:var(--faint);background:none;border:none;cursor:pointer;display:flex;}
+  .x:hover{color:var(--ink);}
+  .x svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;}
+  .so-body{padding:18px 20px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px;}
+  .field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  .req{color:var(--r-tx);}
+  textarea,.inp,select.inp{width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 11px;font-size:12.5px;font-family:var(--mono);color:var(--ink);background:#fff;resize:none;}
+  textarea:focus,.inp:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-50);}
+  .inp.sans,select.inp{font-family:'Inter',sans-serif;}
+  .preview{background:var(--g-bg);border:1px solid #bfe3cd;border-radius:7px;padding:10px 12px;font-size:12px;color:var(--g-tx);font-weight:600;display:flex;align-items:center;gap:8px;}
+  .preview.warn{background:var(--a-bg);border-color:#ecd39a;color:var(--a-tx);}
+  .preview svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .so-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;}
+
+  .modal{position:absolute;background:#fff;border-radius:12px;box-shadow:var(--sh-pop);left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;overflow:hidden;animation:pop .16s cubic-bezier(.4,0,.2,1);}
+  @keyframes pop{from{transform:translate(-50%,-48%) scale(.98);opacity:.7}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  .m-head{height:58px;flex:0 0 58px;display:flex;align-items:center;padding:0 22px;border-bottom:1px solid var(--line);}
+  .m-head h3{margin:0;font-size:16px;font-weight:600;}
+  .m-head .msub{margin-left:10px;font-size:12px;color:var(--faint);font-family:var(--mono);}
+  .m-foot{height:62px;flex:0 0 62px;border-top:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:10px;justify-content:flex-end;background:var(--surface-2);}
+  .m-body{padding:22px 24px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px;}
+
+  .sb-body{flex:1;min-height:0;display:flex;}
+  .sb-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .sb-col+.sb-col{border-left:1px solid var(--line);}
+  .sb-colhead{padding:12px 18px;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--line);background:var(--surface-3);display:flex;align-items:center;gap:8px;}
+  .sb-colhead .cnt{margin-left:auto;font-family:var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:14px;padding:1px 9px;}
+  .sb-list{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+  .dropzone{border:1.5px solid var(--line);border-radius:9px;padding:13px 14px;background:#fff;}
+  .dropzone.active{border-color:var(--navy);background:var(--navy-50);}
+  .dz-head{display:flex;align-items:center;gap:9px;}
+  .dz-head .ti{width:30px;height:30px;border-radius:7px;background:var(--navy-50);border:1px solid #d4def0;display:flex;align-items:center;justify-content:center;}
+  .dz-head .ti svg{width:15px;height:15px;stroke:var(--navy);fill:none;stroke-width:1.8;}
+  .dz-head .tt{font-size:12.5px;font-weight:600;} .dz-head .td{font-size:11px;color:var(--faint);}
+  .stepper{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .stepper button{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:16px;color:var(--navy);cursor:pointer;line-height:1;}
+  .stepper button:hover{background:var(--navy-50);}
+  .stepper button[disabled]{opacity:.35;cursor:not-allowed;}
+  .stepper .val{font-family:var(--mono);font-weight:700;font-size:15px;min-width:34px;text-align:center;}
+  .unassigned-big{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--navy);}
+  .unassigned-big.zero{color:var(--g-tx);}
+
+  .links-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .lchip{display:inline-flex;align-items:center;gap:8px;background:var(--navy-50);border:1px solid #d4def0;border-radius:7px;padding:6px 8px 6px 11px;font-size:11.5px;}
+  .lchip .lt{font-family:var(--mono);font-weight:600;color:var(--navy);}
+  .lchip .ls{color:var(--muted);}
+  .lchip .lx{color:var(--faint);cursor:pointer;display:flex;} .lchip .lx svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+  .addlink{display:inline-flex;align-items:center;gap:6px;border:1px dashed #c9d6ea;border-radius:7px;padding:6px 11px;font-size:11.5px;color:var(--navy);font-weight:500;cursor:pointer;background:none;}
+  .addlink svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+
+  /* floating menu */
+  #menu{position:fixed;z-index:60;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:var(--sh-pop);padding:6px;min-width:170px;display:none;animation:pop .12s ease;}
+  #menu.show{display:block;}
+  .mi{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--ink);}
+  .mi:hover{background:var(--navy-50);}
+  .mi.check{justify-content:space-between;}
+  .mi .tick{color:var(--navy);opacity:0;} .mi.on .tick{opacity:1;}
+  .mi.danger{color:var(--r-tx);} .mi.danger:hover{background:var(--r-bg);}
+  .mi svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .menu-sep{height:1px;background:var(--line);margin:5px 2px;}
+
+  /* toast */
+  #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .toast{background:var(--navy-700);color:#fff;font-size:12.5px;padding:10px 16px;border-radius:9px;box-shadow:var(--sh-pop);display:flex;align-items:center;gap:9px;animation:tin .2s ease;}
+  .toast svg{width:15px;height:15px;stroke:#86e3b0;fill:none;stroke-width:2.2;}
+  @keyframes tin{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+  .stub{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:12px;}
+  .stub svg{width:48px;height:48px;stroke:#c8d3e0;fill:none;stroke-width:1.4;}
+  .stub b{color:var(--muted);font-size:15px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <svg class="logo" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="11" r="5" fill="#7ba0d4"/><circle cx="10" cy="28" r="5" fill="#cfe0f5"/><circle cx="30" cy="28" r="5" fill="#cfe0f5"/><path d="M20 11 L10 28 M20 11 L30 28 M10 28 L30 28" stroke="#9db4d4" stroke-width="2"/></svg>
+    <button class="nav-item" data-nav="trades"><svg viewBox="0 0 24 24"><path d="M7 8l-4 4 4 4M3 12h12M17 16l4-4-4-4M21 12H9"/></svg><span>Trades</span></button>
+    <button class="nav-item active" data-nav="inventory"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4M21 7v10l-9 4M12 11v10"/></svg><span>Inventory</span></button>
+    <button class="nav-item" data-nav="allocations"><svg viewBox="0 0 24 24"><path d="M12 2v10l8 4M12 12L4 16M12 12a10 10 0 11-8 4"/></svg><span>Allocations</span></button>
+    <button class="nav-item" data-nav="reports"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span>Reports</span></button>
+    <div class="spacer"></div>
+    <button class="nav-item"><div class="avatar">SS</div></button>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb">Inventory / Certificates</div>
+        <h2>Certificate Inventory</h2>
+      </div>
+      <div class="gf">
+        <div class="gfield" data-act="menu-asof"><span class="lbl">As of</span><span id="asof-val">May 12, 2026</span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+        <div class="gfield year" data-act="menu-year"><span class="lbl">Year</span><span id="year-val">2024</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="gicon" data-act="search" title="Search serials"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div>
+        <div class="gicon" title="Notifications"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 00-7 7c0 5-2 6-2 6h18s-2-1-2-6a7 7 0 00-7-7zM10 21h4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <!-- PORTFOLIO -->
+    <section class="page" id="page-portfolio">
+      <div class="toolbar">
+        <button class="btn primary" data-act="add-cert"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Certificate</button>
+        <button class="btn" data-act="bulk"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M5 20h14"/></svg>Bulk Upload CSV</button>
+        <button class="btn" data-act="add-range"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Add Serial Range</button>
+        <div class="sep"></div>
+        <button class="btn" data-act="sync"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>Sync with Registry <span class="ts" id="sync-ts">· 6m ago</span></button>
+        <div class="toggle">
+          <span>View:</span>
+          <div class="sw" id="view-sw" data-view="individual" data-act="toggle-view"><span class="opt">Individual</span><span class="opt">Grouped</span><span class="knob"></span></div>
+        </div>
+      </div>
+      <div class="chips" id="pf-chips"></div>
+      <div class="gridwrap"><table id="pf-table"></table></div>
+      <div class="footbar" id="pf-foot"></div>
+    </section>
+
+    <!-- INBOX -->
+    <section class="page" id="page-inbox">
+      <div class="filterbar">
+        <span class="chip-label">FILTER QUEUE</span>
+        <span class="chip" data-act="filter:src">Source <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chip" data-act="filter:reg">Registry <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chip" data-act="filter:conf">Confidence <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        <button class="btn ghost" style="margin-left:auto" data-act="rerun"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>Re-run auto-match</button>
+      </div>
+      <div class="split">
+        <div class="queue" id="inbox-queue"></div>
+        <div class="detail" id="inbox-detail"></div>
+      </div>
+      <div class="actionbar" id="inbox-actions"></div>
+    </section>
+
+    <!-- REGISTRY -->
+    <section class="page" id="page-registry">
+      <div class="filterbar">
+        <span class="chip-label">FILTERS</span>
+        <span class="chip" data-act="rfilter:action">Action <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chip" data-act="rfilter:status">Status <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        <span class="chip">Date range: Last 7 days <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        <button class="btn ghost" style="margin-left:auto" data-act="refresh-reg"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>Refresh status</button>
+      </div>
+      <div class="gridwrap"><table id="reg-table"></table></div>
+      <div class="footbar" id="reg-foot"></div>
+    </section>
+
+    <!-- stub pages for other nav -->
+    <section class="page" id="page-stub">
+      <div class="stub"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><b id="stub-title">Trades</b><div>Not part of this prototype — Certificate Inventory lives under <b style="color:var(--navy)">Inventory</b>.</div><button class="btn primary" data-act="back-inv">Back to Inventory</button></div>
+    </section>
+  </div>
+</div>
+
+<div id="overlay"></div>
+<div id="menu"></div>
+<div id="toasts"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const ICON = {
+  kebab:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  inbound:'<svg viewBox="0 0 24 24"><path d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>',
+  outbound:'<svg viewBox="0 0 24 24"><path d="M12 5v14m0 0l6-6m-6 6l-6-6"/></svg>',
+  reservation:'<svg viewBox="0 0 24 24"><path d="M5 12h14M5 12l5-5M5 12l5 5"/></svg>',
+  retirement:'<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>',
+  warn:'<svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h16.9a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>',
+};
+const PILL = {Available:'green',Forecast:'amber',Allocated:'blue',Exception:'red',Retired:'gray'};
+
+let certs = [
+  {st:'Available',serial:'MRETS-2024-TX-SOL-004521',reg:'M-RETS',vin:2024,tech:'Solar',state:'TX',vol:1,cost:4.20,mark:4.85,trade:'88421',subleg:'Buy · Jan-2024',proj:'ERCOT-PV-44218'},
+  {st:'Available',serial:'MRETS-2024-TX-SOL-004522',reg:'M-RETS',vin:2024,tech:'Solar',state:'TX',vol:1,cost:4.20,mark:4.85,trade:'88421',subleg:'Buy · Jan-2024',proj:'ERCOT-PV-44218'},
+  {st:'Forecast',serial:'(pending mint)',reg:'—',vin:2024,tech:'Solar',state:'TX',vol:1,cost:null,mark:null,trade:'88450',subleg:'Reservation on subleg',proj:'ERCOT-PV-44219'},
+  {st:'Allocated',serial:'MRETS-2024-TX-WIN-004118',reg:'M-RETS',vin:2024,tech:'Wind',state:'TX',vol:1,cost:3.10,mark:3.55,trade:'88301',subleg:'Sell · Mar-2024',proj:'ERCOT-WN-88120'},
+  {st:'Exception',serial:'WREGIS-2024-CA-SOL-118903',reg:'WREGIS',vin:2024,tech:'Solar',state:'CA',vol:1,cost:38.00,mark:41.50,trade:null,subleg:'Innovo sync · no match',proj:'CAISO-PV-22901'},
+  {st:'Available',serial:'WREGIS-2025-CA-WIN-220145',reg:'WREGIS',vin:2025,tech:'Wind',state:'CA',vol:1,cost:12.40,mark:13.10,trade:'88512',subleg:'Buy · Feb-2025',proj:'CAISO-WN-55013'},
+  {st:'Retired',serial:'MRETS-2023-OK-WIN-009842',reg:'M-RETS',vin:2023,tech:'Wind',state:'OK',vol:1,cost:2.05,mark:null,trade:'87990',subleg:'Retirement · RPS-2023',proj:'SPP-WN-12044'},
+  {st:'Available',serial:'PJMGATS-2024-PA-SOL-556210',reg:'PJM-GATS',vin:2024,tech:'Solar',state:'PA',vol:1,cost:28.00,mark:30.25,trade:'88477',subleg:'Buy · Apr-2024',proj:'PJM-PV-77210'},
+  {st:'Available',serial:'PJMGATS-2024-PA-SOL-556211',reg:'PJM-GATS',vin:2024,tech:'Solar',state:'PA',vol:1,cost:28.00,mark:30.25,trade:'88477',subleg:'Buy · Apr-2024',proj:'PJM-PV-77210'},
+  {st:'Allocated',serial:'NAR-2024-IA-WIN-771204',reg:'NAR',vin:2024,tech:'Wind',state:'IA',vol:1,cost:2.80,mark:3.05,trade:'88503',subleg:'Sell · May-2024',proj:'MISO-WN-44120'},
+];
+let ranges = [
+  {id:'r1',range:'MRETS-2024-TX-WIN-004100 → 004150',n:51,tech:'Wind',state:'TX',vin:2024,st:'Available',cost:3.10,trade:'88301',prefix:'MRETS-2024-TX-WIN-0041'},
+  {id:'r2',range:'MRETS-2024-TX-SOL-004500 → 004560',n:61,tech:'Solar',state:'TX',vin:2024,st:'Available',cost:4.20,trade:'88421',prefix:'MRETS-2024-TX-SOL-0045'},
+  {id:'r3',range:'(pending mint) · forecast batch',n:412,tech:'Solar',state:'TX',vin:2024,st:'Forecast',cost:null,trade:'88450',prefix:null},
+  {id:'r4',range:'WREGIS-2024-CA-SOL-118900 → 118922',n:23,tech:'Solar',state:'CA',vin:2024,st:'Exception',cost:38.00,trade:null,prefix:'WREGIS-2024-CA-SOL-1189'},
+  {id:'r5',range:'MRETS-2023-OK-WIN-009800 → 009899',n:100,tech:'Wind',state:'OK',vin:2023,st:'Retired',cost:2.05,trade:'87990',prefix:'MRETS-2023-OK-WIN-0098'},
+];
+let inbox = [
+  {id:'i1',source:'innovo',sourceLabel:'Innovo Sync',n:51,tech:'Wind',state:'TX',vin:2024,reg:'M-RETS',conf:72,age:'2 hours ago',batch:'INV-7741',rangeShort:'004100…004150',
+    matches:[
+      {trade:'88301',type:'Buy',desc:'Panhandle Wind PPA · Mar-2024 delivery · open qty 51 MWh',conf:89,top:true},
+      {trade:'88409',type:'Buy',desc:'ERCOT Wind Block · Feb-2024 delivery · open qty 120 MWh',conf:61},
+      {trade:'88398',type:'Buy',desc:'West TX Wind · Jan-2024 delivery · open qty 25 MWh',conf:44},
+    ]},
+  {id:'i2',source:'auto',sourceLabel:'Auto-match',n:100,tech:'Wind',state:'OK',vin:2023,reg:'M-RETS',conf:95,age:'1 day ago',batch:'AUT-3310',rangeShort:'009800…009899',
+    matches:[
+      {trade:'87990',type:'Retire',desc:'RPS Compliance 2023 · OK obligation · 100 MWh',conf:95,top:true},
+      {trade:'87955',type:'Buy',desc:'SPP Wind Strip · Dec-2023 · open qty 60 MWh',conf:52},
+    ]},
+  {id:'i3',source:'manual',sourceLabel:'Manual Upload',n:23,tech:'Solar',state:'CA',vin:2024,reg:'WREGIS',conf:44,age:'5 hours ago',batch:'MAN-9920',rangeShort:'118900…118922',
+    matches:[
+      {trade:'88440',type:'Buy',desc:'CAISO Solar PCC1 · Apr-2024 · open qty 30 MWh',conf:44,top:true},
+      {trade:'88461',type:'Buy',desc:'NorCal PV · Mar-2024 · open qty 12 MWh',conf:38},
+    ]},
+  {id:'i4',source:'innovo',sourceLabel:'Innovo Sync',n:12,tech:'Solar',state:'TX',vin:2025,reg:'ERCOT',conf:68,age:'1 day ago',batch:'INV-7755',rangeShort:'PV-001…012',
+    matches:[
+      {trade:'88512',type:'Buy',desc:'ERCOT Solar 2025 · Feb-2025 · open qty 12 MWh',conf:68,top:true},
+    ]},
+  {id:'i5',source:'manual',sourceLabel:'Manual Upload',n:8,tech:'Hydro',state:'NM',vin:2024,reg:'WREGIS',conf:31,age:'2 days ago',batch:'MAN-9931',rangeShort:'HY-200…207',
+    matches:[
+      {trade:'88488',type:'Buy',desc:'SW Hydro REC · 2024 · open qty 8 MWh',conf:31,top:true},
+    ]},
+  {id:'i6',source:'auto',sourceLabel:'Auto-match',n:40,tech:'Wind',state:'IA',vin:2024,reg:'NAR',conf:83,age:'2 days ago',batch:'AUT-3318',rangeShort:'771200…771239',
+    matches:[
+      {trade:'88503',type:'Sell',desc:'Brookfield IA Wind · May-2024 · open qty 40 MWh',conf:83,top:true},
+    ]},
+];
+let registry = [
+  {id:'g1',status:'confirmed',action:'Retirement',n:100,range:'MRETS-2023-OK-WIN-009800…009899',cp:'RPS Compliance 2023',reg:'M-RETS',trade:'87990',sub:'May 12 · 09:14',conf:'2 min ago'},
+  {id:'g2',status:'submitted',action:'Transfer',n:51,range:'MRETS-2024-TX-WIN-004100…004150',cp:'EDP Retail',reg:'M-RETS',trade:'88301',sub:'May 12 · 11:02',conf:null},
+  {id:'g3',status:'failed',action:'Retirement',n:25,range:'WREGIS-2024-CA-SOL-118900…118924',cp:'Voluntary Green-e',reg:'WREGIS',trade:'88477',sub:'May 12 · 08:40',conf:null,err:'Registry rejected: vintage mismatch'},
+  {id:'g4',status:'confirmed',action:'Transfer',n:200,range:'PJMGATS-2024-PA-SOL-556000…556199',cp:'Constellation Energy',reg:'PJM-GATS',trade:'88477',sub:'May 12 · 06:25',conf:'3 hrs ago'},
+  {id:'g5',status:'pending',action:'Retirement',n:60,range:'WREGIS-2025-CA-WIN-220100…220159',cp:'CA RPS 2025',reg:'WREGIS',trade:'88512',sub:null,conf:null},
+  {id:'g6',status:'submitted',action:'Transfer',n:40,range:'NAR-2024-IA-WIN-771200…771239',cp:'Brookfield Renewable',reg:'NAR',trade:'88503',sub:'May 12 · 10:48',conf:null},
+];
+
+/* ---------------- STATE ---------------- */
+const S = {
+  nav:'inventory', tab:'portfolio', view:'individual',
+  pfFilters:{status:null,registry:null,technology:null,vintage:null},
+  expanded:new Set(),
+  selInbox:'i1', selTarget:null,
+  split:null,
+};
+
+/* ---------------- HELPERS ---------------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const money=v=>v==null?'<span class="dash">—</span>':'$'+v.toFixed(2);
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=ICON.check+'<span>'+msg+'</span>';
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .3s';t.style.opacity='0';setTimeout(()=>t.remove(),300);},2400);
+}
+
+/* ---------------- TABS / NAV ---------------- */
+function renderTabs(){
+  const tabs=[{id:'portfolio',label:'Portfolio'},{id:'inbox',label:'Matching Inbox',badge:inbox.length},{id:'registry',label:'Registry Activity'}];
+  $('#tabs').innerHTML=tabs.map(t=>`<button class="tab ${t.id===S.tab?'active':''}" data-act="tab:${t.id}">${t.label}${t.badge!=null?`<span class="badge">${t.badge}</span>`:''}</button>`).join('');
+}
+function showTab(){
+  ['portfolio','inbox','registry','stub'].forEach(p=>$('#page-'+p).classList.remove('show'));
+  if(S.nav!=='inventory'){$('#page-stub').classList.add('show');$('#stub-title').textContent=S.nav[0].toUpperCase()+S.nav.slice(1);return;}
+  $('#page-'+S.tab).classList.add('show');
+  if(S.tab==='portfolio')renderPortfolio();
+  if(S.tab==='inbox')renderInbox();
+  if(S.tab==='registry')renderRegistry();
+}
+
+/* ---------------- PORTFOLIO ---------------- */
+function pfFiltered(){
+  return certs.filter(c=>{
+    const f=S.pfFilters;
+    if(f.status&&c.st!==f.status)return false;
+    if(f.registry&&c.reg!==f.registry)return false;
+    if(f.technology&&c.tech!==f.technology)return false;
+    if(f.vintage&&c.vin!=f.vintage)return false;
+    return true;
+  });
+}
+function renderChips(){
+  const f=S.pfFilters;
+  const chip=(dim,label)=>{
+    const val=f[dim];
+    if(val)return `<span class="chip on" data-act="filter:${dim}">${label}: ${val} <span class="x" data-act="clear:${dim}">✕</span></span>`;
+    return `<span class="chip" data-act="filter:${dim}">${label} <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>`;
+  };
+  $('#pf-chips').innerHTML='<span class="chip-label">FILTERS</span>'+
+    chip('status','Status')+chip('registry','Registry')+chip('vintage','Vintage')+
+    chip('technology','Technology')+
+    `<span class="chip" data-act="noop">State <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>`+
+    `<span class="chip" data-act="noop">Linked / Unlinked <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>`;
+}
+function renderPortfolio(){
+  renderChips();
+  $('#view-sw').dataset.view=S.view;
+  S.view==='individual'?renderIndividual():renderGrouped();
+}
+function renderIndividual(){
+  const rows=pfFiltered();
+  let html=`<thead><tr><th class="check"><div class="cbx"></div></th><th>Status</th><th>Serial Number</th><th>Registry</th><th>Vintage</th><th>Technology</th><th>State</th><th class="num">Volume (MWh)</th><th class="num">Cost Basis</th><th class="num">Mark</th><th>Linked Trade</th><th>Linked Subleg</th><th></th></tr></thead><tbody>`;
+  if(!rows.length)html+=`<tr><td colspan="13" style="text-align:center;color:var(--faint);height:120px">No certificates match these filters.</td></tr>`;
+  rows.forEach((c,i)=>{
+    const cls=c.st==='Forecast'?'forecast':c.st==='Exception'?'exception':c.st==='Retired'?'retired':'';
+    const idx=certs.indexOf(c);
+    html+=`<tr class="${cls}"><td class="check"><div class="cbx"></div></td>
+      <td><span class="pill ${PILL[c.st]}"><span class="d"></span>${c.st}</span></td>
+      <td class="serial ${c.serial.startsWith('(')?'dash':''}">${c.serial}</td>
+      <td class="${c.reg==='—'?'dash':''}">${c.reg}</td><td class="mono">${c.vin}</td>
+      <td><span class="tech"><span class="tdot ${c.tech}"></span>${c.tech}</span></td><td>${c.state}</td>
+      <td class="num">${c.vol.toFixed(2)}</td><td class="num">${money(c.cost)}</td><td class="num">${money(c.mark)}</td>
+      <td>${c.trade?`<span class="link">#${c.trade}</span>`:'<span class="dash">— unlinked</span>'}</td>
+      <td class="sub">${c.subleg}</td>
+      <td><div class="rowact"><button class="kebab" data-act="kebab:${idx}">${ICON.kebab}</button></div></td></tr>`;
+  });
+  html+='</tbody>';
+  $('#pf-table').innerHTML=html;
+  // footer
+  const all=pfFiltered();
+  const avail=certs.filter(c=>c.st==='Available').length, fc=certs.filter(c=>c.st==='Forecast').length;
+  $('#pf-foot').innerHTML=`<span class="fstat"><b>${certs.length.toLocaleString()}</b> certificates</span>
+    <span class="fstat"><span class="fdot" style="background:var(--g-dot)"></span><b>${avail}</b> available</span>
+    <span class="fstat"><span class="fdot" style="background:var(--a-dot)"></span><b>${fc}</b> forecast</span>
+    ${rows.length!==certs.length?`<span class="fstat" style="color:var(--navy)"><b>${rows.length}</b> shown (filtered)</span>`:''}
+    <span class="attn" data-act="tab:inbox"><b>${inbox.length}</b> need attention →</span>`;
+}
+function renderGrouped(){
+  let html=`<thead><tr><th style="width:30px"></th><th class="check"><div class="cbx"></div></th><th>Serial Range</th><th class="num">Certs</th><th>Technology</th><th>State</th><th>Vintage</th><th>Status</th><th class="num">Avg Cost</th><th>Linked</th><th>Range actions</th></tr></thead><tbody>`;
+  ranges.forEach(r=>{
+    const cls=r.st==='Forecast'?'forecast':r.st==='Exception'?'exception':r.st==='Retired'?'retired':'';
+    const exp=S.expanded.has(r.id);
+    const acts = r.st==='Exception'?'<span class="mb" data-act="ract:Match">Match</span>'
+      : r.st==='Retired'?'<span class="mb" data-act="ract:Export">Export</span>'
+      : r.st==='Forecast'?'<span class="mb" data-act="ract:Assign">Assign</span>'
+      : '<span class="mb" data-act="ract:Assign">Assign</span><span class="mb" data-act="ract:Retire">Retire</span><span class="mb" data-act="ract:Transfer">Transfer</span>';
+    html+=`<tr class="${cls} ${exp?'expanded':''}"><td>${ICON.chev.replace('class="chev"',`class="chev" data-act="expand:${r.id}"`)}</td>
+      <td class="check"><div class="cbx"></div></td>
+      <td class="rangecell ${r.prefix?'':'dash'}">${r.range}</td>
+      <td class="num">${r.n}</td><td><span class="tech"><span class="tdot ${r.tech}"></span>${r.tech}</span></td>
+      <td>${r.state}</td><td class="mono">${r.vin}</td>
+      <td><span class="pill ${PILL[r.st]}"><span class="d"></span>${r.st}</span></td>
+      <td class="num">${money(r.cost)}</td>
+      <td>${r.trade?`<span class="link">#${r.trade}</span>`:'<span class="dash">— unlinked</span>'}</td>
+      <td><span class="miniact">${acts}</span></td></tr>`;
+    if(exp&&r.prefix){
+      for(let k=0;k<3;k++){
+        const num=(100+k).toString();
+        html+=`<tr class="childrow"><td></td><td></td><td class="serial">${r.prefix}${num}</td><td class="num sub">1</td><td colspan="6" class="sub">individual certificate · ${r.tech} · ${r.state}</td><td><span class="miniact"><span class="mb" data-act="noop">View</span></span></td></tr>`;
+      }
+      html+=`<tr class="childrow"><td></td><td></td><td colspan="9" class="sub" style="padding-left:30px">…and ${r.n-3} more in this range</td><td></td></tr>`;
+    }
+  });
+  html+='</tbody>';
+  $('#pf-table').innerHTML=html;
+  const total=ranges.reduce((a,r)=>a+r.n,0);
+  $('#pf-foot').innerHTML=`<span class="fstat"><b>${total.toLocaleString()}</b> certificates in <b>${ranges.length}</b> ranges</span>
+    <span class="attn" data-act="tab:inbox"><b>${inbox.length}</b> need attention →</span>`;
+}
+
+/* ---------------- INBOX ---------------- */
+function renderInbox(){
+  if(!inbox.length){
+    $('#inbox-queue').innerHTML=`<div class="qhead">Inbox queue <span class="qn">0 items</span></div>`;
+    $('#inbox-detail').innerHTML=`<div class="empty">${ICON.check.replace('viewBox','class="" viewBox')}<div style="font-weight:600;color:var(--muted)">Inbox zero 🎉</div><div>Every certificate batch has been matched.</div></div>`;
+    $('#inbox-actions').innerHTML='';
+    return;
+  }
+  if(!inbox.find(x=>x.id===S.selInbox))S.selInbox=inbox[0].id;
+  // queue
+  $('#inbox-queue').innerHTML=`<div class="qhead">Inbox queue <span class="qn">${inbox.length} items</span></div>`+
+    inbox.map(it=>{
+      const col=it.conf>=80?'var(--g-dot)':it.conf>=55?'var(--a-dot)':'var(--r-dot)';
+      const tcol=it.conf>=80?'var(--g-tx)':it.conf>=55?'var(--a-tx)':'var(--r-tx)';
+      return `<div class="qitem ${it.id===S.selInbox?'sel':''}" data-act="isel:${it.id}">
+        <div class="qtop"><span class="src ${it.source}">${it.sourceLabel}</span><span class="age">${it.age}</span></div>
+        <div class="qsum">${it.n} certificates — ${it.tech}, ${it.state}, Vintage ${it.vin}, ${it.reg}</div>
+        <div class="conf"><span>Suggested match</span><span class="confbar"><i style="width:${it.conf}%;background:${col}"></i></span><span class="pct" style="color:${tcol}">${it.conf}%</span></div>
+      </div>`;
+    }).join('');
+  renderInboxDetail();
+}
+function renderInboxDetail(){
+  const it=inbox.find(x=>x.id===S.selInbox); if(!it){renderInbox();return;}
+  const m=it.matches;
+  const matchHtml=m.map((x,i)=>{
+    const tcol=x.conf>=80?'var(--g-tx)':x.conf>=55?'var(--a-tx)':'var(--r-tx)';
+    return `<div class="match ${x.top?'top':''}">
+      <span class="star">${x.top?'★':'<span style="width:13px;display:inline-block"></span>'}</span>
+      <div><div class="mtrade">Trade #${x.trade} · ${x.type}</div><div class="mmeta">${x.desc}</div></div>
+      <div class="mright"><div class="confwrap"><div class="pct" style="color:${tcol}">${x.conf}%</div><div class="lbl">confidence</div></div>
+        <button class="btn ${x.top?'primary':''}" data-act="accept:${x.trade}">Accept</button></div></div>`;
+  }).join('');
+  const tgt=(id,label,desc,icon)=>`<div class="target ${S.selTarget===id?'on':''}" data-act="target:${id}"><span class="ti">${icon}</span><div><div class="tt">${label}</div><div class="td">${desc}</div></div></div>`;
+  let picker='';
+  if(S.selTarget){
+    const labels={inbound:'inbound sublegs',outbound:'outbound sublegs',reservation:'forecast reservations',retirement:'compliance obligations'};
+    picker=`<div class="picker"><div class="psearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search ${labels[S.selTarget]} — trade ID, counterparty, delivery month…</div>`+
+      m.slice(0,2).map(x=>`<div class="presult" data-act="accept:${x.trade}"><span class="ptrade">#${x.trade}</span><span>${x.desc.split(' · ')[0]}</span><span class="sub">· ${x.desc.split(' · ')[1]||''}</span><span class="pq">open ${it.n} MWh</span></div>`).join('')+`</div>`;
+  }
+  $('#inbox-detail').innerHTML=`
+    <div class="attrcard"><div class="ahead"><span class="src ${it.source}">${it.sourceLabel}</span><h3>${it.n} certificates · ${it.tech} · ${it.state}</h3><span class="age" style="margin-left:auto;font-family:var(--mono);color:var(--faint);font-size:11.5px">batch #${it.batch}</span></div>
+      <div class="attrgrid">
+        <div class="attr"><div class="k">Registry</div><div class="v">${it.reg}</div></div>
+        <div class="attr"><div class="k">Vintage</div><div class="v">${it.vin}</div></div>
+        <div class="attr"><div class="k">Technology</div><div class="v">${it.tech}</div></div>
+        <div class="attr"><div class="k">Geography</div><div class="v">${it.state}</div></div>
+        <div class="attr"><div class="k">Volume</div><div class="v">${it.n}.00 MWh</div></div>
+        <div class="attr"><div class="k">Serial range</div><div class="v mono">${it.rangeShort}</div></div>
+      </div></div>
+    <div class="sechead">Suggested Matches <span class="hint">ranked by confidence</span></div>
+    ${matchHtml}
+    <div class="sechead" style="margin-top:4px">Or match manually</div>
+    <div class="targets">
+      ${tgt('inbound','Inbound Transaction','Link to buy subleg / acquisition',ICON.inbound)}
+      ${tgt('outbound','Outbound Transaction','Link to sell subleg / delivery',ICON.outbound)}
+      ${tgt('reservation','Reservation','Supersede forecast placeholder',ICON.reservation)}
+      ${tgt('retirement','Retirement','Retire against obligation',ICON.retirement)}
+    </div>
+    ${picker}`;
+  $('#inbox-actions').innerHTML=`<button class="btn primary" data-act="accept-top">Accept Suggestion</button>
+    <div class="right"><button class="btn" data-act="split-open">Split Batch…</button><button class="btn" data-act="dismiss">Dismiss</button><button class="btn" data-act="snooze">Snooze</button></div>`;
+}
+
+/* ---------------- REGISTRY ---------------- */
+function stepHtml(status,err){
+  const S1=(c,l,extra='')=>`<span class="step ${c}">${extra}${l}</span>`;
+  const dot='<span class="sd"></span>';
+  if(status==='confirmed')return `<span class="steps">${S1('done',' Pending',dot)}<span class="arrow">›</span>${S1('done','Submitted',dot)}<span class="arrow">›</span>${S1('done','Confirmed','<span class="ck">'+ICON.check+'</span>')}</span>`;
+  if(status==='submitted')return `<span class="steps">${S1('done','Pending',dot)}<span class="arrow">›</span>${S1('cur','Submitted','<span class="spinner"></span>')}<span class="arrow">›</span>${S1('wait','Confirmed',dot)}</span>`;
+  if(status==='pending')return `<span class="steps">${S1('cur','Pending',dot)}<span class="arrow">›</span>${S1('wait','Submitted',dot)}<span class="arrow">›</span>${S1('wait','Confirmed',dot)}</span>`;
+  if(status==='failed')return `<span class="steps">${S1('done','Pending',dot)}<span class="arrow">›</span>${S1('done','Submitted',dot)}<span class="arrow">›</span>${S1('fail','Failed','<svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.6"><path d="M6 6l12 12M18 6L6 18"/></svg>')}</span>`;
+}
+function renderRegistry(){
+  let html=`<thead><tr><th style="width:300px">Status</th><th>Action</th><th class="num">Certs</th><th>Serial Range</th><th>Counterparty / Beneficiary</th><th>Registry</th><th>Trade</th><th>Submitted</th><th>Confirmed</th><th></th></tr></thead><tbody>`;
+  registry.forEach(g=>{
+    const cls=g.status==='failed'?'exception':'';
+    let confCell = g.status==='confirmed'?`<span class="mono" style="color:var(--g-tx)">${g.conf}</span>`
+      : g.status==='failed'?`<span class="errtip" title="${g.err}">${ICON.warn} vintage mismatch</span>`
+      : g.status==='pending'?'<span class="dash">—</span>':'<span class="dash">pending…</span>';
+    let subCell = g.sub?`<span class="sub mono">${g.sub}</span>`:'<span class="dash">queued</span>';
+    let actions = g.status==='failed'?`<div class="rowact" style="gap:6px"><button class="btn retry" data-act="retry:${g.id}"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>Retry</button><button class="btn tiny" data-act="noop">Export</button></div>`
+      : g.status==='pending'?`<div class="rowact"><button class="btn tiny primary" data-act="submit:${g.id}">Submit now</button></div>`
+      : `<div class="rowact"><button class="kebab" data-act="noop">${ICON.kebab}</button></div>`;
+    html+=`<tr class="${cls}"><td>${stepHtml(g.status,g.err)}</td><td>${g.action}</td><td class="num">${g.n}</td>
+      <td class="mono">${g.range}</td><td>${g.cp}</td><td>${g.reg}</td><td><span class="link">#${g.trade}</span></td>
+      <td>${subCell}</td><td>${confCell}</td><td>${actions}</td></tr>`;
+  });
+  html+='</tbody>';
+  $('#reg-table').innerHTML=html;
+  const c=registry.filter(g=>g.status==='confirmed').length, f=registry.filter(g=>g.status==='submitted').length,
+        q=registry.filter(g=>g.status==='pending').length, fail=registry.filter(g=>g.status==='failed').length;
+  $('#reg-foot').innerHTML=`<span class="fstat"><span class="fdot" style="background:var(--g-dot)"></span><b>${c}</b> confirmed</span>
+    <span class="fstat"><span class="fdot" style="background:var(--b-dot)"></span><b>${f}</b> in flight</span>
+    <span class="fstat"><span class="fdot" style="background:var(--n-dot)"></span><b>${q}</b> queued</span>
+    ${fail?`<span class="attn"><b>${fail}</b> failed — action required →</span>`:''}`;
+}
+
+/* ---------------- OVERLAYS ---------------- */
+function openOverlay(html){$('#overlay').innerHTML=html;$('#overlay').classList.add('show');}
+function closeOverlay(){$('#overlay').classList.remove('show');$('#overlay').innerHTML='';}
+
+function openSlideover(){
+  openOverlay(`<div class="scrim" data-act="ov-close"></div>
+   <div class="slideover">
+     <div class="so-head"><h3>Add Serial Range</h3><button class="x" data-act="ov-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+     <div class="so-body">
+       <div class="field"><label>Serial range string <span class="req">*</span></label>
+         <textarea id="range-in" rows="3">MRETS-2024-TX-WIN-004151 to 004200</textarea></div>
+       <div id="range-preview"></div>
+       <div class="grid2">
+         <div class="field"><label>Registry</label><select class="inp sans"><option>M-RETS</option><option>WREGIS</option><option>PJM-GATS</option><option>NAR</option><option>ERCOT</option></select></div>
+         <div class="field"><label>Vintage</label><select class="inp sans"><option>2024</option><option>2025</option><option>2023</option></select></div>
+       </div>
+       <div class="grid2">
+         <div class="field"><label>Technology</label><select class="inp sans"><option>Wind</option><option>Solar</option><option>Hydro</option><option>Biomass</option></select></div>
+         <div class="field"><label>State / Geography</label><select class="inp sans"><option>TX — ERCOT</option><option>CA — CAISO</option><option>OK — SPP</option></select></div>
+       </div>
+       <div class="field"><label>Product</label><select class="inp sans"><option>REC — Renewable Energy Certificate</option><option>SREC — Solar REC</option></select></div>
+     </div>
+     <div class="so-foot"><button class="btn" data-act="ov-close">Cancel</button><button class="btn primary" data-act="save-range">Save Range</button></div>
+   </div>`);
+  const ta=$('#range-in');
+  const upd=()=>{
+    const n=parseRange(ta.value);
+    $('#range-preview').innerHTML = n>0
+      ? `<div class="preview">${ICON.check}Will create ${n} certificate${n>1?'s':''}</div>`
+      : `<div class="preview warn">${ICON.warn}Enter a valid range, e.g. ABC-43678393 to 43678395</div>`;
+  };
+  ta.addEventListener('input',upd); upd(); ta.focus();
+}
+function parseRange(str){
+  const nums=str.match(/(\d+)\s*(?:to|-|–|→|\.\.\.?)\s*(\d+)/i);
+  if(nums){const a=+nums[1],b=+nums[2];if(b>=a&&b-a<100000)return b-a+1;}
+  return 0;
+}
+
+function openCertModal(idx){
+  const c=idx!=null?certs[idx]:{serial:'',reg:'M-RETS',vin:2024,tech:'Solar',state:'TX',vol:1,cost:'',proj:'',trade:null,subleg:''};
+  const editing=idx!=null;
+  const links=editing&&c.trade?`<span class="lchip"><span class="lt">#${c.trade}</span><span class="ls">· ${c.subleg}</span><span class="lx" data-act="noop"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>`:'';
+  openOverlay(`<div class="scrim" data-act="ov-close"></div>
+   <div class="modal" style="width:720px;max-height:88vh">
+     <div class="m-head"><h3>${editing?'Edit':'Create'} Certificate</h3>${editing?`<span class="msub">${c.serial}</span>`:''}<button class="x" data-act="ov-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+     <div class="m-body">
+       <div class="grid2">
+         <div class="field"><label>Serial Number <span class="req">*</span></label><input class="inp" value="${c.serial}" placeholder="MRETS-2024-…"/></div>
+         <div class="field"><label>Registry <span class="req">*</span></label><select class="inp sans"><option ${c.reg==='M-RETS'?'selected':''}>M-RETS</option><option ${c.reg==='WREGIS'?'selected':''}>WREGIS</option><option ${c.reg==='PJM-GATS'?'selected':''}>PJM-GATS</option><option>NAR</option><option>ERCOT</option></select></div>
+       </div>
+       <div class="grid2">
+         <div class="field"><label>Vintage</label><select class="inp sans"><option ${c.vin==2024?'selected':''}>2024</option><option ${c.vin==2025?'selected':''}>2025</option><option ${c.vin==2023?'selected':''}>2023</option></select></div>
+         <div class="field"><label>Technology</label><select class="inp sans"><option ${c.tech==='Solar'?'selected':''}>Solar</option><option ${c.tech==='Wind'?'selected':''}>Wind</option><option>Hydro</option><option>Biomass</option></select></div>
+       </div>
+       <div class="grid2">
+         <div class="field"><label>Fuel Type</label><select class="inp sans"><option>Photovoltaic</option><option>Onshore Wind</option><option>Run-of-river</option></select></div>
+         <div class="field"><label>State</label><select class="inp sans"><option ${c.state==='TX'?'selected':''}>TX — ERCOT</option><option ${c.state==='CA'?'selected':''}>CA — CAISO</option><option>OK — SPP</option></select></div>
+       </div>
+       <div class="grid2">
+         <div class="field"><label>Certification</label><select class="inp sans"><option>Green-e Energy</option><option>None</option></select></div>
+         <div class="field"><label>Project ID</label><input class="inp" value="${c.proj||''}"/></div>
+       </div>
+       <div class="grid2">
+         <div class="field"><label>Volume (MWh)</label><input class="inp" value="${c.vol?.toFixed?c.vol.toFixed(2):'1.00'}"/></div>
+         <div class="field"><label>Cost Basis ($/MWh)</label><input class="inp" value="${c.cost!=null&&c.cost!==''?(+c.cost).toFixed(2):''}"/></div>
+       </div>
+       <div class="field"><label>Links</label><div class="links-chips">${links}<button class="addlink" data-act="noop"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add link</button></div></div>
+     </div>
+     <div class="m-foot">${editing?'<button class="btn ghost" style="margin-right:auto;color:var(--r-tx)" data-act="ov-close">Delete</button>':''}<button class="btn" data-act="ov-close">Cancel</button><button class="btn primary" data-act="save-cert">${editing?'Save':'Create'} Certificate</button></div>
+   </div>`);
+}
+
+function openSplit(){
+  const it=inbox.find(x=>x.id===S.selInbox); if(!it)return;
+  S.split={total:it.n,a:Math.round(it.n*0.6),itemId:it.id,
+    aLabel:it.matches[0]?`Trade #${it.matches[0].trade} · ${it.matches[0].type==='Sell'?'Outbound':'Inbound'}`:'Trade · Inbound',
+    aDesc:it.matches[0]?it.matches[0].desc.split(' · ').slice(0,2).join(' · '):'—',
+    bLabel:'Retirement · '+(it.state)+' RPS '+it.vin, bDesc:it.tech+' voluntary compliance obligation'};
+  renderSplit();
+}
+function renderSplit(){
+  const sp=S.split, unA=sp.total-sp.a, b=sp.a, a=sp.a; // a -> target A count, rest -> B
+  const tA=sp.a, tB=sp.total-sp.a, unassigned=0;
+  openOverlay(`<div class="scrim" data-act="ov-close"></div>
+   <div class="modal" style="width:1020px;height:620px">
+     <div class="m-head"><h3>Split Batch</h3><span class="msub">batch #${inbox.find(x=>x.id===sp.itemId).batch} · ${sp.total} certificates</span><button class="x" data-act="ov-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+     <div class="sb-body">
+       <div class="sb-col">
+         <div class="sb-colhead">Allocation <span class="cnt">${sp.total} total</span></div>
+         <div class="sb-list" style="align-items:center;justify-content:center;text-align:center;gap:14px">
+           <div style="color:var(--faint);font-size:12px;text-transform:uppercase;letter-spacing:.04em">Unassigned</div>
+           <div class="unassigned-big zero">0</div>
+           <div style="color:var(--g-tx);font-size:12.5px;font-weight:600">${ICON.check.replace('viewBox','style="width:14px;height:14px;stroke:var(--g-dot);fill:none;stroke-width:2.4;vertical-align:-2px" viewBox')} Fully allocated across 2 targets</div>
+           <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px">Adjust the split on the right →</div>
+         </div>
+       </div>
+       <div class="sb-col">
+         <div class="sb-colhead">Assign to targets <span class="cnt">2 targets</span></div>
+         <div class="sb-list">
+           <div class="dropzone active">
+             <div class="dz-head"><span class="ti">${ICON.inbound}</span><div><div class="tt">${sp.aLabel}</div><div class="td">${sp.aDesc}</div></div>
+               <div class="stepper"><button data-act="split-dec" ${tA<=0?'disabled':''}>−</button><span class="val">${tA}</span><button data-act="split-inc" ${tA>=sp.total?'disabled':''}>+</button></div></div>
+           </div>
+           <div class="dropzone">
+             <div class="dz-head"><span class="ti">${ICON.retirement}</span><div><div class="tt">${sp.bLabel}</div><div class="td">${sp.bDesc}</div></div>
+               <div class="stepper"><button data-act="split-inc" ${tB<=0?'disabled':''}>−</button><span class="val">${tB}</span><button data-act="split-dec" ${tB>=sp.total?'disabled':''}>+</button></div></div>
+           </div>
+           <div class="dropzone" style="border-style:dashed;text-align:center;color:var(--faint)"><div style="font-size:12px;padding:6px 0;font-family:var(--mono)">+ Add another target</div></div>
+         </div>
+       </div>
+     </div>
+     <div class="m-foot"><span style="margin-right:auto;font-size:12px;color:var(--muted);font-family:var(--mono)">${tA} + ${tB} = ${sp.total} allocated</span><button class="btn" data-act="ov-close">Cancel</button><button class="btn primary" data-act="split-apply">Apply Split</button></div>
+   </div>`);
+}
+
+/* ---------------- FLOATING MENU ---------------- */
+function openMenu(anchor,items){
+  const m=$('#menu');
+  m.innerHTML=items.map(it=>it.sep?'<div class="menu-sep"></div>':
+    `<div class="mi ${it.danger?'danger':''} ${it.check?'check':''} ${it.on?'on':''}" data-mi="${it.id}">${it.icon||''}<span>${it.label}</span>${it.check?'<span class="tick">✓</span>':''}</div>`).join('');
+  const r=anchor.getBoundingClientRect();
+  m.style.left=Math.min(r.left,window.innerWidth-210)+'px';
+  m.style.top=(r.bottom+6)+'px';
+  m.classList.add('show');
+  m._items=items;
+}
+function closeMenu(){$('#menu').classList.remove('show');}
+
+function filterMenu(dim){
+  const opts={status:['Available','Forecast','Allocated','Exception','Retired'],
+    registry:['M-RETS','WREGIS','PJM-GATS','NAR','ERCOT'],
+    technology:['Solar','Wind','Hydro','Biomass'],
+    vintage:['2023','2024','2025']};
+  const cur=S.pfFilters[dim];
+  const items=[{id:'__all',label:'All',check:true,on:!cur}];
+  opts[dim].forEach(o=>items.push({id:o,label:o,check:true,on:cur==o}));
+  return items;
+}
+
+/* ---------------- EVENT ROUTER ---------------- */
+document.addEventListener('click',e=>{
+  // menu item pick
+  const mi=e.target.closest('[data-mi]');
+  if(mi){ handleMenuPick(mi.dataset.mi); return; }
+  if($('#menu').classList.contains('show')&&!e.target.closest('#menu')) closeMenu();
+
+  const el=e.target.closest('[data-act],[data-nav]');
+  if(!el)return;
+  if(el.dataset.nav){ S.nav=el.dataset.nav; $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav===S.nav)); showTab(); return; }
+  const act=el.dataset.act; const [cmd,arg]=act.split(':');
+
+  switch(cmd){
+    case 'tab': S.nav='inventory'; $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav==='inventory')); S.tab=arg; renderTabs(); showTab(); break;
+    case 'back-inv': S.nav='inventory'; $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav==='inventory')); showTab(); break;
+    case 'toggle-view': S.view=S.view==='individual'?'grouped':'individual'; renderPortfolio(); break;
+    case 'expand': S.expanded.has(arg)?S.expanded.delete(arg):S.expanded.add(arg); renderGrouped(); break;
+    case 'add-cert': openCertModal(null); break;
+    case 'add-range': openSlideover(); break;
+    case 'bulk': toast('CSV uploader opened — drop a file to stage certificates'); break;
+    case 'sync': $('#sync-ts').textContent='· just now'; toast('Synced from Innovo — 3 new batches in Matching Inbox'); break;
+    case 'kebab': { const i=+arg; const c=certs[i];
+      openMenu(el,[
+        {id:'edit:'+i,label:'Edit certificate',icon:'<svg viewBox="0 0 24 24"><path d="M11 4H4v16h16v-7M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>'},
+        {id:'links:'+i,label:'View linked trade',icon:'<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>'},
+        {sep:true},
+        {id:'transfer:'+i,label:'Transfer…',icon:ICON.outbound},
+        {id:'retire:'+i,label:'Retire certificate',danger:true,icon:'<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'},
+      ]); break; }
+    case 'filter': openMenu(el,filterMenu(arg)); $('#menu')._dim=arg; break;
+    case 'clear': S.pfFilters[arg]=null; closeMenu(); renderPortfolio(); break;
+    case 'ract': toast(arg+' range — action staged'); break;
+    case 'isel': S.selInbox=arg; S.selTarget=null; renderInbox(); break;
+    case 'target': S.selTarget=S.selTarget===arg?null:arg; renderInboxDetail(); break;
+    case 'accept': acceptInbox('#'+arg); break;
+    case 'accept-top': { const it=inbox.find(x=>x.id===S.selInbox); acceptInbox(it&&it.matches[0]?'#'+it.matches[0].trade:'suggested match'); break; }
+    case 'dismiss': removeInbox('dismissed'); break;
+    case 'snooze': removeInbox('snoozed for 24h'); break;
+    case 'rerun': toast('Re-running auto-match across 23 batches…'); break;
+    case 'split-open': openSplit(); break;
+    case 'split-inc': S.split.a=Math.min(S.split.total,S.split.a+1); renderSplit(); break;
+    case 'split-dec': S.split.a=Math.max(0,S.split.a-1); renderSplit(); break;
+    case 'split-apply': { const id=S.split.itemId; closeOverlay(); inbox=inbox.filter(x=>x.id!==id); if(S.selInbox===id)S.selInbox=inbox[0]?.id; renderTabs(); renderInbox(); toast('Batch split applied across 2 targets'); break; }
+    case 'retry': retryRegistry(arg); break;
+    case 'submit': submitRegistry(arg); break;
+    case 'refresh-reg': toast('Registry statuses refreshed'); renderRegistry(); break;
+    case 'menu-year': openMenu(el,[{id:'y:2023',label:'2023',check:true,on:$('#year-val').textContent==='2023'},{id:'y:2024',label:'2024',check:true,on:$('#year-val').textContent==='2024'},{id:'y:2025',label:'2025',check:true,on:$('#year-val').textContent==='2025'}]); $('#menu')._dim='year'; break;
+    case 'menu-asof': toast('As-of date picker — defaults to today'); break;
+    case 'search': toast('Serial search — type to filter the grid'); break;
+    case 'save-cert': closeOverlay(); toast('Certificate saved'); if(S.tab==='portfolio')renderPortfolio(); break;
+    case 'save-range': { const n=parseRange($('#range-in')?.value||'')||50; closeOverlay(); toast(n+' certificates added to inventory'); break; }
+    case 'ov-close': closeOverlay(); break;
+    case 'noop': break;
+  }
+});
+function handleMenuPick(id){
+  const dim=$('#menu')._dim;
+  if(id.startsWith('y:')){ $('#year-val').textContent=id.slice(2); S.pfFilters.vintage=id.slice(2); closeMenu(); if(S.tab==='portfolio')renderPortfolio(); toast('Year set to '+id.slice(2)); return; }
+  if(dim&&S.pfFilters.hasOwnProperty(dim)){
+    S.pfFilters[dim]= id==='__all'?null:id; closeMenu(); renderPortfolio(); return;
+  }
+  // kebab actions
+  const [c,arg]=id.split(':');
+  closeMenu();
+  if(c==='edit'){ openCertModal(+arg); }
+  else if(c==='retire'){ certs[+arg].st='Retired'; certs[+arg].subleg='Retirement · queued'; renderPortfolio(); toast('Certificate retired'); }
+  else if(c==='transfer'){ toast('Transfer drafted — see Registry Activity'); }
+  else if(c==='links'){ S.tab='portfolio'; toast('Linked to Trade #'+(certs[+arg].trade||'—')); }
+}
+function acceptInbox(label){ const id=S.selInbox; inbox=inbox.filter(x=>x.id!==id); S.selInbox=inbox[0]?.id||null; S.selTarget=null; renderTabs(); renderInbox(); toast('Matched to '+label+' — moved to Registry queue'); }
+function removeInbox(verb){ const id=S.selInbox; inbox=inbox.filter(x=>x.id!==id); S.selInbox=inbox[0]?.id||null; S.selTarget=null; renderTabs(); renderInbox(); toast('Batch '+verb); }
+function retryRegistry(id){ const g=registry.find(x=>x.id===id); if(!g)return; g.status='submitted'; g.sub='May 12 · just now'; g.err=null; renderRegistry(); toast('Resubmitted to '+g.reg+'…'); setTimeout(()=>{ g.status='confirmed'; g.conf='just now'; renderRegistry(); toast('Retirement confirmed by '+g.reg); },1800); }
+function submitRegistry(id){ const g=registry.find(x=>x.id===id); if(!g)return; g.status='submitted'; g.sub='May 12 · just now'; renderRegistry(); toast('Submitted to '+g.reg); setTimeout(()=>{ g.status='confirmed'; g.conf='just now'; renderRegistry(); toast('Confirmed by '+g.reg); },1800); }
+
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMenu(); closeOverlay(); }});
+window.addEventListener('resize',()=>closeMenu());
+
+/* ---------------- BOOT ---------------- */
+renderTabs(); showTab();
+</script>
+</body>
+</html>

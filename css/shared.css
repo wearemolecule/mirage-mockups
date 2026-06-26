@@ -1,0 +1,12 @@
+/**
+ * Shared styles for Market Data screens.
+ * Import this file in any screen that uses the common layout, header, and components.
+ */
+@import url('variables.css');
+@import url('base.css');
+@import url('header.css');
+@import url('layout.css');
+@import url('grid-tables.css');
+@import url('tabs-stack.css');
+@import url('components.css');
+@import url('notifications.css');

@@ -1,0 +1,5319 @@
+/*
+ * Fund Allocations — feature stylesheet (fa-*.html only).
+ * Standard table padding, header height, and scroll shell: grid-tables.css + variables --table-grid-*.
+ * This file: Allocations strip (.fa-alloc-strip-scroll), mapping cards, fa-trades-grid, settings/fund-allocations shells, etc.
+ */
+:root {
+  --primary: var(--color-blue);
+  --success: var(--color-green);
+  --warning: var(--color-orange);
+  /* Unfinalized (pending) labels: Parent Trades dot + strip Status + finalized trade chips (amber vs. --warning orange) */
+  --fa-pending-amber: #b45309;
+  --danger: var(--color-red);
+  --bg: var(--color-bg-secondary);
+  --card: var(--color-bg-primary);
+  --border: var(--color-border-light);
+  --input-bg: var(--color-bg-tertiary);
+  --input-border: var(--color-border-light);
+  --text: var(--color-text-primary);
+  --muted: var(--color-text-secondary);
+  --faint: var(--color-text-muted);
+  --row-alt: var(--color-bg-tertiary);
+  --row-border: var(--color-border-light);
+  --font: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Geometric sans monospace (pairs with Figtree); use via .mono or var(--font-mono) */
+  --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+  --base: 13px;
+  --c0: var(--color-blue);
+  --c1: var(--color-rose);
+  --c2: var(--color-purple);
+  --c3: var(--color-orange);
+  /* Strip: tooltips stack above adjacent rows (parent trades, actual/expected) */
+  --alloc-strip-overlay-z: 10100;
+  /*
+   * Column 2: summary month (with menu col) + trade row order ids — keep narrow so Product can widen.
+   * Product width below is tuned so col2 + col3 total matches prior layout (~248px) for stable table slack.
+   */
+  --alloc-strip-month-col: 112px;
+  --alloc-strip-product-col: 136px;
+  --alloc-strip-avg-col: 76px;
+  --alloc-strip-uom-col: 92px;
+}
+
+/* ── Shared: FCM account column header (<th>) — allocations strip, mapping NAV, AUM grids, etc.
+   Requires class="data-table" on <table>. Pair with fa-fcm-acct-th + fa-fcm-acct-th--strip|--nav|--grid-group, alloc-strip-col-rsep where needed.
+   Static accents: --accent0 / --accent1 / --accent2 (= --c0 / --c1 / --c2). Dynamic (JS): fa-fcm-acct-th--accent-var + style="--fa-fcm-accent: …". */
+.data-table thead th.fa-fcm-acct-th {
+  font-weight: 400;
+  vertical-align: middle;
+  white-space: nowrap;
+  height: var(--table-grid-header-height);
+  line-height: var(--table-grid-header-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  text-align: center !important;
+  /* Slightly lighter than default .data-table th (--color-gray-200) */
+  background: var(--color-gray-100);
+}
+
+.data-table thead th.fa-fcm-acct-th--strip {
+  width: 96px;
+  min-width: 96px;
+  max-width: 96px;
+  font-size: 0.65rem;
+}
+
+.data-table thead th.fa-fcm-acct-th--nav {
+  width: 176px;
+  min-width: 176px;
+  max-width: 176px;
+}
+
+/* Wide colspan FCM headers (e.g. AUM first thead row) */
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--grid-group {
+  border-left: 1px solid var(--border);
+  padding: 5px 8px;
+  color: var(--color-text-primary, var(--text));
+}
+
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent0 {
+  border-top: 3px solid var(--c0);
+}
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent0 .fa-fcm-acct-th-acct {
+  color: var(--c0);
+}
+
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent1 {
+  border-top: 3px solid var(--c1);
+}
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent1 .fa-fcm-acct-th-acct {
+  color: var(--c1);
+}
+
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent2 {
+  border-top: 3px solid var(--c2);
+}
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent2 .fa-fcm-acct-th-acct {
+  color: var(--c2);
+}
+
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent-var {
+  border-top: 3px solid var(--fa-fcm-accent);
+}
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--accent-var .fa-fcm-acct-th-acct {
+  color: var(--fa-fcm-accent);
+}
+.data-table thead th.fa-fcm-acct-th.fa-fcm-acct-th--strip.fa-fcm-acct-th--accent-var {
+  color: var(--fa-fcm-accent);
+}
+
+/* Optional “Short - MS-123” structure inside .fa-fcm-acct-th--nav */
+.fa-fcm-acct-th-short,
+.fa-fcm-acct-th-sep,
+.fa-fcm-acct-th-acct {
+  font-weight: 400;
+}
+
+html { font-size: 16px; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family:var(--font); font-size:var(--base); background:var(--bg); color:var(--text); display:flex; height:100vh; overflow:hidden; }
+
+/* ── Main ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── Topbar ── */
+.topbar { background:var(--card); border-bottom:1px solid var(--border); padding:0 18px; height:48px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.topbar-title {
+  font-size: 0.88rem;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0;
+  text-transform: uppercase;
+}
+.topbar-title-main {
+  font-weight: 600;
+}
+.topbar-title-sub {
+  font-weight: 300;
+  color: inherit;
+}
+
+/* fa-main: topbar screen title + red period (matches Trades .page-title::after) */
+.topbar-title.fa-main-screen-title {
+  font-weight: 600;
+}
+.topbar-title.fa-main-screen-title::after {
+  content: '.';
+  color: var(--color-red);
+}
+
+/* components.css adds a red period after .page-title — omit for FA split titles */
+.fa-main-shell h1.page-title.fa-page-title-split::after {
+  content: none;
+}
+
+.fa-main-shell .page-title.fa-page-title-split {
+  font-weight: 600;
+}
+.topbar-sep { width:1px; height:18px; background:var(--border); }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:var(--spacing-xl); }
+
+/* ── Summary strip ── */
+.summary-strip { background:var(--card); border-bottom:1px solid var(--border); padding:8px 18px; display:flex; align-items:center; gap:20px; flex-shrink:0; }
+.stat-item { display:flex; flex-direction:column; gap:1px; }
+.stat-label { font-size:.6rem; color:var(--faint); text-transform:uppercase; letter-spacing:.04em; }
+.stat-val { font-size:.88rem; font-weight:600; }
+.stat-sep { width:1px; height:28px; background:var(--border); }
+
+/* ── Tabs ── */
+.tabs-bar { background:var(--card); border-bottom:1px solid var(--border); padding:0 18px; display:flex; flex-shrink:0; }
+.tab { padding:9px 14px; font-size:.78rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; align-items:center; gap:6px; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+.tab-count { background:#eef2fd; color:var(--primary); font-size:.62rem; font-weight:600; padding:1px 6px; border-radius:8px; }
+.tab.active .tab-count { background:var(--primary); color:#fff; }
+.tab-count.warn { background: #fff3eb; color: var(--color-orange); }
+
+/* ── Filters ── */
+.filters { background:var(--card); border-bottom:1px solid var(--border); padding:6px 18px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.f-label { font-size:.69rem; color:var(--muted); white-space:nowrap; }
+.f-select,.f-input { background:var(--input-bg); border:1px solid var(--input-border); border-radius:0; padding:3px 8px; font-family:var(--font); font-size:.74rem; color:var(--text); height:27px; outline:none; }
+.f-select { padding-right:22px; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%236b7a99'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 7px center; cursor:pointer; }
+.f-sep { width:1px; height:15px; background:var(--border); margin:0 2px; }
+
+/* ── Layout ── */
+.content-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+/* Panel roots use id="panel-*" (no .tab-panel wrapper). Match descendants so #panel-orders works inside .fa-screen-card (standalone). */
+.content-area [id^="panel-"] {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.content-area [id^="panel-"].active {
+  display: flex;
+  flex-direction: column;
+}
+.split { flex:1; display:flex; overflow:hidden; }
+.split-left { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); }
+.split-right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.panel-label { padding:7px 13px; background:var(--card); border-bottom:1px solid var(--border); font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); display:flex; align-items:center; gap:7px; }
+.scroll { flex:1; overflow-y:auto; }
+
+/* True-up: book cards stack; horizontal inset comes from .main-content only */
+#trueup-books {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: 0 0 var(--spacing-md);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* True-up tab: intro strip + books; single scroll on shell */
+.fa-trueup-panel-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fa-trueup-panel-intro {
+  padding: 10px 18px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.fa-trueup-panel-intro-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.fa-trueup-panel-intro-desc {
+  font-size: 0.71rem;
+  color: var(--muted);
+}
+
+.fa-main-shell .content-area.fa-trueup-standalone-layout {
+  gap: 0;
+  overflow: visible;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+body.fa-standalone-shell > .main.main-content > .content-area.fa-trueup-standalone-layout,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area.fa-trueup-standalone-layout {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Shared collapsible book card header (AUM, Mapping, Main mapping tab, True-up) */
+.fa-book-card-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  line-height: normal;
+}
+
+.fa-book-card-toggle .card-title {
+  margin: 0;
+  line-height: normal;
+}
+
+.fa-book-card-toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary, #3b82f6) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: var(--radius-md, 4px);
+}
+
+.fa-book-card-toggle .fa-aum-book-card-title,
+.fa-book-card-toggle .fa-mapping-book-card-title,
+.fa-book-card-toggle .alloc-strip-card-title-row {
+  flex: 1;
+  min-width: 0;
+  line-height: normal;
+}
+
+.fa-book-card-caret {
+  flex-shrink: 0;
+  margin-top: 0.32em;
+  margin-right: -2px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted, var(--muted));
+  transition: transform 0.15s ease;
+}
+
+/* Caret right after book title / ref, before account trail — inline inside .fa-card-title-text */
+.fa-book-card-toggle .fa-card-title-text > .fa-book-card-caret {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.35em;
+  margin-right: 0.2em;
+  margin-top: 0;
+}
+
+/* Caret between title span and mode/subtitle in mapping row (flex item) */
+.fa-book-card-toggle .fa-mapping-book-card-title > .fa-book-card-caret,
+.fa-book-card-header .fa-book-card-toggle .fa-book-card-caret {
+  margin-top: 0;
+  align-self: center;
+}
+
+.fa-book-card-book-icon {
+  flex-shrink: 0;
+  margin-top: 0.12em;
+  font-size: 0.78rem;
+  color: #000;
+}
+
+.fa-card-title-text {
+  display: flex;
+  align-items: center;
+}
+
+.fa-book-card--collapsed .fa-book-card-caret {
+  transform: rotate(-90deg);
+}
+
+/* Account trail in collapsible header: show only when body is collapsed (state from book-card-collapse.js). */
+[data-fa-book-card]:not(.fa-book-card--collapsed) .fa-book-card-toggle .fa-strip-card-accts {
+  display: none !important;
+}
+
+/*
+ * Book card body visibility when collapsed is driven by JS ([hidden] after
+ * slide-up). Avoid display:none on .fa-book-card--collapsed > .card-body so
+ * max-height transitions can run while [hidden] is off.
+ *
+ * Card bodies use display:flex in FA — that ties [hidden]’s specificity and
+ * wins in our stylesheet order, so [hidden] must force display:none !important
+ * after the slide completes.
+ */
+[data-fa-book-card] > .card-body[hidden],
+[data-fa-book-card] > .fa-book-card-collapse-target[hidden] {
+  display: none !important;
+}
+
+/* Collapsed: flush under header; hide only real controls (not notes, ratio meta, months label, etc.) */
+[data-fa-book-card].fa-book-card--collapsed > .card-header,
+[data-fa-book-card].fa-book-card--collapsed > .fa-book-card-header {
+  border-bottom: none !important;
+}
+
+[data-fa-book-card].fa-book-card--collapsed > .card-header .card-actions button,
+[data-fa-book-card].fa-book-card--collapsed > .card-header .card-actions a.action-btn,
+[data-fa-book-card].fa-book-card--collapsed > .card-header .card-actions input[type="button"],
+[data-fa-book-card].fa-book-card--collapsed > .card-header .card-actions input[type="submit"],
+[data-fa-book-card].fa-book-card--collapsed > .fa-book-card-header button:not(.fa-book-card-toggle),
+[data-fa-book-card].fa-book-card--collapsed > .fa-book-card-header a.action-btn,
+[data-fa-book-card].fa-book-card--collapsed > .fa-book-card-header input[type="button"],
+[data-fa-book-card].fa-book-card--collapsed > .fa-book-card-header input[type="submit"] {
+  display: none !important;
+}
+
+.fa-trueup-book-card {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+/* Match AUM: muted account list after book ref / chevron (no vertical rule) */
+.content-area.fa-trueup-standalone-layout .fa-aum-book-card-title .fa-card-title-text .fa-strip-card-accts {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 300;
+  margin-left: 0.5em;
+  padding-left: 0;
+  vertical-align: baseline;
+}
+
+/* True-up: one-time intro above first book card (#trueup-books) */
+#trueup-books > .fa-trueup-page-intro {
+  margin: 0 0 12px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-muted, var(--muted));
+  line-height: 1.45;
+  max-width: 56rem;
+}
+
+/* True-up book header: toolbar only */
+.fa-trueup-book-card-header .fa-trueup-book-header-actions {
+  flex: 0 1 auto;
+  max-width: min(100%, 780px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.fa-trueup-book-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.fa-trueup-actions-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fa-trueup-actions-menu-trigger {
+  min-width: 2.25rem;
+}
+
+.fa-trueup-actions-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 200px;
+  max-width: min(280px, 92vw);
+  background: var(--color-bg-primary, var(--card));
+  border: 1px solid var(--color-border-light, var(--border));
+  border-radius: var(--radius-md, 4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 5000;
+  display: none;
+  padding: 4px 0;
+}
+
+.fa-trueup-actions-menu-dropdown.open {
+  display: block;
+}
+
+.fa-trueup-actions-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--color-text-primary, var(--text));
+  cursor: pointer;
+}
+
+.fa-trueup-actions-menu-item:hover {
+  background: var(--color-bg-hover, var(--color-gray-50, #f7f7f8));
+}
+
+/*
+ * True-up “more” menus: avoid clipping by .content-card overflow:hidden and by later
+ * siblings (ticker cards / card bodies) painting on top. Lift the open card and allow overflow.
+ */
+#trueup-books .fa-trueup-book-card:has(.fa-trueup-actions-menu-dropdown.open),
+#trueup-books .fa-trueup-ticker-card:has(.fa-trueup-actions-menu-dropdown.open) {
+  position: relative;
+  z-index: 40;
+  overflow: visible;
+}
+
+#trueup-books .fa-trueup-book-card:has(.fa-trueup-actions-menu-dropdown.open) {
+  z-index: 50;
+}
+
+/* Book header + dropdown above this book’s ticker stack (stacking without :has on ticker). */
+#trueup-books .fa-trueup-book-card > .card-header.fa-trueup-book-card-header {
+  position: relative;
+  z-index: 2;
+}
+
+#trueup-books .fa-trueup-book-card > .fa-trueup-book-card-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* Per-ticker “more” menu above that card’s table; :has rule lifts whole card over following tickers. */
+#trueup-books .fa-trueup-ticker-card > .card-header.fa-trueup-ticker-card-header {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 720px) {
+  .fa-trueup-book-card-header .fa-trueup-book-header-actions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+.fa-trueup-book-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: 1em;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Per-ticker flush card: header = symbol + lots line; actions = next trade + input */
+.fa-trueup-ticker-card {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+/* Avoid double bottom line: tfoot row border + .content-card border were stacking */
+#trueup-books .fa-trueup-ticker-card .data-table tfoot td {
+  border-bottom: none !important;
+}
+
+/*
+ * Pinned-bottom total row — visual cues similar to AG Grid pinned bottom / floating footer:
+ * heavier top seam, secondary fill, bold figures (grid body stays normal weight).
+ */
+#trueup-books .fa-trueup-ticker-card .data-table tfoot tr.fa-trueup-pinned-total-row td {
+  border-top: 2px solid var(--color-border-medium);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  min-height: 24px;
+  height: auto;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table tfoot tr.fa-trueup-pinned-total-row td.fa-trueup-pinned-total-label {
+  text-align: right;
+  color: var(--color-text-secondary);
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table tfoot tr.fa-trueup-pinned-total-row td.fa-trueup-pinned-total-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table tfoot tr.fa-trueup-pinned-total-row td.fa-trueup-pinned-total-cell {
+  font-weight: 600;
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table tfoot tr.fa-trueup-pinned-total-row td.fa-trueup-table-spacer {
+  background: var(--color-bg-secondary);
+  border-top: 2px solid var(--color-border-medium);
+}
+
+.fa-trueup-ticker-card-header {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.fa-trueup-ticker-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
+.fa-trueup-ticker-card-meta {
+  font-size: 0.67rem;
+  font-weight: 400;
+  color: var(--color-text-secondary, var(--muted));
+}
+
+/* Commodity tickers: Molecule accent yellow (variables.css --color-yellow); not .fa-trueup-ticker-card-meta */
+.fa-trueup-ticker-card-title .fa-card-title-text.fa-trueup-ticker-symbol--yellow {
+  color: var(--color-yellow);
+}
+
+/* Text after [SYM]: not yellow / not bold (brackets + .short-name keep accent styling) */
+.fa-trueup-ticker-card-title .fa-trueup-ticker-product-name {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.fa-trueup-ticker-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 10px;
+  margin-left: auto;
+  font-size: 0.69rem;
+  color: var(--color-text-secondary, var(--muted));
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.fa-trueup-product-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 6px;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+/* Next trade — single bordered input group (no number spinners) */
+.fa-trueup-next-trade-group {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 4px);
+  overflow: hidden;
+  background: var(--color-bg-primary, var(--card));
+  flex-shrink: 0;
+  min-height: 28px;
+}
+
+.fa-trueup-next-trade-group:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--primary, #3b82f6) 35%, transparent);
+  outline-offset: 1px;
+}
+
+.fa-trueup-next-trade-group__prepend,
+.fa-trueup-next-trade-group__append {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 0.69rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, var(--muted));
+  background: var(--color-bg-tertiary, var(--color-gray-50, #f7f7f8));
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.fa-trueup-next-trade-group__prepend {
+  border-right: 1px solid var(--border);
+}
+
+.fa-trueup-next-trade-group__append {
+  border-left: 1px solid var(--border);
+}
+
+.fa-trueup-next-trade-group__input {
+  width: 48px;
+  min-width: 40px;
+  margin: 0;
+  padding: 0 6px;
+  border: none;
+  border-radius: 0;
+  font-size: 0.71rem;
+  font-weight: 500;
+  text-align: right;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg);
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.fa-trueup-next-trade-group__input:focus {
+  outline: none;
+}
+
+.fa-trueup-next-trade-group__input::-webkit-outer-spin-button,
+.fa-trueup-next-trade-group__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.fa-trueup-next-trade-group__input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Sticky .data-table th mis-paints in nested scroll */
+#trueup-books .fa-trueup-ticker-card .data-table thead th {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+
+/* True-up: numeric / % columns (class .r) — layout is outside .fa-screen-card so apply here */
+#trueup-books .fa-trueup-ticker-card .data-table th.r,
+#trueup-books .fa-trueup-ticker-card .data-table td.r {
+  text-align: right;
+}
+
+/* True-up account grid: fixed data columns + trailing flex spacer */
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table {
+  table-layout: fixed;
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table .fa-trueup-table-spacer,
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table col.fa-trueup-col-spacer {
+  width: auto;
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table th.fa-trueup-table-spacer {
+  padding: 0;
+  background: var(--color-gray-200);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table td.fa-trueup-table-spacer {
+  padding: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table thead th:first-child,
+#trueup-books .fa-trueup-ticker-card .data-table.fa-trueup-accts-table tbody td:first-child {
+  white-space: normal;
+}
+
+/* True-up suggested column: “(x%)” after lot count — no space before span; gap from margin-left */
+.fa-trueup-suggested-pct {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 3.35rem;
+  min-width: 3.35rem;
+  margin-left: 3px;
+  text-align: left;
+  vertical-align: baseline;
+  font-size: 0.65rem;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* True-up colored values: FA tooltip (single active color explained per hover) */
+#trueup-books .fa-trueup-ticker-card .data-table .fa-trueup-value-tip {
+  cursor: help;
+}
+
+/* Single line; width follows content (inherits .fa-tooltip-wrap::before nowrap + no max-width) */
+#trueup-books .fa-trueup-ticker-card .data-table .fa-trueup-value-tip::before {
+  text-align: left;
+}
+
+/* fund-allocations.html — True-up tab only: .mono → Roboto (standalone true-up.html keeps DM Mono) */
+#fa-tab-panel-trueup .mono {
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Plain tables: use class="data-table" (grid-tables.css). FA-specific table tweaks live below. */
+.mono { font-family: var(--font-mono); font-size:.72rem; }
+
+/* Inline monospace in FA templates → same stack as .mono */
+[style*='font-family:monospace'],
+[style*='font-family: monospace'],
+[style*='Courier New'] {
+  font-family: var(--font-mono) !important;
+}
+.pos { color:var(--success); } .neg { color:var(--danger); }
+
+/* ── Badges ── */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:9px; font-size:.63rem; font-weight:500; }
+.b-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.b-green { background: #eef1eb; color: var(--color-green); } .b-green .b-dot { background: var(--color-green); }
+.b-amber { background: #fff3eb; color: var(--color-orange); } .b-amber .b-dot { background: var(--color-orange); }
+.b-red   { background:#fee2e2; color:#991b1b; } .b-red   .b-dot { background:#ef4444; }
+.b-blue  { background:#dbeafe; color:#1d4ed8; } .b-blue  .b-dot { background:#3b82f6; }
+.b-gray  { background:#f1f5f9; color:#475569; } .b-gray  .b-dot { background:#94a3b8; }
+
+/* ── Buttons (same metrics as components.css .action-btn via variables) ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: var(--action-btn-font-size, 12px);
+  font-weight: var(--action-btn-font-weight, 500);
+  line-height: 1;
+  height: var(--action-btn-height, 29px);
+  min-height: var(--action-btn-height, 29px);
+  padding: 0 var(--action-btn-padding-x, 11px);
+  white-space: nowrap;
+  background: var(--card);
+  color: var(--action-btn-text, var(--color-gray-800));
+}
+.btn svg { width:12px; height:12px; }
+
+/* [hidden] must beat .btn { display: inline-flex } (e.g. Save Allocations until strip edits) */
+.btn[hidden] {
+  display: none !important;
+}
+
+.btn-primary {
+  background: var(--action-primary-bg, var(--color-gray-100));
+  color: var(--action-primary-text, var(--color-text-primary));
+  border-color: var(--action-primary-border, var(--color-border-medium));
+  font-weight: var(--action-btn-font-weight, 500);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--action-primary-bg-hover, var(--color-gray-200));
+  border-color: var(--action-primary-border-hover, var(--color-border-dark));
+  color: var(--action-primary-text, var(--color-text-primary));
+}
+.btn-primary:disabled,
+.btn-primary:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-success { background:var(--success); color:#fff; border-color:#5a7a38; }
+.btn-success:hover { background:#16a34a; border-color:#15803d; }
+.btn-outline { background:transparent; border:1px solid var(--border); color:var(--action-btn-text, var(--color-gray-800)); }
+.btn-outline:hover { border-color:var(--color-border-dark); color:var(--action-btn-text, var(--color-gray-800)); }
+.btn-ghost { background:transparent; color:var(--action-btn-text, var(--color-gray-800)); border:1px solid var(--border); }
+.btn-ghost:hover:not(:disabled) { background:var(--input-bg); color:var(--action-btn-text, var(--color-gray-800)); border-color:var(--color-border-dark); }
+.btn-ghost:disabled,
+.btn-ghost:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-danger { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+.btn-danger:hover { background:#fecaca; }
+.btn-sm {
+  height: var(--action-btn-height-sm, 25px);
+  min-height: var(--action-btn-height-sm, 25px);
+  padding: 0 var(--action-btn-padding-x-sm, 9px);
+  font-size: var(--action-btn-font-size-sm, 11px);
+}
+
+/* Match Trades / Market Data: all FA shell buttons use standard .action-btn height (29px), not -sm (25px). */
+.fa-standalone-shell .btn.btn-sm,
+.fa-standalone-shell .action-btn.action-btn-sm {
+  height: var(--action-btn-height, 29px);
+  min-height: var(--action-btn-height, 29px);
+  padding: 0 var(--action-btn-padding-x, 11px);
+  font-size: var(--action-btn-font-size, 12px);
+}
+
+.btn-xs {
+  height: var(--action-btn-height-xs, 21px);
+  min-height: var(--action-btn-height-xs, 21px);
+  padding: 0 var(--action-btn-padding-x-xs, 7px);
+  font-size: var(--action-btn-font-size-xs, 10px);
+  border-radius: 3px;
+}
+
+/* ── Empty ── */
+.empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--faint); }
+.empty svg { width:34px; height:34px; opacity:.22; }
+.empty-title { font-size:.82rem; font-weight:500; }
+.empty-sub { font-size:.71rem; text-align:center; max-width:210px; }
+
+/* ── KV ── */
+.kv { display:grid; gap:5px 14px; }
+.kv2 { grid-template-columns:1fr 1fr; }
+.kv3 { grid-template-columns:1fr 1fr 1fr; }
+.kv4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+.kv5 { grid-template-columns:1fr 1fr 1fr 1fr 1fr; }
+.kv-item { display:flex; flex-direction:column; gap:1px; }
+.kv-l { font-size:.62rem; color:var(--faint); text-transform:uppercase; letter-spacing:.03em; }
+.kv-v { font-size:.78rem; font-weight:500; }
+
+/* ── Fund dot ── */
+.fund-chip { display:inline-flex; align-items:center; gap:6px; }
+.fund-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ── Alloc bar ── */
+.alloc-bar-track { position:relative; width:80px; height:5px; background:#e5e7eb; border-radius:3px; overflow:hidden; flex-shrink:0; }
+.alloc-bar-target { position:absolute; top:0; left:0; height:100%; background:#d1d5db; border-radius:3px; }
+.alloc-bar-actual { position:absolute; top:0; left:0; height:100%; border-radius:3px; }
+
+/* ── Qty input ── */
+.qty-input { width:50px; height:22px; text-align:right; border:1px solid var(--input-border); border-radius:0; background:var(--input-bg); font-family:var(--font); font-size:.77rem; font-weight:500; color:var(--text); padding:0 5px; outline:none; }
+.qty-input:focus { border-color:var(--primary); background:#fff; }
+.qty-input.changed { border-color:var(--warning); background:#fffbeb; }
+
+/* ── Remainder ── */
+.remainder-row { display:flex; align-items:center; gap:8px; padding:7px 13px; border-top:1px solid var(--row-border); background:var(--card); flex-shrink:0; }
+.rem-label { font-size:.71rem; color:var(--muted); }
+.rem-val { font-size:.79rem; font-weight:600; }
+.rem-ok { color:var(--success); } .rem-bad { color:var(--danger); }
+
+/* ── Detail actions ── */
+.detail-actions { padding:9px 13px; border-top:1px solid var(--border); display:flex; gap:7px; flex-shrink:0; background:var(--card); align-items:center; }
+
+/* ── Section divider ── */
+.section-divider { padding:6px 13px; background:#f8fafc; border-top:1px solid var(--border); border-bottom:1px solid var(--row-border); font-size:.67rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); display:flex; align-items:center; gap:7px; }
+
+/* ── Inner tabs ── */
+.inner-tabs { display:flex; border-bottom:1px solid var(--border); background:var(--card); flex-shrink:0; padding:0 13px; }
+.inner-tab { padding:7px 11px; font-size:.74rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.inner-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+/* ── Trade entry form ── */
+.form-section { padding:14px 20px; border-bottom:1px solid var(--border); }
+.form-section-title { font-size:.69rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); margin-bottom:10px; }
+.form-grid { display:grid; gap:10px 16px; }
+.form-g2 { grid-template-columns:1fr 1fr; }
+.form-g3 { grid-template-columns:1fr 1fr 1fr; }
+.form-g4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+.form-field { display:flex; flex-direction:column; gap:4px; }
+.form-label { font-size:.68rem; color:var(--muted); font-weight:500; }
+.form-input,.form-select { background:var(--input-bg); border:1px solid var(--input-border); border-radius:0; padding:5px 9px; font-family:var(--font); font-size:.78rem; color:var(--text); height:30px; outline:none; width:100%; }
+.form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%236b7a99'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; cursor:pointer; padding-right:24px; }
+.form-input:focus,.form-select:focus { border-color:var(--primary); background:#fff; }
+.dir-toggle { display:flex; border:1px solid var(--input-border); border-radius:4px; overflow:hidden; height:30px; }
+.dir-btn { flex:1; display:flex; align-items:center; justify-content:center; font-size:.77rem; font-weight:500; cursor:pointer; color:var(--muted); background:var(--input-bg); transition:all .12s; }
+.dir-btn.buy.active { background: #eef1eb; color: var(--color-green); border-right:1px solid var(--input-border); }
+.dir-btn.sell.active { background:#fee2e2; color:#991b1b; }
+
+/* ── Toggle switch ── */
+.toggle-row { display:flex; align-items:center; gap:10px; }
+.toggle { position:relative; width:36px; height:20px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:#d1d5db; border-radius:10px; cursor:pointer; transition:.2s; }
+.toggle-slider::before { content:''; position:absolute; width:14px; height:14px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.2s; }
+.toggle input:checked + .toggle-slider { background:var(--primary); }
+.toggle input:checked + .toggle-slider::before { transform:translateX(16px); }
+.toggle-label { font-size:.77rem; font-weight:500; color:var(--text); }
+.toggle-sub { font-size:.68rem; color:var(--muted); }
+
+/* Hover tooltip (same pattern as components.css data-tooltip / options-info-icon-wrapper) */
+.fa-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.fa-tooltip-wrap::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  background: var(--color-gray-800);
+  color: #fff;
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.fa-tooltip-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--color-gray-800);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+  z-index: 10001;
+}
+
+.fa-tooltip-wrap:hover::before,
+.fa-tooltip-wrap:hover::after {
+  opacity: 1;
+}
+
+/* Trades list tooltips: default tooltip is centered above anchor; that spills past the right edge of
+   .table-container (overflow-x: auto) and parent cards (overflow: hidden). Anchor to the right so
+   the label grows leftward and stays visible. */
+.trades-list-card .fa-tooltip-wrap::before {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.trades-list-card .fa-tooltip-wrap::after {
+  left: auto;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+/* Unfinalized (amber) badge: open downward (above-anchor tooltips clip under .content-card overflow) */
+.trades-list-card .fa-trades-pending-count-tooltip::before {
+  bottom: auto;
+  top: calc(100% + 6px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  font-size: 11px;
+  z-index: 10002;
+}
+
+.trades-list-card .fa-trades-pending-count-tooltip::after {
+  bottom: auto;
+  top: calc(100% + 0px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  border-top: none;
+  border-bottom: 6px solid var(--color-gray-800);
+  z-index: 10003;
+}
+
+/* ── Split preview card ── */
+.split-preview { background:#eff6ff; border:1px solid #bfdbfe; border-radius:5px; padding:10px 12px; margin:0 20px 14px; }
+.split-preview-title { font-size:.68rem; font-weight:600; color:#1e40af; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.split-preview-row { display:flex; align-items:center; gap:10px; padding:3px 0; border-bottom:1px solid #dbeafe; font-size:.74rem; }
+.split-preview-row:last-child { border-bottom:none; }
+
+/* ── Mapping rule card ── */
+.rule-group-head { padding:9px 13px; background:#f8fafc; border-bottom:1px solid var(--border); font-size:.75rem; font-weight:600; display:flex; align-items:center; gap:8px; border-top:1px solid var(--border); }
+.rule-group-head:first-child { border-top:none; }
+.ratio-pill { display:inline-flex; align-items:center; padding:1px 7px; border-radius:8px; font-size:.66rem; font-weight:600; background:#eff6ff; color:var(--primary); }
+.ratio-pill.warn { background: #fff3eb; color: var(--color-orange); }
+
+/* ── Lineage pill ── */
+.lineage { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; font-size:.63rem; color:#1d4ed8; font-weight:500; cursor:pointer; }
+.lineage:hover { background:#dbeafe; }
+.lineage svg { width:9px; height:9px; }
+
+/* ── Drift bar ── */
+.drift-bar { display:flex; align-items:center; gap:5px; }
+.drift-track { width:50px; height:4px; background:#e5e7eb; border-radius:2px; overflow:hidden; flex-shrink:0; }
+.drift-fill { height:100%; border-radius:2px; }
+.d-ok { background:var(--success); } .d-warn { background:var(--warning); } .d-bad { background:var(--danger); }
+
+/* ── Cap chips ── */
+.cap-chip { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:4px; font-size:.63rem; font-weight:500; background: #eef1eb; color: var(--color-green); }
+
+/* True-up: “| Subtitle” stays mixed case next to main title */
+.fa-alloc-title-line .fa-page-title-split .topbar-title-sub {
+  text-transform: none;
+  color: inherit;
+  font-weight: 500;
+}
+
+.fa-alloc-cal-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 19px;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+.fa-alloc-cal-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fa-alloc-cal-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.fa-alloc-cal-swatch--ok { background: #eef1eb; }
+.fa-alloc-cal-swatch--bad { background: #fff3eb; }
+.fa-alloc-cal-swatch--none {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* ── New-book modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:1000; display:flex; align-items:center; justify-content:center; }
+.modal-card { background:var(--card); border-radius:8px; width:540px; max-height:82vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+.modal-card--new-book {
+  width:640px;
+  max-width:94vw;
+  --fa-nb-line-h: 30px;
+  --fa-nb-line-gap: 8px;
+  --fa-nb-remove-col: 36px;
+  /* FCM | Account (wider) | remove */
+  --fa-nb-sma-line-cols: minmax(0, 1fr) minmax(0, 1.55fr) var(--fa-nb-remove-col);
+  --fa-nb-scroll-visible-lines: 5;
+}
+.modal-head { padding:13px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; }
+.modal-body { padding:16px 18px; overflow-y:auto; flex:1; }
+/* Modal actions: use components.css `.modal-footer` + `.modal-btn` (same as Market Data modals). */
+
+.modal-title-nb { font-size:1rem; font-weight:600; color:var(--text); }
+
+/* Top fields: Book name + reference with left accent bar */
+.fa-nb-top-grid { display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:18px; }
+#modal-new-book .fa-nb-top-grid .form-field { gap:0; width:50%; max-width:50%; }
+#modal-new-book .fa-nb-top-grid .form-label { margin-bottom:0; }
+.fa-nb-input-accent {
+  display:flex;
+  align-items:stretch;
+  border:1px solid var(--input-border);
+  border-radius:0;
+  overflow:hidden;
+  background:var(--input-bg);
+}
+.fa-nb-input-accent__bar {
+  width:4px;
+  flex-shrink:0;
+  background:var(--color-gray-400);
+}
+.fa-nb-input-accent .form-input {
+  flex:1;
+  min-width:0;
+  border:none !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:transparent;
+}
+
+/* Reference # — literal “#” prefix before the value (value stored without #) */
+.fa-nb-input-accent--ref .fa-nb-ref-prefix {
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  padding:0 0 0 12px;
+  font-size:.8rem;
+  font-weight:600;
+  color:var(--muted);
+  user-select:none;
+  font-family:ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+  letter-spacing:0.02em;
+}
+.fa-nb-input-accent--ref .form-input {
+  padding-left:4px;
+}
+.fa-nb-input-accent--ref .form-input:read-only {
+  background: var(--color-gray-100, #f3f4f6);
+  cursor: default;
+  color: var(--muted);
+}
+
+/* Nested SMA card (Mapping Rules — New Book) */
+.fa-nb-sma-card__heading { font-size:.82rem; font-weight:600; color:var(--text); }
+/* New SMA Line: use global .action-btn sizing (no local shrink) */
+.fa-nb-sma-card > .card-header .action-btn {
+  font-weight: 500;
+}
+.fa-nb-sma-card__body { padding:10px 14px 12px; }
+.fa-nb-lines-head {
+  display:grid;
+  grid-template-columns:var(--fa-nb-sma-line-cols);
+  gap:8px;
+  margin-bottom:6px;
+  padding:0 2px;
+  font-size:.67rem;
+  color:var(--faint);
+}
+.fa-nb-lines-scroll {
+  height:calc(var(--fa-nb-scroll-visible-lines) * (var(--fa-nb-line-h) + var(--fa-nb-line-gap)));
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:4px;
+}
+
+.nb-line {
+  display:grid;
+  grid-template-columns:var(--fa-nb-sma-line-cols);
+  gap:8px;
+  margin-bottom:var(--fa-nb-line-gap);
+  align-items:center;
+}
+.nb-line .form-select {
+  height:var(--fa-nb-line-h);
+  min-height:var(--fa-nb-line-h);
+  font-size:.74rem;
+  min-width:0;
+  /* Keep right padding ≥ base .form-select so label text clears the SVG caret */
+  padding:2px 28px 2px 8px;
+  max-width:100%;
+  background-position:right 10px center;
+}
+.nb-remove {
+  width:28px;
+  height:var(--fa-nb-line-h);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--input-bg);
+  border:1px solid var(--input-border);
+  border-radius:4px;
+  cursor:pointer;
+  color:var(--muted);
+  font-size:.75rem;
+  padding:0;
+  line-height:1;
+  flex-shrink:0;
+}
+.nb-remove:hover { color:var(--danger); border-color:var(--danger); background:#fff5f5; }
+
+/* Layout integration with shared header/page-header */
+.fa-main-shell { display: flex; flex-direction: column; min-height: 0; }
+
+/* Standalone FA pages: injected .header + .main — body flex column (sidebar pages use row via app-sidebar.css) */
+body.fa-standalone-shell {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100vh;
+}
+body.fa-standalone-shell > .header,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .header {
+  flex-shrink: 0;
+}
+body.fa-standalone-shell > .main.main-content,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* True-up (true-up.html): body.fa-trueup-doc-scroll — scroll inside .main.main-content */
+body.fa-standalone-shell.fa-trueup-doc-scroll {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+body.fa-standalone-shell.fa-trueup-doc-scroll > .main.main-content,
+body.fa-standalone-shell.fa-trueup-doc-scroll.app-with-sidebar > .app-main > .main.main-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto !important;
+  max-height: none !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Avoid flex:1 + flex-basis:0 on .content-area (clips tall #trueup-books); let main be the scrollport */
+body.fa-standalone-shell.fa-trueup-doc-scroll > .main.main-content > .content-area.fa-trueup-standalone-layout,
+body.fa-standalone-shell.fa-trueup-doc-scroll.app-with-sidebar
+  > .app-main
+  > .main.main-content
+  > .content-area.fa-trueup-standalone-layout {
+  flex: 0 0 auto !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  min-height: 0;
+  overflow: visible;
+  margin-top: 0;
+  padding-top: 0;
+}
+body.fa-standalone-shell.fa-trueup-doc-scroll #trueup-books {
+  padding-top: 0;
+  padding-bottom: var(--spacing-xl);
+}
+
+/* True-up (and similar): screen title row above content-area */
+body.fa-standalone-shell > .main.main-content > #fa-alloc-screen-head,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > #fa-alloc-screen-head {
+  flex-shrink: 0;
+}
+/* Fill space below page title; single card should stretch to bottom of main */
+body.fa-standalone-shell > .main.main-content > .content-area,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+body.fa-standalone-shell > .main.main-content > .content-area > .fa-screen-card,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .fa-screen-card {
+  flex: 1;
+  min-height: 0;
+}
+
+/* fund-allocations.html: .tabs-stack fills viewport below screen head */
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section {
+  flex: 1 1 0;
+  min-height: 0;
+  margin-bottom: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__bar,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__bar {
+  flex-shrink: 0;
+}
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels > .tabs-stack__panel.active,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels > .tabs-stack__panel.active {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Embedded fa-main under tabs-stack: override row flex (tabs-stack.css) so split + strip get column layout (.fa-tab-panel-allocations--embedded-main on the tab panel). */
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels > .tabs-stack__panel.fa-tab-panel-allocations--embedded-main.active,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels > .tabs-stack__panel.fa-tab-panel-allocations--embedded-main.active {
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panel.active > .content-area.fa-alloc-embedded-main,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panel.active > .content-area.fa-alloc-embedded-main {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.fa-main-shell .tabs-stack__panel .content-area.fa-alloc-embedded-main .split,
+.fa-main-shell .tabs-stack__panel .content-area.fa-alloc-embedded-main .scroll {
+  min-height: 0;
+}
+
+.fa-main-shell .tabs-stack__panel.fa-tab-panel-allocations--embedded-main .fa-split-right-alloc {
+  min-width: 260px;
+}
+
+/* True-up tab embedded in fund-allocations.html (scroll inside panel; mirrors true-up.html layout) */
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels > .tabs-stack__panel.fa-tab-panel-trueup--embedded.active,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panels > .tabs-stack__panel.fa-tab-panel-trueup--embedded.active {
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+body.fa-standalone-shell > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panel.fa-tab-panel-trueup--embedded.active > .content-area.fa-trueup-standalone-layout,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > .tabs-stack.fa-alloc-tabbed-section .tabs-stack__panel.fa-tab-panel-trueup--embedded.active > .content-area.fa-trueup-standalone-layout {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* settings.html: unified page (Client Accounts + Mapping Rules, no tabs; mirror tab embed flex) */
+body.fa-standalone-shell > .main.main-content > .content-area.fa-settings-unified-wrap,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area.fa-settings-unified-wrap {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+body.fa-standalone-shell > .main.main-content > .content-area.fa-settings-unified-wrap > .content-area.fa-settings-layout,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area.fa-settings-unified-wrap > .content-area.fa-settings-layout {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  --fa-aum-col-menu: 24px;
+  --fa-aum-col-ticker: 310px;
+  --fa-aum-col-lev: 100px;
+  --fa-aum-col-wtd: 100px;
+}
+
+/* fund-allocations.html: tab row spacing (label + optional inline content) */
+.fa-alloc-tabbed-section .tabs-stack__tab {
+  gap: 8px;
+}
+
+.fa-alloc-tabbed-section .tabs-stack__tab-label {
+  flex-shrink: 0;
+}
+
+/* Expand / Collapse all — paired icon buttons in an input-group-style segment */
+.fa-expand-collapse-all-group {
+  display: inline-flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  vertical-align: middle;
+  border: 1px solid var(--action-btn-border, var(--color-border-medium));
+  border-radius: var(--radius-md, 6px);
+  overflow: hidden;
+  background: var(--action-btn-bg, var(--color-bg-primary));
+}
+
+.fa-expand-collapse-all-group > button.fa-expand-collapse-all-btn.action-btn {
+  border: none;
+  border-radius: 0;
+}
+
+.fa-expand-collapse-all-group > button.fa-expand-collapse-all-btn.action-btn + button.fa-expand-collapse-all-btn.action-btn {
+  border-left: 1px solid var(--action-btn-border, var(--color-border-medium));
+}
+
+button.fa-expand-collapse-all-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.fa-expand-collapse-all-btn .fas {
+  font-size: 0.72rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.allocations-strip-card .fa-expand-collapse-all-group,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .fa-expand-collapse-all-group {
+  border-color: var(--border);
+  border-radius: 6px;
+  background: transparent;
+}
+
+.allocations-strip-card .fa-expand-collapse-all-group > .fa-expand-collapse-all-btn.btn.btn-ghost.btn-sm,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .fa-expand-collapse-all-group > .fa-expand-collapse-all-btn.btn.btn-ghost.btn-sm {
+  min-width: 1.85rem;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  border: none;
+  border-radius: 0;
+}
+
+.allocations-strip-card .fa-expand-collapse-all-group > .fa-expand-collapse-all-btn.btn.btn-ghost.btn-sm + .fa-expand-collapse-all-btn.btn.btn-ghost.btn-sm,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .fa-expand-collapse-all-group > .fa-expand-collapse-all-btn.btn.btn-ghost.btn-sm + .fa-expand-collapse-all-btn.btn.btn-ghost.btn-sm {
+  border-left: 1px solid var(--border);
+}
+
+.fa-expand-collapse-all-group > button.fa-expand-collapse-all-btn:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+/* fund-allocations.html — True-up tab */
+.fa-alloc-tabbed-section #fa-alloc-tab-actions-trueup .action-btn:disabled,
+.fa-alloc-tabbed-section #fa-alloc-tab-actions-trueup .action-btn:disabled:hover,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .btn-ghost.btn-sm:disabled,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .btn-ghost.btn-sm:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--color-text-tertiary, var(--muted));
+}
+
+/* settings.html — narrower Lev / Wtd in Mapping Rules book grids */
+.fa-settings-unified-wrap .content-area.fa-settings-layout {
+  --fa-aum-col-lev: 64px;
+  --fa-aum-col-wtd: 72px;
+}
+
+/* settings.html — Mapping Rules card header Expand/Collapse All */
+.content-area.fa-settings-layout .fa-settings-mapping-card-actions .action-btn:disabled,
+.content-area.fa-settings-layout .fa-settings-mapping-card-actions .action-btn:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--color-text-tertiary, var(--muted));
+}
+
+.fa-page-header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+/* Fund Allocations shell: consistent card header height and padding */
+.fa-main-shell .card-header {
+  min-height: 40px;
+  padding: 0 1em;
+  box-sizing: border-box;
+}
+
+/*
+ * Collapsible book card headers (AUM nested books, Mapping Rules cards, True-up,
+ * Main mapping tab, strip): 0.5em vertical padding; min-height 40px.
+ * Overrides the generic .fa-main-shell .card-header padding-y:0 so title + chevron
+ * center evenly; matches .fa-book-card-header rows on Main mapping tab.
+ */
+.fa-main-shell [data-fa-book-card] > .card-header,
+.fa-main-shell .fa-main-mapping-book-wrap > .fa-book-card-header {
+  min-height: 40px;
+  padding: 0.5em 1em;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.fa-date-picker { height: 30px; border: 1px solid var(--color-border-light); border-radius: 0; padding: 0 10px; font-size: 12px; background: var(--color-bg-tertiary); color: var(--color-text-secondary); font-family: inherit; }
+.fa-screen-card { border: 1px solid var(--color-border-light); border-radius: var(--radius-md); background: var(--color-bg-primary); overflow: hidden; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.fa-screen-card .card-header,
+.fa-screen-card .curves-card-header { border-bottom: 1px solid var(--color-border-light); }
+.fa-screen-card > [id^="panel-"],
+/* Only the shell’s primary .content-area lane (not nested .content-area.fa-alloc-embedded-main). */
+body.fa-standalone-shell > .main.main-content > .content-area > [id^="panel-"],
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area > [id^="panel-"] {
+  display: flex !important;
+  flex: 1;
+  min-height: 0;
+}
+.fa-screen-card .split,
+.fa-screen-card .scroll,
+.fa-main-shell .content-area .split,
+.fa-main-shell .content-area .scroll {
+  min-height: 0;
+}
+
+/* ── AUM & Ratios (settings.html tab) ─────────────────────────────────────── */
+body.fa-standalone-shell > .main.main-content > .content-area.fa-settings-layout,
+body.fa-standalone-shell.app-with-sidebar > .app-main > .main.main-content > .content-area.fa-settings-layout {
+  gap: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Book leverage grids: fixed lead cols; last spacer col flexes */
+  --fa-aum-col-menu: 24px;
+  --fa-aum-col-ticker: 310px;
+  --fa-aum-col-lev: 100px;
+  --fa-aum-col-wtd: 100px;
+}
+
+/* Client Accounts | Mapping Rules — vertical split with drag handle */
+.content-area.fa-settings-layout > .fa-settings-page-split {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+}
+
+.fa-settings-split-pane--top {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fa-settings-split-pane--bottom {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fa-settings-split-pane--bottom > .fa-settings-mapping-card {
+  flex: 1;
+  min-height: 0;
+}
+
+.fa-settings-split-pane--top .fa-aum-client-accounts-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fa-settings-split-pane--top .fa-aum-client-accounts-card-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scroll lives here, not on .card-body — correct scrollport for .data-table sticky thead */
+.fa-settings-split-pane--top .fa-aum-client-accounts-card-body .fa-aum-client-accounts-table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.fa-settings-split-resizer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: row-resize;
+  box-sizing: border-box;
+  color: var(--color-text-muted, #64748b);
+  transition: color 0.12s ease;
+}
+
+.fa-settings-split-resizer-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.fa-settings-split-resizer:hover,
+.fa-settings-split-resizer:focus-visible {
+  background: transparent;
+  color: var(--color-text-secondary, #475569);
+  outline: none;
+}
+
+.fa-settings-split-resizer:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-bg-primary, #fff), 0 0 0 4px var(--color-gray-400, #94a3b8);
+}
+
+.fa-aum-book-card {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+/* Mapping Rules outer card fills space below Client Accounts; body scrolls the intro + book grids */
+.fa-settings-mapping-card {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Let ticker-row ⋮ menus escape nested .content-card overflow (book cards only) */
+.content-area.fa-settings-layout .fa-aum-book-card {
+  overflow: visible;
+}
+
+/* Same outer header rhythm as Client Accounts: inherits .fa-main-shell .card-header (padding: 0 1em; min-height via title row). Extra bottom padding below intro copy before the header border. */
+.fa-settings-mapping-card > .card-header.fa-settings-mapping-card-header {
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-bottom: var(--spacing-md);
+}
+
+/* Top row: match .fa-main-shell .card-header single-row height + same wrap gap as .fa-aum-client-accounts-card-header */
+.fa-settings-mapping-card-header-main-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
+.fa-settings-mapping-card-header-main-row .card-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.fa-aum-client-accounts-card > .card-header.fa-aum-client-accounts-card-header {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fa-aum-client-accounts-card-header .card-actions {
+  margin-left: auto;
+}
+
+.fa-aum-client-accounts-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  min-width: 0;
+}
+
+.fa-aum-last-update-inline {
+  font-size: 0.68rem;
+  color: var(--color-text-muted, var(--faint));
+  white-space: nowrap;
+}
+
+.fa-aum-last-update-inline strong {
+  color: var(--color-text-secondary, var(--muted));
+  font-weight: 600;
+}
+
+.fa-aum-client-accounts-card-body {
+  padding: 1em;
+}
+
+/* Client Accounts grid (settings — AUM & Ratios): fixed first five columns; last column fills remainder, left-aligned */
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table col.fa-aum-ca-col-client {
+  width: 260px;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table col.fa-aum-ca-col-acct {
+  width: 110px;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table col.fa-aum-ca-col-fcm {
+  width: 200px;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table col.fa-aum-ca-col-aum {
+  width: 110px;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table col.fa-aum-ca-col-asof {
+  width: 90px;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table col.fa-aum-ca-col-updated {
+  width: auto;
+  min-width: 0;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table th.fa-aum-ca-col-updated,
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table td.fa-aum-ca-col-updated {
+  text-align: left;
+}
+
+.fa-aum-client-accounts-card .fa-aum-client-accounts-table td.fa-aum-ca-col-updated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Client Accounts body rows — same height/padding rhythm as Trades / Market Data (grid-tables) */
+.content-area.fa-settings-layout .fa-aum-client-accounts-card .fa-aum-client-accounts-table tbody td {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  height: var(--table-grid-row-min-height);
+  min-height: var(--table-grid-row-min-height);
+  line-height: var(--table-grid-row-min-height);
+  font-size: var(--table-grid-font-size);
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.content-area.fa-settings-layout .fa-aum-client-accounts-card .fa-aum-client-accounts-table tbody td.fa-aum-ca-cell-client {
+  font-weight: 500;
+}
+
+.content-area.fa-settings-layout .fa-aum-client-accounts-card .fa-aum-client-accounts-table tbody td.fa-aum-ca-cell-acct {
+  color: var(--muted);
+}
+
+.content-area.fa-settings-layout .fa-aum-client-accounts-card .fa-aum-client-accounts-table tbody td.fa-aum-ca-cell-aum {
+  color: var(--text);
+}
+
+.content-area.fa-settings-layout .fa-aum-client-accounts-card .fa-aum-client-accounts-table tbody td.fa-aum-ca-cell-asof,
+.content-area.fa-settings-layout .fa-aum-client-accounts-card .fa-aum-client-accounts-table tbody td.fa-aum-ca-col-updated {
+  font-size: 0.7rem;
+  color: var(--faint);
+}
+
+.content-area.fa-settings-layout .fa-aum-client-accounts-card input.fa-aum-account-aum-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.content-area.fa-settings-layout .fa-aum-client-accounts-card input.fa-aum-account-aum-input::-webkit-outer-spin-button,
+.content-area.fa-settings-layout .fa-aum-client-accounts-card input.fa-aum-account-aum-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.fa-settings-mapping-card-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: 1em;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* aum-ticker-book-matrix.html — all books stacked in one scroll (no nested book cards) */
+.fa-aum-unified-derived-body.fa-settings-mapping-card-body {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+.fa-aum-unified-derived-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.fa-settings-mapping-card-header .fa-settings-mapping-card-actions.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.fa-settings-mapping-card-actions-divider {
+  display: inline-block;
+  width: 1px;
+  height: 1.15em;
+  margin: 0 6px 0 4px;
+  background: var(--border);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* Same height/padding as other card-header .action-btn */
+.fa-settings-mapping-card-action-btn.action-btn {
+  font-size: var(--action-btn-font-size, 12px);
+}
+
+.fa-aum-unified-one-grid .fa-aum-col-book,
+.fa-aum-unified-one-grid col.fa-aum-col-book {
+  width: 5.2em;
+}
+
+.fa-aum-unified-one-grid .fa-aum-book-col-th {
+  min-width: 4.5em;
+}
+
+.fa-aum-unified-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: auto;
+  background: var(--card);
+}
+
+.fa-settings-mapping-intro-block {
+  margin: 0;
+}
+
+.fa-settings-mapping-intro-list {
+  margin: 0;
+  padding-left: 1.15em;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary, #475569);
+}
+
+.fa-settings-mapping-intro-list li {
+  margin: 0 0 0.2em;
+}
+
+.fa-settings-mapping-intro-list li:last-child {
+  margin-bottom: 0;
+}
+
+.fa-settings-mapping-intro-list strong {
+  font-weight: 600;
+}
+
+.fa-aum-book-card > .card-body.fa-aum-book-card-body {
+  padding: 1em;
+}
+
+/* Flush Mapping Rules book cards: FCM key + grid stack; horizontal scroll on narrow viewports */
+.content-area.fa-settings-layout .fa-aum-book-card.content-card--flush-body > .card-body.fa-aum-book-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modifier on .content-card: body padding cleared; table outer border removed separately (AUM flush grids) */
+.content-card.content-card--flush-body > .card-body {
+  border: none;
+  padding: 0;
+}
+
+/*
+ * Flush body: .data-table normally has its own 1px shell (see .content-area.fa-settings-layout .data-table).
+ * That stacks with .content-card’s border — drop the table frame; cell borders keep the grid.
+ */
+/* Flush book cards: table shell would double the .content-card border (AUM + Mapping Rules). */
+.content-card.content-card--flush-body > .card-body > .data-table {
+  border: none;
+}
+
+/* Legacy: nested flush layout still wrapped in .table-container */
+.content-card.content-card--flush-body > .card-body > .table-container {
+  border: none;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table {
+  font-size: var(--table-grid-font-size);
+}
+
+/* AUM leverage grids: first column uses Mapping Rules–style product labels */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table .fa-aum-ticker-cell {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table .fa-aum-ticker-cell .product-label {
+  font-size: var(--table-grid-font-size);
+  font-weight: 400;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table .fa-aum-ticker-cell .fa-mapping-nav-default-ticker {
+  font-size: var(--table-grid-font-size);
+  font-weight: 400;
+  color: var(--color-text-muted, var(--muted));
+  font-style: italic;
+}
+
+/* New Ticker row: flex must live inside the cell — display:flex on <td> breaks table row heights / borders */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-ticker-cell--add-inline,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-ticker-cell--add-inline {
+  line-height: normal;
+}
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-ticker-cell--add-inline .fa-aum-add-ticker-inputs,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-ticker-cell--add-inline .fa-aum-add-ticker-inputs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* New Ticker row: text-style Add | Cancel */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-add-ticker-actions,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-add-ticker-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+}
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-add-ticker-btn,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-add-ticker-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 0;
+}
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-add-ticker-btn:hover,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-add-ticker-btn:hover {
+  color: var(--text);
+}
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-add-ticker-btn:focus-visible,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-add-ticker-btn:focus-visible {
+  outline: none;
+}
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-add-ticker-btn--add,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-add-ticker-btn--add {
+  font-weight: 700;
+}
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-add-ticker-sep,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-add-ticker-sep {
+  color: var(--faint);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/*
+ * AUM book grids use the same Trades menu classes; with few columns, auto table layout
+ * lets the first column grow to the button’s min-content (~32px+). Trades looks narrower
+ * because many columns compete for width. Fixed layout + hard cap matches Trades’ 24px col.
+ */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid {
+  table-layout: fixed;
+  overflow: visible;
+}
+
+/*
+ * AUM ticker grids: one thead row (Lev/Wtd). JS adds .fa-aum-th-accent-top on Lev/Wtd only (3px accent);
+ * menu / ticker / Effective Split keep default borders. Normal flow avoids sticky thead overlap.
+ */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead th {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+
+/* Menu, Ticker, Effective Split: no background override — use default .data-table th (grid-tables gray-200). */
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead tr.fa-aum-grid-subhead th.fa-aum-th-accent-top {
+  border-top: 3px solid var(--fa-fcm-accent) !important;
+}
+
+/* Lev/Wtd — gray fill (under colored top bar on account pairs) */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead tr.fa-aum-grid-subhead th.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead tr.fa-aum-grid-subhead th.fa-aum-wtd-col {
+  background: var(--color-gray-100);
+}
+
+/* Thead: Ticker, Lev, Wtd, Effective Split — shared padding + vertical center */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead tr.fa-aum-grid-subhead th {
+  vertical-align: middle;
+  padding: 6px var(--table-grid-cell-pad-x);
+  line-height: 1.25;
+  height: auto;
+  min-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+
+/*
+ * AUM book grids (parity with .fa-alloc-strip-scroll <colgroup>): fixed lead + account subcolumns on every
+ * card; last <col> flexes so tables with fewer accounts don’t widen Leverage/Wtd/Ticker.
+ */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid col.fa-aum-col-menu {
+  width: var(--fa-aum-col-menu);
+  min-width: var(--fa-aum-col-menu);
+  max-width: var(--fa-aum-col-menu);
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid col.fa-aum-col-ticker {
+  width: var(--fa-aum-col-ticker);
+  min-width: var(--fa-aum-col-ticker);
+  max-width: var(--fa-aum-col-ticker);
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid col.fa-aum-col-lev {
+  width: var(--fa-aum-col-lev);
+  min-width: var(--fa-aum-col-lev);
+  max-width: var(--fa-aum-col-lev);
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid col.fa-aum-col-wtd {
+  width: var(--fa-aum-col-wtd);
+  min-width: var(--fa-aum-col-wtd);
+  max-width: var(--fa-aum-col-wtd);
+}
+
+/* Effective Split: shrink to header + chip row content (fixed layout + width:0 col hint) */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid col.fa-aum-col-split {
+  width: 108px;
+  min-width: 108px;
+  max-width: 108px;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid col.fa-aum-col-spacer {
+  width: auto;
+  min-width: 0;
+}
+
+/* Mapping Rules book grids: tbody uses same row height + cell padding as Trades / Market Data (grid-tables) */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  height: var(--table-grid-row-min-height);
+  min-height: var(--table-grid-row-min-height);
+  line-height: var(--table-grid-row-min-height);
+  font-size: var(--table-grid-font-size);
+  box-sizing: border-box;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.trades-col-menu,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td.trades-col-menu {
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-split-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td.fa-aum-split-col {
+  white-space: nowrap;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td.fa-aum-lev-col {
+  border-left: 1px solid var(--border);
+  font-weight: 400;
+  font-size: 0.7rem;
+}
+
+/* Mapping Rules: Lev override tint — light mix of account FCM accent (--fa-aum-fcm-accent on td) */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-lev-col.fa-aum-lev-col--override {
+  background-color: color-mix(in srgb, var(--fa-aum-fcm-accent, #64748b) 18%, var(--color-bg-primary, #ffffff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fa-aum-fcm-accent, #64748b) 32%, var(--border, #e2e8f0));
+}
+
+/* Lev editors: neutral border/fill (no per-account accent borders on the control) */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-lev-col {
+  vertical-align: middle;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input.fa-aum-lev-input--plain {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 6px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 4px;
+  background-color: var(--color-bg-primary, #fff);
+  /* color + -webkit-text-fill-color set inline per account (COLORS[ci]) */
+  font-family: inherit;
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-lev-col.fa-aum-lev-col--override input.fa-aum-lev-input.fa-aum-lev-input--plain {
+  background-color: color-mix(in srgb, var(--fa-aum-fcm-accent, #64748b) 10%, var(--color-bg-primary, #ffffff));
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input.fa-aum-lev-input--plain:focus,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input.fa-aum-lev-input--plain:focus-visible,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input.fa-aum-lev-input--plain:active {
+  outline: none;
+  border-color: var(--border, #e2e8f0);
+  box-shadow: none;
+  font-weight: inherit;
+}
+
+/* Book Use Default → matrix locked; column menu Use Default → single ticker row (--ticker-default-locked): dim body cells only */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--locked > td:not(.trades-col-menu),
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--ticker-default-locked > td:not(.trades-col-menu) {
+  color: var(--color-text-muted, #64748b);
+  opacity: 0.58;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--locked > td.trades-col-menu,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--ticker-default-locked > td.trades-col-menu {
+  color: var(--color-text-primary, #0f172a);
+  opacity: 1;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--locked > td.fa-aum-wtd-col--derived-locked,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--ticker-default-locked > td.fa-aum-wtd-col--derived-locked {
+  color: var(--color-text-muted, #64748b);
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--locked .product-label,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--locked .fa-mapping-nav-default-ticker,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--ticker-default-locked .product-label,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--ticker-default-locked .fa-mapping-nav-default-ticker {
+  color: inherit;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--locked input.fa-aum-lev-input--plain:disabled,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr.fa-aum-matrix-row--ticker-default-locked input.fa-aum-lev-input--plain:disabled {
+  cursor: not-allowed;
+  border-color: var(--border, #e2e8f0);
+  background-color: var(--color-gray-100, #f1f5f9);
+  /* text color stays per-account via inline styles */
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-wtd-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td.fa-aum-wtd-col {
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td .fa-aum-split-chip,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td .fa-aum-split-chip {
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td .fa-aum-split-chip-sep,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td .fa-aum-split-chip-sep {
+  color: var(--faint);
+  margin: 0 3px;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-ticker-cell .fa-aum-ticker-product-label,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td.fa-aum-ticker-cell .fa-aum-ticker-product-label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Reinforce <col> widths on cells (some engines redistribute slack despite colgroup) */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .trades-col-menu {
+  width: var(--fa-aum-col-menu) !important;
+  min-width: var(--fa-aum-col-menu) !important;
+  max-width: var(--fa-aum-col-menu) !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid th.fa-aum-ticker-col,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-ticker-cell {
+  width: var(--fa-aum-col-ticker) !important;
+  min-width: var(--fa-aum-col-ticker) !important;
+  max-width: var(--fa-aum-col-ticker) !important;
+  box-sizing: border-box;
+  border-right: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid th.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid th.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-lev-col {
+  width: var(--fa-aum-col-lev) !important;
+  min-width: var(--fa-aum-col-lev) !important;
+  max-width: var(--fa-aum-col-lev) !important;
+  box-sizing: border-box;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead th.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid thead th.fa-aum-lev-col {
+  text-align: center;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody td.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody td.fa-aum-lev-col {
+  text-align: right;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid input.fa-aum-lev-input {
+  text-align: right;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input:focus:not(.fa-aum-lev-input--plain),
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid input.fa-aum-lev-input:focus {
+  font-weight: 600;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input::-webkit-outer-spin-button,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid input.fa-aum-lev-input::-webkit-inner-spin-button,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid input.fa-aum-lev-input::-webkit-outer-spin-button,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid input.fa-aum-lev-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid th.fa-aum-wtd-col,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-wtd-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid th.fa-aum-wtd-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-wtd-col {
+  width: var(--fa-aum-col-wtd) !important;
+  min-width: var(--fa-aum-col-wtd) !important;
+  max-width: var(--fa-aum-col-wtd) !important;
+  box-sizing: border-box;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid th.fa-aum-split-col,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-split-col {
+  width: 108px !important;
+  min-width: 108px !important;
+  max-width: 108px !important;
+  box-sizing: border-box;
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+  border-left: none;
+  /* Match Lev/Wtd vertical rules (inline uses var(--border)) */
+  border-right: 1px solid var(--border);
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-spacer-th,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-spacer-cell {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-right: none !important;
+  background: transparent;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .fa-aum-spacer-th {
+  background: var(--color-gray-200);
+}
+
+/* FCM block starts after Effective Split — divider is split’s border-right; strip first cell’s left so it doesn’t double */
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead tr.fa-aum-grid-subhead > th.fa-aum-split-col + th.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody tr > td.fa-aum-split-col + td.fa-aum-lev-col {
+  border-left: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead tr:not(.fa-aum-grid-subhead) > th.fa-aum-split-col + th.fa-fcm-acct-th.fa-fcm-acct-th--grid-group {
+  border-left: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid td.fa-aum-ticker-cell--add-inline .fa-aum-add-ticker-actions--below-inputs {
+  margin-top: 6px;
+}
+
+/* Unified all-books AUM grid — same column widths / split / spacer as per-book cards */
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid col.fa-aum-col-menu {
+  width: var(--fa-aum-col-menu);
+  min-width: var(--fa-aum-col-menu);
+  max-width: var(--fa-aum-col-menu);
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid col.fa-aum-col-ticker {
+  width: var(--fa-aum-col-ticker);
+  min-width: var(--fa-aum-col-ticker);
+  max-width: var(--fa-aum-col-ticker);
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid col.fa-aum-col-split {
+  width: 108px;
+  min-width: 108px;
+  max-width: 108px;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid col.fa-aum-col-lev {
+  width: var(--fa-aum-col-lev);
+  min-width: var(--fa-aum-col-lev);
+  max-width: var(--fa-aum-col-lev);
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid col.fa-aum-col-wtd {
+  width: var(--fa-aum-col-wtd);
+  min-width: var(--fa-aum-col-wtd);
+  max-width: var(--fa-aum-col-wtd);
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid col.fa-aum-col-spacer {
+  width: auto;
+  min-width: 0;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .trades-col-menu {
+  width: var(--fa-aum-col-menu) !important;
+  min-width: var(--fa-aum-col-menu) !important;
+  max-width: var(--fa-aum-col-menu) !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid th.fa-aum-ticker-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-ticker-cell {
+  width: var(--fa-aum-col-ticker) !important;
+  min-width: var(--fa-aum-col-ticker) !important;
+  max-width: var(--fa-aum-col-ticker) !important;
+  box-sizing: border-box;
+  border-right: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid th.fa-aum-split-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-split-col {
+  width: 108px !important;
+  min-width: 108px !important;
+  max-width: 108px !important;
+  box-sizing: border-box;
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+  border-left: none;
+  border-right: 1px solid var(--border);
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-spacer-th,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-spacer-cell {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-right: none !important;
+  background: transparent;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid .fa-aum-spacer-th {
+  background: var(--color-gray-200);
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid thead tr.fa-aum-grid-subhead > th.fa-aum-split-col + th.fa-aum-lev-col,
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody tr > td.fa-aum-split-col + td.fa-aum-lev-col {
+  border-left: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid tbody tr > td.fa-aum-split-col + td.fa-aum-unified-dash-pair {
+  border-left: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid thead tr:not(.fa-aum-grid-subhead) > th.fa-aum-split-col + th.fa-fcm-acct-th.fa-fcm-acct-th--grid-group {
+  border-left: none !important;
+}
+
+.content-area.fa-settings-layout .fa-aum-unified-one-grid.data-table.trades-grid td.fa-aum-ticker-cell--add-inline .fa-aum-add-ticker-actions--below-inputs {
+  margin-top: 6px;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid thead,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tbody,
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid tr {
+  overflow: visible;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .trades-col-menu {
+  padding: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 0;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .trades-col-menu:has(.fa-aum-ticker-menu-dropdown.open) {
+  z-index: 50;
+}
+
+.content-area.fa-settings-layout .fa-aum-book-card .data-table.trades-grid .trades-row-menu-btn {
+  padding: 4px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ticker row ⋮ menu (Delete = same as × on ticker cell) */
+.content-area.fa-settings-layout .fa-aum-ticker-menu-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.content-area.fa-settings-layout .fa-aum-ticker-menu-dropdown {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  right: auto;
+  margin-top: 0;
+  margin-left: 6px;
+  transform: translateY(-50%);
+  min-width: 132px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 220;
+  display: none;
+  padding: 4px 0;
+}
+
+.content-area.fa-settings-layout .fa-aum-ticker-menu-dropdown.open {
+  display: block;
+}
+
+.content-area.fa-settings-layout .fa-aum-ticker-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.content-area.fa-settings-layout .fa-aum-ticker-menu-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.content-area.fa-settings-layout .fa-aum-ticker-menu-item--delete {
+  color: var(--danger, #dc2626);
+}
+
+.fa-aum-book-card-header {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.fa-aum-book-card-header .card-actions {
+  margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Use All Defaults / Use All Adjusted — inactive mode is disabled in JS; mute visually */
+.content-area.fa-settings-layout .fa-aum-book-card .card-actions .fa-aum-book-mode-btn.action-btn:disabled,
+.content-area.fa-settings-layout .fa-aum-book-card .card-actions .fa-aum-book-mode-btn.action-btn:disabled:hover {
+  opacity: 0.52;
+  cursor: default;
+}
+
+.fa-aum-book-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  /* Scope line (.fa-aum-book-sub) lives inside .fa-card-title-text; pipe spacing is ::before on .fa-aum-book-sub */
+  gap: 6px 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.fa-aum-book-card-title .fa-card-title-text {
+  font-size: 14px;
+}
+
+/* Muted “(#GH5600)” after book name — shared: AUM strip & Mapping Rules cards */
+.fa-aum-book-ref-inline {
+  font-size: 0.82em;
+  font-weight: 500;
+  color: var(--color-text-muted, var(--muted));
+  margin-left: 0.28em;
+  letter-spacing: 0.01em;
+}
+
+/* Account trail after book ref / chevron (no vertical rule — scope line uses | in .fa-aum-book-sub) */
+.content-area.fa-settings-layout .fa-aum-book-card-title .fa-card-title-text .fa-strip-card-accts,
+.fa-main-shell .fa-mapping-book-card-title .fa-card-title-text .fa-strip-card-accts {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 300;
+  margin-left: 0.5em;
+  padding-left: 0;
+  vertical-align: baseline;
+}
+
+/* AUM grids: monospace only for product ticker symbol in row label */
+.content-area.fa-settings-layout .fa-aum-ticker-cell .product-label .short-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.fa-aum-book-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-muted, var(--muted));
+  line-height: normal;
+}
+
+.fa-aum-book-sub::before {
+  content: '|';
+  margin: 0 0.35em;
+  font-weight: 400;
+  color: inherit;
+}
+
+/* Collapsible book cards: scope subtitle reads cleaner without the pipe when the body is open */
+[data-fa-book-card]:not(.fa-book-card--collapsed) .fa-aum-book-sub::before {
+  content: none;
+}
+
+/* Mapping Rules: full-bleed filter strip (standalone fa-screen-card; fa-settings tab panel) */
+.fa-screen-card > .fa-mapping-rules-filter-panel,
+.fa-settings-mapping-embedded > .fa-mapping-rules-filter-panel,
+.fa-mapping-rules-filter-panel.filter-panel {
+  flex-shrink: 0;
+  padding: 0;
+  background: var(--color-bg-primary);
+  border-left: none;
+  border-right: none;
+}
+
+/* Mapping Rules: body scrolls book list + error */
+.fa-screen-card > #fa-mapping-body.fa-mapping-screen-body,
+.fa-settings-mapping-embedded > #fa-mapping-body.fa-mapping-screen-body,
+.fa-mapping-screen-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  gap: var(--spacing-md);
+  -webkit-overflow-scrolling: touch;
+}
+
+.fa-mapping-books-empty {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.fa-mapping-load-err {
+  margin: 0;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+/* Padding only when not using content-card--flush-body (flush zeroes body padding globally). */
+.fa-mapping-book-card:not(.content-card--flush-body) .card-body {
+  padding: 1em;
+}
+
+/* Wide NAV grids: horizontal scroll; stack key + table flush (no flex gap). */
+.content-card.fa-mapping-book-card.content-card--flush-body > .card-body {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Single bottom edge: last grid row border + .content-card border were stacking */
+.content-card.fa-mapping-book-card.content-card--flush-body > .card-body > .data-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.fa-mapping-book-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  min-width: 0;
+  line-height: normal;
+}
+
+/* NAV / scope line: pipe is the only separator; don’t add flex gap before it */
+.fa-mapping-book-card-title:has(.fa-aum-book-sub) {
+  column-gap: 0;
+  row-gap: 6px;
+}
+
+.fa-mapping-book-mode {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: normal;
+}
+
+.fa-mapping-book-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.fa-mapping-book-card > .card-header .fa-mapping-edit-book-btn,
+.fa-aum-book-card > .card-header .fa-mapping-edit-book-btn {
+  font-size: 0.68rem;
+  height: auto;
+  padding: 4px 10px;
+  flex-shrink: 0;
+}
+
+.fa-mapping-book-ratio-label {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.fa-mapping-book-ratio-bar {
+  width: 80px;
+  height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.fa-mapping-book-ratio-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  max-width: 100%;
+}
+
+.fa-mapping-book-ratio-pct {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fa-mapping-book-card--invalid {
+  border-color: #fca5a5;
+}
+
+.fa-mapping-book-card--invalid > .card-header {
+  background: #fff5f5;
+}
+
+.fa-mapping-book-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fa-mapping-book-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 220px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  display: none;
+  padding: 4px 0;
+}
+
+.fa-mapping-book-menu-dropdown.open {
+  display: block;
+}
+
+.fa-mapping-book-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.fa-mapping-book-menu-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.fa-mapping-nav-table thead th {
+  background: var(--color-gray-200);
+}
+
+/* Mapping NAV grid: fixed layout — spacer col absorbs extra width so data columns stay left-aligned. */
+.fa-mapping-book-card .fa-mapping-nav-table {
+  table-layout: fixed;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table col.fa-mapping-nav-col-ticker {
+  width: 280px;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table col.fa-mapping-nav-col-acct {
+  width: 96px;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table col.fa-mapping-nav-col-spacer {
+  width: auto;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table .fa-mapping-nav-spacer-th,
+.fa-mapping-book-card .fa-mapping-nav-table .fa-mapping-nav-spacer-cell {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-right: none !important;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table .fa-mapping-nav-spacer-th {
+  background: var(--color-gray-200);
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table .fa-mapping-nav-spacer-cell {
+  background: transparent;
+}
+
+/*
+ * Mapping Rules: single thead row + FCM color key — 3px top bar only on FCM account headers (NAV grid).
+ * Fixed-ratio SMA table has no FCM th; no accent bar on that thead.
+ */
+.fa-mapping-book-card .fa-mapping-nav-table thead tr.alloc-strip-thead-labels > th.fa-fcm-acct-th--strip.fa-fcm-acct-th--accent-var {
+  border-top: 3px solid var(--fa-fcm-accent) !important;
+}
+
+/* Mapping NAV: wider ticker col; FCM cols narrowed below (separate rule) */
+.fa-mapping-book-card .fa-mapping-nav-table th.fa-mapping-nav-ticker-th,
+.fa-mapping-book-card .fa-mapping-nav-table td.fa-mapping-nav-ticker-cell {
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  box-sizing: border-box;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table tbody td.fa-mapping-nav-ticker-cell {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table .product-label {
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table .fa-mapping-nav-default-ticker {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* Mapping NAV: vertical rules match allocations strip (1px rsep; header rsep + lead col use --color-border-medium). */
+.fa-mapping-book-card .fa-mapping-nav-table thead th,
+.fa-mapping-book-card .fa-mapping-nav-table tbody td {
+  border-right: none !important;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table thead tr > th:first-child {
+  border-right: 1px solid var(--color-border-medium) !important;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table thead th.alloc-strip-col-rsep {
+  border-right: 1px solid var(--color-border-medium) !important;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table tbody td.fa-mapping-nav-ticker-cell {
+  border-right: 1px solid var(--row-border) !important;
+}
+
+/*
+ * Mapping NAV: FCM account cols — same fixed width as allocations strip (.fa-alloc-strip-scroll th/td FCM, 96px).
+ */
+.fa-mapping-book-card .fa-mapping-nav-table thead th.fa-fcm-acct-th--strip,
+.fa-mapping-book-card .fa-mapping-nav-table tbody td.alloc-strip-col-rsep {
+  width: 96px !important;
+  min-width: 96px !important;
+  max-width: 96px !important;
+  box-sizing: border-box;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+.fa-mapping-book-card .fa-mapping-nav-table tbody td.alloc-strip-col-rsep {
+  border-right: 1px solid var(--row-border) !important;
+}
+
+/* Keep page shell aligned with trades / market-data structure. Skip sidebar shell pages — they need body flex row (app-sidebar.css). */
+body:not(.app-sidebar-enabled) { display: block !important; }
+
+/* Typography normalization to match trades / market-data */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.page-title { font-size: 20px; font-weight: 600; }
+.curves-card-title .fa-card-title-text { font-size: 14px; font-weight: 600; }
+.btn,
+.action-btn,
+.f-select,
+.f-input,
+.form-input,
+.form-select,
+.qty-input {
+  font-size: var(--action-btn-font-size, 12px);
+}
+
+.f-label,
+.panel-label,
+.form-label,
+.kv-l,
+.stat-label { font-size: 11px; }
+
+.mono,
+.badge,
+.ratio-pill,
+.cap-chip { font-size: 12px; }
+
+/* FA standalone shell: card-wrapped grids keep vertical rules on top of standard .data-table */
+.fa-screen-card .data-table,
+.fa-settings-mapping-embedded .data-table,
+.content-area.fa-settings-layout .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+}
+
+.fa-screen-card .table-container .data-table,
+.fa-settings-mapping-embedded .table-container .data-table,
+.content-area.fa-settings-layout .table-container .data-table {
+  border: none;
+}
+
+.fa-screen-card .data-table thead th,
+.fa-screen-card .data-table tbody td,
+.fa-settings-mapping-embedded .data-table thead th,
+.fa-settings-mapping-embedded .data-table tbody td,
+.content-area.fa-settings-layout .data-table:not(.fa-aum-client-accounts-table) thead th,
+.content-area.fa-settings-layout .data-table:not(.fa-aum-client-accounts-table) tbody td {
+  border-right: 1px solid var(--color-border-light);
+}
+
+.fa-screen-card .data-table thead th:last-child,
+.fa-screen-card .data-table tbody td:last-child,
+.fa-settings-mapping-embedded .data-table thead th:last-child,
+.fa-settings-mapping-embedded .data-table tbody td:last-child,
+.content-area.fa-settings-layout .data-table:not(.fa-aum-client-accounts-table) thead th:last-child,
+.content-area.fa-settings-layout .data-table:not(.fa-aum-client-accounts-table) tbody td:last-child {
+  border-right: none;
+}
+
+.fa-screen-card .data-table th.r,
+.fa-screen-card .data-table td.r,
+.fa-settings-mapping-embedded .data-table th.r,
+.fa-settings-mapping-embedded .data-table td.r,
+.content-area.fa-settings-layout .data-table th.r,
+.content-area.fa-settings-layout .data-table td.r {
+  text-align: right;
+}
+
+/* Normalize legacy group separators from FA blueprint */
+.fa-screen-card tbody tr[style*="border-top:2px"],
+.fa-settings-mapping-embedded tbody tr[style*="border-top:2px"],
+.content-area.fa-settings-layout tbody tr[style*="border-top:2px"] {
+  border-top-width: 1px !important;
+}
+.fa-screen-card tbody tr[style*="border-top:2px solid #c8d6e2"],
+.fa-settings-mapping-embedded tbody tr[style*="border-top:2px solid #c8d6e2"],
+.content-area.fa-settings-layout tbody tr[style*="border-top:2px solid #c8d6e2"] {
+  border-top: 1px solid var(--color-border-medium) !important;
+}
+
+/* Hard cap: no border heavier than 1px in FA content */
+.fa-main-shell [style*="border:2px"],
+.fa-main-shell [style*="border-top:2px"],
+.fa-main-shell [style*="border-bottom:2px"],
+.fa-main-shell [style*="border-left:2px"],
+.fa-main-shell [style*="border-right:2px"] {
+  border-width: 1px !important;
+  border-top-width: 1px !important;
+  border-right-width: 1px !important;
+  border-bottom-width: 1px !important;
+  border-left-width: 1px !important;
+}
+
+.fa-main-shell [style*="outline:2px"] {
+  outline-width: 1px !important;
+}
+
+/* Strip grid: padding/line-height + ellipsis on all body rows (expanded + summary) */
+.fa-alloc-strip-scroll table {
+  table-layout: fixed;
+  width: 100%;
+  border: 1px solid var(--color-border-light);
+  max-height: none;
+  overflow: visible;
+}
+
+/*
+ * Lead columns: menu (Trades-style ⋮) + Month–Avg; min+max on <col> prevents slack absorption.
+ */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > colgroup > col.alloc-strip-col-menu {
+  width: 24px;
+  min-width: 24px;
+  max-width: 24px;
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > colgroup > col.alloc-strip-col-month {
+  width: var(--alloc-strip-month-col);
+  min-width: var(--alloc-strip-month-col);
+  max-width: var(--alloc-strip-month-col);
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > colgroup > col.alloc-strip-col-product {
+  width: var(--alloc-strip-product-col);
+  min-width: var(--alloc-strip-product-col);
+  max-width: var(--alloc-strip-product-col);
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > colgroup > col.alloc-strip-col-total {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > colgroup > col.alloc-strip-col-avg {
+  width: var(--alloc-strip-avg-col);
+  min-width: var(--alloc-strip-avg-col);
+  max-width: var(--alloc-strip-avg-col);
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > colgroup > col.alloc-strip-col-uom {
+  width: var(--alloc-strip-uom-col);
+  min-width: var(--alloc-strip-uom-col);
+  max-width: var(--alloc-strip-uom-col);
+}
+
+/*
+ * Reinforce lead widths on cells (some engines redistribute table slack despite <col>).
+ * Exclude [colspan]: summary/subtotal/AE rows use colspan on the first cell — those must stay
+ * left-aligned with normal padding, not the ⋮ menu column’s centered 24px treatment.
+ */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead th:nth-child(1):not([colspan]),
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr > td:nth-child(1):not([colspan]) {
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+/*
+ * Thead labels: first th is colspan=2 (menu+month); children 2–5 are Product / Total / Avg / UOM.
+ * Do not use the same nth-child() map as tbody — summary rows omit the separate menu cell.
+ */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead tr.alloc-strip-thead-labels > th:nth-child(2) {
+  width: var(--alloc-strip-product-col) !important;
+  min-width: var(--alloc-strip-product-col) !important;
+  max-width: var(--alloc-strip-product-col) !important;
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead tr.alloc-strip-thead-labels > th:nth-child(3) {
+  width: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead tr.alloc-strip-thead-labels > th:nth-child(4) {
+  width: var(--alloc-strip-avg-col) !important;
+  min-width: var(--alloc-strip-avg-col) !important;
+  max-width: var(--alloc-strip-avg-col) !important;
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead tr.alloc-strip-thead-labels > th:nth-child(5) {
+  width: var(--alloc-strip-uom-col) !important;
+  min-width: var(--alloc-strip-uom-col) !important;
+  max-width: var(--alloc-strip-uom-col) !important;
+}
+
+/*
+ * Body column 2: summary’s 2nd td is Product (table col 3); detail/subtotal 2nd td is month / id / label (col 2).
+ * Product–UOM body widths follow <colgroup> so expanded vs collapsed rows stay aligned.
+ */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr.alloc-strip-detail-row > td:nth-child(2),
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr.alloc-strip-subtotal-row > td:nth-child(2) {
+  width: var(--alloc-strip-month-col) !important;
+  min-width: var(--alloc-strip-month-col) !important;
+  max-width: var(--alloc-strip-month-col) !important;
+}
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr.alloc-strip-summary-row > td:nth-child(2) {
+  width: var(--alloc-strip-product-col) !important;
+  min-width: var(--alloc-strip-product-col) !important;
+  max-width: var(--alloc-strip-product-col) !important;
+}
+
+/* FCM account columns: fixed width so row count doesn’t change slack distribution */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead th.fa-fcm-acct-th--strip,
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr > td.alloc-strip-col-rsep:not(.alloc-strip-avg-cell):not(.alloc-strip-detail-price):not(.alloc-strip-uom-cell) {
+  width: 96px !important;
+  min-width: 96px !important;
+  max-width: 96px !important;
+}
+
+/* fa-main strip: FCM cols wider than embedded 96px but tighter than full name on one line (names wrap) */
+body:not(.fa-fund-alloc-embedded-strip) .fa-alloc-strip-scroll > .content-card > .card-body > table > thead th.fa-fcm-acct-th--strip,
+body:not(.fa-fund-alloc-embedded-strip) .fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr > td.alloc-strip-col-rsep:not(.alloc-strip-avg-cell):not(.alloc-strip-detail-price):not(.alloc-strip-uom-cell) {
+  width: 152px !important;
+  min-width: 152px !important;
+  max-width: 152px !important;
+}
+
+/*
+ * Trail columns (FA main strip): Leftover + Fill trades fixed; Status absorbs remaining width.
+ */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead th.alloc-strip-leftover-th,
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody td.alloc-strip-leftover-td--num {
+  width: 76px !important;
+  min-width: 76px !important;
+  max-width: 76px !important;
+}
+
+.fa-alloc-strip-scroll thead th.alloc-strip-fill-trades-th,
+.fa-alloc-strip-scroll tbody td.alloc-strip-fill-trades-cell {
+  width: 4.85rem !important;
+  min-width: 4.85rem !important;
+  max-width: 4.85rem !important;
+  text-align: center !important;
+  vertical-align: middle;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+.fa-alloc-strip-scroll thead th.alloc-strip-fill-trades-th {
+  font-size: 0.62rem;
+  line-height: 1.15;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.fa-alloc-strip-scroll tbody td.alloc-strip-fill-trades-cell--empty {
+  color: var(--faint);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
+
+.fa-alloc-strip-scroll thead th.alloc-strip-status-th,
+.fa-alloc-strip-scroll tbody td.alloc-strip-status-cell {
+  width: auto !important;
+  min-width: 4.75rem !important;
+  max-width: none !important;
+}
+
+.fa-alloc-strip-scroll thead th.alloc-strip-status-th {
+  text-align: left !important;
+}
+
+.fa-alloc-strip-scroll th {
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.fa-alloc-strip-scroll tbody td {
+  height: var(--table-grid-row-min-height) !important;
+  min-height: var(--table-grid-row-min-height) !important;
+  line-height: var(--table-grid-row-min-height) !important;
+  padding-top: var(--table-grid-cell-pad-y) !important;
+  padding-bottom: var(--table-grid-cell-pad-y) !important;
+  padding-left: var(--table-grid-cell-pad-x) !important;
+  padding-right: var(--table-grid-cell-pad-x) !important;
+  vertical-align: middle !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  box-sizing: border-box !important;
+}
+
+.fa-alloc-strip-scroll tbody td:last-child {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Strip column: stacked book cards (vertical rhythm via strip scroll gap / fa-main card-body gap) */
+.fa-alloc-strip-scroll > .content-card {
+  margin: 0;
+  overflow: visible;
+}
+
+.fa-alloc-strip-scroll .content-card:not(.content-card--flush-body) .card-body {
+  padding: 8px 10px 10px;
+  overflow: visible;
+  max-height: none;
+}
+
+/* Strip book cards: .fa-alloc-strip-scroll table { border } beats generic flush — drop outer table frame here */
+.fa-alloc-strip-scroll > .content-card.content-card--flush-body > .card-body > table {
+  border: none;
+}
+
+/* Last grid row + nested .content-card border were doubling the bottom seam */
+.fa-alloc-strip-scroll > .content-card.content-card--flush-body > .card-body > table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* fa-main strip: wide FCM grids — scroll each book card body horizontally */
+.fa-alloc-strip-scroll > .content-card.alloc-strip-book-card {
+  min-width: 0;
+  align-self: stretch;
+}
+
+.fa-alloc-strip-scroll > .content-card.alloc-strip-book-card > .card-body {
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fa-alloc-strip-scroll > .content-card.alloc-strip-book-card > .card-body > table.data-table {
+  min-width: 100%;
+  width: 100%;
+  max-width: none;
+}
+
+/* fa-main Mapping tab: book card bodies (SMA + ticker leverage tables) */
+.fa-main-shell .fa-main-mapping-book-wrap > .fa-book-card-collapse-target {
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fa-main-shell .fa-main-mapping-book-wrap > .fa-book-card-collapse-target > .data-table {
+  min-width: 100%;
+  width: max-content;
+  max-width: none;
+}
+
+/* Main → Mapping tab: book wraps use border + inner .data-table (not .content-card) */
+.fa-main-mapping-book-wrap .fa-book-card-collapse-target > .data-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.fa-alloc-strip-scroll thead tr,
+.fa-alloc-strip-scroll thead th {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+
+/*
+ * FCM strip: band row — only FCM columns get the colored top bar (.fa-fcm-acct-th--accent-var);
+ * non-FCM band cells stay flush (no top border).
+ */
+
+/* Band row: empty lead/trail cells stay minimal; FCM cells show institution line */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band > th {
+  height: auto !important;
+  min-height: 12px !important;
+  max-height: none !important;
+  line-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 2px !important;
+  font-size: 0 !important;
+  overflow: hidden;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Band row: non-FCM cells — white fill, no top border (FCM keeps gray-100 + accent top) */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band > th:not(.fa-fcm-acct-th) {
+  background: var(--color-bg-primary, #fff) !important;
+  border-top: none !important;
+}
+
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band > th.fa-fcm-acct-th--strip {
+  min-height: 40px !important;
+  padding-top: 4px !important;
+  padding-bottom: 6px !important;
+  line-height: 1.2 !important;
+  font-size: 0.62rem !important;
+  vertical-align: middle;
+}
+
+/* Band row FCM cell: one line — client • acct# • $AUM (same tokens as .alloc-strip-fcm-key) */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .alloc-strip-fcm-band-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0 0.28em;
+  max-width: 100%;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .alloc-strip-fcm-band-name {
+  display: inline;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .fa-fcm-key-muted {
+  font-size: 0.58rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted, var(--muted));
+}
+
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .fa-aum-fcm-key-sep {
+  font-size: 0.58rem;
+  color: var(--color-text-muted, var(--muted));
+  user-select: none;
+}
+
+/* main.html strip only: stacked band (name + $AUM); wide cols + wrap so names are not truncated */
+body:not(.fa-fund-alloc-embedded-strip) .fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band > th.fa-fcm-acct-th--strip {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  min-height: auto !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  vertical-align: middle !important;
+}
+
+body:not(.fa-fund-alloc-embedded-strip) .fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .alloc-strip-fcm-band-legacy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  line-height: 1.25;
+  max-width: 100%;
+}
+
+body:not(.fa-fund-alloc-embedded-strip) .fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .alloc-strip-fcm-band-legacy-name {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+body:not(.fa-fund-alloc-embedded-strip) .fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band .alloc-strip-fcm-band-legacy-meta {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted, var(--muted));
+  line-height: 1.25;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Label row: account headers sit under band; remove duplicate accent top */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-labels > th.fa-fcm-acct-th--strip {
+  border-top: none !important;
+}
+
+/*
+ * fund-allocations.html (body.fa-fund-alloc-embedded-strip): one thead row — 3px top bar only on
+ * FCM account cells (key above table); lead/trail headers use default cell borders.
+ */
+body.fa-fund-alloc-embedded-strip .fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-labels > th.fa-fcm-acct-th--strip.fa-fcm-acct-th--accent-var {
+  border-top: 3px solid var(--fa-fcm-accent) !important;
+}
+
+/* FCM color key above strip / Mapping Rules / AUM & Ratios book grids */
+body.fa-fund-alloc-embedded-strip .alloc-strip-fcm-key,
+body.fa-standalone-shell .fa-mapping-book-card .alloc-strip-fcm-key,
+.content-area.fa-settings-layout .fa-aum-book-card .alloc-strip-fcm-key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+  column-gap: 1.15em;
+  padding: 1rem 12px;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  box-sizing: border-box;
+}
+
+body.fa-fund-alloc-embedded-strip .alloc-strip-fcm-key-item,
+body.fa-standalone-shell .fa-mapping-book-card .alloc-strip-fcm-key-item,
+.content-area.fa-settings-layout .fa-aum-book-card .alloc-strip-fcm-key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+body.fa-fund-alloc-embedded-strip .alloc-strip-fcm-key-text,
+body.fa-standalone-shell .fa-mapping-book-card .alloc-strip-fcm-key-text,
+.content-area.fa-settings-layout .fa-aum-book-card .alloc-strip-fcm-key-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+body.fa-fund-alloc-embedded-strip .alloc-strip-fcm-key-dot,
+body.fa-standalone-shell .fa-mapping-book-card .alloc-strip-fcm-key-dot,
+.content-area.fa-settings-layout .fa-aum-book-card .alloc-strip-fcm-key-dot {
+  width: 0.52em;
+  height: 0.52em;
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+  background: var(--fa-fcm-accent);
+  /* Slight lift so the disc lines up with cap-height / text center (line-box centering reads low). */
+  transform: translateY(-0.055em);
+  box-sizing: border-box;
+}
+
+body.fa-fund-alloc-embedded-strip .alloc-strip-fcm-key .alloc-strip-fcm-band-name,
+body.fa-standalone-shell .fa-mapping-book-card .alloc-strip-fcm-key .alloc-strip-fcm-band-name,
+.content-area.fa-settings-layout .fa-aum-book-card .alloc-strip-fcm-key .alloc-strip-fcm-band-name {
+  display: inline;
+  font-weight: 500;
+  font-size: inherit;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+/* AUM / mapping / strip keys: account # and $ amount muted; bullets between name • acct • amt */
+.alloc-strip-fcm-key .fa-fcm-key-muted {
+  color: var(--color-text-muted, var(--muted));
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.alloc-strip-fcm-key .fa-aum-fcm-key-sep {
+  color: var(--color-text-muted, var(--muted));
+  user-select: none;
+}
+
+/* Resizable split handle on FA main orders screen */
+.fa-orders-resize-handle {
+  display: flex !important;
+}
+
+/* FA main (main.html): tabs + strip toolbar + split panes (was inline on markup) */
+.fa-alloc-tabs-bar {
+  align-items: center;
+  gap: 0;
+}
+
+.fa-alloc-tab-right-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-left: 1px solid var(--border);
+}
+
+.fa-strip-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fa-strip-filters-row .fa-strip-filter-select {
+  width: 78px;
+  height: 25px;
+  font-size: 0.72rem;
+}
+
+.fa-strip-filters-row .fa-strip-filter-select--wide {
+  width: 130px;
+}
+
+.fa-strip-filters-row .fa-strip-filter-select--status {
+  width: 110px;
+}
+
+.fa-split-left-trades {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.fa-split-right-alloc {
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fa-trades-grid .fa-trades-grid-row {
+  cursor: pointer;
+}
+
+.fa-alloc-strip-scroll td.fa-strip-detail-lots {
+  color: var(--muted);
+}
+
+.fa-panels-container {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fa-content-bottom {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  gap: 0;
+}
+
+.fa-left-container {
+  border: none;
+  padding: 0;
+  background: transparent;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fa-right-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Right pane: fa-main uses outer .allocations-strip-card; fund-allocations.html uses .fa-alloc-strip-scroll only */
+.allocations-strip-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.allocations-strip-card .card-header {
+  flex-shrink: 0;
+}
+
+/* fund-allocations.html: .fa-alloc-strip-scroll is direct child of .fa-split-right-alloc (no outer card) */
+.fa-split-right-alloc > .fa-alloc-strip-scroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.allocations-strip-card .fa-alloc-strip-header-actions,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations.fa-alloc-tab-allocations-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.allocations-strip-card .fa-alloc-strip-actions-sep.action-separator {
+  margin: 0 8px 0 10px;
+  height: 18px;
+}
+
+.allocations-strip-card .fa-alloc-strip-header-actions .btn-ghost.btn-sm,
+.allocations-strip-card .fa-alloc-strip-header-actions .btn-primary.btn-sm,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .btn-ghost.btn-sm,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .btn-primary.btn-sm {
+  white-space: nowrap;
+}
+
+.allocations-strip-card .fa-alloc-strip-header-actions .btn-ghost.btn-sm:disabled,
+.allocations-strip-card .alloc-strip-book-card-actions .btn-ghost.btn-sm:disabled,
+.fa-split-right-alloc > .fa-alloc-strip-scroll .alloc-strip-book-card-actions .btn-ghost.btn-sm:disabled,
+.fa-alloc-tabbed-section #fa-tab-actions-allocations .btn-ghost.btn-sm:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Strip header: light grey primary (components.css). Tab bar: white fill (components.css .tabs-stack__actions). Pointer-events guard for disabled primary. */
+.allocations-strip-card .fa-alloc-strip-header-actions .btn-primary.btn-sm:disabled,
+.allocations-strip-card .fa-alloc-strip-header-actions .btn-primary.btn-sm:disabled:hover,
+.fa-alloc-tabbed-section .tabs-stack__actions .btn-primary.btn-sm:disabled,
+.fa-alloc-tabbed-section .tabs-stack__actions .btn-primary.btn-sm:disabled:hover {
+  pointer-events: none;
+}
+
+.allocations-strip-card > .card-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* No vertical rules between columns (nested per-book grids) */
+.allocations-strip-card table thead th,
+.allocations-strip-card table tbody td,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table thead th,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table tbody td {
+  border-right: none;
+}
+
+/* Avg Price + per-FCM account column dividers */
+.allocations-strip-card table thead th.alloc-strip-col-rsep,
+.allocations-strip-card table tbody td.alloc-strip-col-rsep,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table thead th.alloc-strip-col-rsep,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table tbody td.alloc-strip-col-rsep {
+  border-right: 1px solid var(--row-border);
+}
+
+.allocations-strip-card .fa-card-title-text .fa-strip-card-accts,
+.fa-split-right-alloc > .fa-alloc-strip-scroll .fa-card-title-text .fa-strip-card-accts {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 300;
+  margin-left: 0.5em;
+  padding-left: 0;
+  vertical-align: baseline;
+}
+
+.allocations-strip-card .alloc-strip-card-title-row,
+.fa-split-right-alloc > .fa-alloc-strip-scroll .alloc-strip-card-title-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  row-gap: 10px;
+  column-gap: 0;
+}
+
+.allocations-strip-card .alloc-strip-book-card-actions .btn-ghost.btn-sm,
+.fa-split-right-alloc > .fa-alloc-strip-scroll .alloc-strip-book-card-actions .btn-ghost.btn-sm {
+  white-space: nowrap;
+}
+
+.allocations-strip-card .alloc-strip-empty-state,
+.fa-split-right-alloc > .fa-alloc-strip-scroll .alloc-strip-empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.allocations-strip-card input[type="number"],
+.fa-split-right-alloc > .fa-alloc-strip-scroll input[type="number"] {
+  text-align: right;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+  background: transparent !important;
+}
+
+.allocations-strip-card input[type="number"]:focus,
+.fa-split-right-alloc > .fa-alloc-strip-scroll input[type="number"]:focus {
+  background: transparent !important;
+}
+
+.allocations-strip-card input[type="number"]::-webkit-outer-spin-button,
+.allocations-strip-card input[type="number"]::-webkit-inner-spin-button,
+.fa-split-right-alloc > .fa-alloc-strip-scroll input[type="number"]::-webkit-outer-spin-button,
+.fa-split-right-alloc > .fa-alloc-strip-scroll input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.allocations-strip-card table th,
+.allocations-strip-card table td,
+.allocations-strip-card table th *,
+.allocations-strip-card table td *,
+.allocations-strip-card table input,
+.allocations-strip-card table button,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table th,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table td,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table th *,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table td *,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table input,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table button {
+  font-family: var(--font) !important;
+}
+
+/* FA icons inside strip cells/buttons must keep FA font (rule above would break glyphs) */
+.allocations-strip-card table .fas,
+.allocations-strip-card table .fa-solid,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table .fas,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table .fa-solid {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+}
+
+.allocations-strip-card table .far,
+.allocations-strip-card table .fa-regular,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table .far,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table .fa-regular {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 400 !important;
+}
+
+.allocations-strip-card table .fab,
+.allocations-strip-card table .fa-brands,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table .fab,
+.fa-split-right-alloc > .fa-alloc-strip-scroll table .fa-brands {
+  font-family: "Font Awesome 6 Brands" !important;
+  font-weight: 400 !important;
+}
+
+/* Expanded detail rows: restart striping (first detail = base); subtotal + AE stay white */
+.fa-alloc-strip-scroll tbody tr.alloc-strip-detail-row.alloc-strip-exp-base {
+  background: var(--card) !important;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-detail-row.alloc-strip-exp-alt {
+  background: var(--row-alt) !important;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-detail-row.alloc-strip-exp-base:hover,
+.fa-alloc-strip-scroll tbody tr.alloc-strip-detail-row.alloc-strip-exp-alt:hover {
+  background: #edf3fd !important;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-subtotal-row,
+.fa-alloc-strip-scroll tbody tr.alloc-strip-ae-row {
+  background: var(--card) !important;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-subtotal-row:hover,
+.fa-alloc-strip-scroll tbody tr.alloc-strip-ae-row:hover {
+  background: #edf3fd !important;
+}
+
+/* Expanded summary: same fill as .data-table header + 2px top (aria-expanded on tr) */
+.fa-alloc-strip-scroll tr.alloc-strip-summary-row[aria-expanded="true"] {
+  background: var(--color-gray-200);
+}
+
+.fa-alloc-strip-scroll tr.alloc-strip-summary-row[aria-expanded="true"] > td {
+  background: var(--color-gray-200);
+  border-top: 2px solid var(--color-border-dark);
+}
+
+/* FCM lot inputs on the grey expanded parent row: subtle white veil + stronger edge vs row bg */
+.fa-alloc-strip-scroll tr.alloc-strip-summary-row[aria-expanded="true"] td.alloc-strip-fcm-col .alloc-strip-fcm-input {
+  background: rgba(255, 255, 255, 0.35) !important;
+  border-color: var(--color-border-medium) !important;
+}
+
+/* Slightly stronger vertical rules between Avg/FCM columns: header + expanded parent only */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr > th.alloc-strip-col-rsep {
+  border-right: 1px solid var(--color-border-medium) !important;
+}
+
+.fa-alloc-strip-scroll tr.alloc-strip-summary-row[aria-expanded="true"] > td.alloc-strip-col-rsep {
+  border-right: 1px solid var(--color-border-medium) !important;
+}
+
+/* Subtotal seam: with border-collapse, a lone darker border-top often loses to the row-above
+   bottom (light grid line). Match both sides so the merged edge stays visible. */
+.fa-alloc-strip-scroll tbody tr.alloc-strip-detail-row:has(+ tr.alloc-strip-subtotal-row) > td {
+  border-bottom: 1px solid var(--color-border-dark) !important;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-subtotal-row > td {
+  border-top: 1px solid var(--color-border-dark) !important;
+  border-bottom: 1px solid var(--row-border);
+}
+
+/* Subtotal lead cell is empty (no ⋮ control); match row fill instead of trades menu gray-100 */
+.fa-alloc-strip-scroll tbody tr.alloc-strip-subtotal-row > td.trades-col-menu {
+  background: var(--card) !important;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-subtotal-row:hover > td.trades-col-menu {
+  background: #edf3fd !important;
+}
+
+/* Actual / expected % row (below subtotal when expanded) */
+.fa-alloc-strip-scroll tbody tr.alloc-strip-ae-row {
+  cursor: default;
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-ae-row:has(td.alloc-strip-ae-fcm .fa-tooltip-wrap:hover) {
+  position: relative;
+  z-index: var(--alloc-strip-overlay-z);
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-ae-row td {
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  height: var(--table-grid-row-min-height) !important;
+  min-height: var(--table-grid-row-min-height) !important;
+  line-height: var(--table-grid-row-min-height) !important;
+  box-sizing: border-box !important;
+  border-bottom: 2px solid var(--color-border-dark);
+}
+
+.fa-alloc-strip-scroll tbody tr.alloc-strip-ae-row td.alloc-strip-ae-fcm {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-ae-fcm .fa-tooltip-wrap::before,
+.fa-alloc-strip-scroll td.alloc-strip-ae-fcm .fa-tooltip-wrap::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-ae-fcm .fa-tooltip-wrap::after {
+  right: 14px;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-ae-fcm {
+  font-size: 0.64rem;
+  font-weight: 500;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-ae-pair {
+  font-variant-numeric: tabular-nums;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-ae-sep {
+  color: var(--faint);
+  font-weight: 400;
+  padding: 0 1px;
+}
+
+/* ── Allocations strip: row + cell patterns (built by allocStrip* JS helpers) ── */
+.fa-alloc-strip-scroll tr.alloc-strip-summary-row {
+  cursor: pointer;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-summary-month {
+  font-weight: 500;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-summary-total {
+  font-weight: 600;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-avg-cell {
+  white-space: nowrap;
+}
+
+.fa-alloc-strip-scroll thead th.alloc-strip-uom-hd,
+.fa-alloc-strip-scroll tbody td.alloc-strip-uom-cell {
+  white-space: nowrap;
+  text-align: left !important;
+}
+
+/* Month boundary: same weight as other row rules */
+.fa-alloc-strip-scroll td.alloc-strip-month-sep,
+.fa-alloc-strip-scroll th.alloc-strip-month-sep {
+  border-top: 1px solid var(--row-border);
+}
+
+.fa-alloc-strip-scroll .alloc-strip-month-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-expand-chevron {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+/* Product column: [SYM] long name — same pattern as FA trades grid (.bracket / .short-name) */
+.fa-alloc-strip-scroll .product-label.fa-trades-product-label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  min-width: 0;
+  color: inherit;
+}
+
+.fa-alloc-strip-scroll .product-label.fa-trades-product-label .short-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.fa-alloc-strip-scroll tr.alloc-strip-detail-row .product-label.fa-trades-product-label,
+.fa-alloc-strip-scroll tr.alloc-strip-subtotal-row .product-label.fa-trades-product-label {
+  opacity: 0.35;
+}
+
+.fa-alloc-strip-scroll tr.alloc-strip-detail-row td.alloc-strip-uom-cell,
+.fa-alloc-strip-scroll tr.alloc-strip-subtotal-row td.alloc-strip-uom-cell {
+  opacity: 0.35;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-avg-num {
+  font-size: 0.74rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fa-alloc-strip-scroll tr.alloc-strip-subtotal-row .alloc-strip-avg-num {
+  font-weight: 600;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-avg-empty {
+  color: var(--faint);
+}
+
+.fa-alloc-strip-scroll .alloc-strip-status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6rem;
+  font-weight: 500;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-status-cell {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-fill-trades-count-btn {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-fill-trades-count-btn:hover {
+  text-decoration: underline;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-fill-trades-count-btn:focus-visible {
+  outline: 2px solid var(--color-blue-500, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-leftover-td--num {
+  text-align: right !important;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-leftover-ok {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.35;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-leftover-warn {
+  color: var(--warning);
+  font-weight: 600;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-leftover-bad {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Allocation strip: Total, Avg, Leftover (numeric), FCM account cols — .r aligns right (no global FA table .r) */
+.fa-alloc-strip-scroll > .content-card > .card-body > table thead th.r,
+.fa-alloc-strip-scroll > .content-card > .card-body > table tbody td.r {
+  text-align: right;
+}
+
+/*
+ * FCM account columns: tighter horizontal padding so 44px inputs and read-only lots share one vertical edge.
+ * Input uses border 1px + horizontal padding 4px → numeric inset from cell edge = 5px beyond input’s outer right.
+ */
+.fa-alloc-strip-scroll thead th.alloc-strip-fcm-col,
+.fa-alloc-strip-scroll tbody td.alloc-strip-fcm-col {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+/* FCM cells host inputs: don’t clip borders / baseline (global tbody td overflow + line-height fights inputs) */
+.fa-alloc-strip-scroll tbody td.alloc-strip-fcm-col {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: normal !important;
+  white-space: normal !important;
+}
+
+/* FCM cells always use inputs; legacy mono text cells (no input) kept for any one-off rows */
+.fa-alloc-strip-scroll tbody td.alloc-strip-fcm-col.mono:not(:has(input)) {
+  padding-right: calc(4px + 5px) !important;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-fcm-input--readonly {
+  -webkit-text-fill-color: currentColor;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-fcm-input--readonly:read-only {
+  background: transparent !important;
+}
+
+/*
+ * Plain FCM lot values (trade "-" row + subtotal): same right inset as other mono FCM cells
+ * (.fa-alloc-strip-scroll tbody td.alloc-strip-fcm-col.mono:not(:has(input))), and same 0.72rem tabular
+ * figures as .alloc-strip-fcm-input so "-" lines up with digits in summary inputs and subtotal.
+ */
+.fa-alloc-strip-scroll td.alloc-strip-fcm-trade-dash,
+.fa-alloc-strip-scroll td.alloc-strip-fcm-subtotal {
+  font-size: 0.72rem !important;
+  font-variant-numeric: tabular-nums !important;
+  text-align: right !important;
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-detail-id {
+  font-size: 0.7rem;
+  color: var(--primary);
+}
+
+.fa-alloc-strip-scroll td.alloc-strip-subtotal-label {
+  font-size: 0.68rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-detail-price {
+  font-size: 0.71rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.fa-alloc-strip-scroll .alloc-strip-expected-split {
+  margin-left: 6px;
+  color: var(--muted);
+}
+
+/*
+ * Trades-style ⋮ column (tbody only below). Merged Month header uses .alloc-strip-menu-month-th and
+ * should match other label-row th backgrounds (.data-table th = gray-200), not menu gray-100.
+ */
+.fa-alloc-strip-scroll thead .alloc-strip-menu-col:not(.alloc-strip-menu-month-th),
+.fa-alloc-strip-scroll thead .alloc-strip-menu-col-band:not(.alloc-strip-menu-month-band) {
+  background: var(--color-gray-100) !important;
+}
+
+/* Thead / summary / subtotal: first cell spans menu + month cols — not 24px menu width */
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-labels > th.alloc-strip-menu-month-th,
+.fa-alloc-strip-scroll > .content-card > .card-body > table > thead > tr.alloc-strip-thead-band > th.alloc-strip-menu-month-band {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  text-align: left !important;
+  padding-left: var(--table-grid-cell-pad-x) !important;
+  padding-right: var(--table-grid-cell-pad-x) !important;
+}
+
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr > td.alloc-strip-summary-menu-month {
+  text-align: left !important;
+  vertical-align: middle !important;
+  padding-left: var(--table-grid-cell-pad-x) !important;
+  padding-right: var(--table-grid-cell-pad-x) !important;
+}
+
+.fa-alloc-strip-scroll > .content-card > .card-body > table > tbody > tr.alloc-strip-subtotal-row > td.alloc-strip-subtotal-label {
+  text-align: left !important;
+  vertical-align: middle !important;
+}
+
+/* Match components.css .trades-grid.data-table .trades-col-menu (+ tbody gray band) */
+.fa-alloc-strip-scroll .data-table .trades-col-menu {
+  width: 24px;
+  min-width: 24px;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.fa-alloc-strip-scroll .data-table tbody .trades-col-menu {
+  background: var(--color-gray-100);
+}
+
+.fa-alloc-strip-scroll tbody td.trades-col-menu.alloc-strip-trade-menu-td {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-dropdown {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: 6px;
+  transform: translateY(-50%);
+  min-width: 148px;
+  background: var(--card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: var(--alloc-strip-overlay-z);
+  display: none;
+  padding: 4px 0;
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-dropdown.open {
+  display: block;
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-item:hover {
+  background: var(--input-bg);
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--muted);
+}
+
+/* Allocation strip rows: month boundary uses shared grid border — no per-cell inline padding */
+.fa-alloc-strip-scroll .data-table tbody tr.alloc-strip-row--month-start > td {
+  border-top: 1px solid var(--color-border-medium);
+}
+
+/* SMA ratio validation warning row — horizontal padding matches grid tokens */
+.fa-mapping-book-card .data-table td.fa-mapping-ratio-warn-cell {
+  padding: 6px var(--table-grid-cell-pad-x);
+  font-size: 0.71rem;
+  color: var(--danger);
+  background: var(--color-bg-danger-subtle, #fff5f5);
+}
+
+.fa-alloc-strip-scroll .fa-strip-trade-menu-item:disabled:hover {
+  background: none;
+}
+
+/* Match components.css .trades-grid.data-table .trades-row-menu-btn (vertical ⋮) */
+.fa-alloc-strip-scroll .data-table .trades-row-menu-btn.fa-strip-trade-menu-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--color-text-tertiary, var(--muted));
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.fa-alloc-strip-scroll .data-table .trades-row-menu-btn.fa-strip-trade-menu-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-text-primary, var(--text));
+}
+
+.fa-alloc-strip-scroll .data-table .trades-row-menu-btn.fa-strip-trade-menu-btn i {
+  display: block;
+  line-height: 1;
+}
+
+/* Left pane: card fills column; body scrolls */
+.trades-list-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trades-list-card .card-header {
+  flex-shrink: 0;
+  overflow: visible;
+  position: relative;
+  z-index: 3;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.trades-list-card .card-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0;
+  overflow: visible;
+  min-width: 0;
+}
+
+/* Title + pending badge: badge sits on top-right of the label */
+.fa-trades-title-cluster {
+  position: relative;
+  display: inline-block;
+  padding-right: 16px;
+  padding-top: 1px;
+}
+
+.trades-list-card .card-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.trades-list-card .card-filters {
+  flex-shrink: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Match Market Data search control; override global search-input min-width for narrow column */
+.trades-list-card .card-filters .search-input-wrapper {
+  width: 100%;
+  min-width: 0;
+}
+
+.trades-list-card .card-filters .search-input-wrapper .search-input {
+  width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.trades-list-card .card-filters-row {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: stretch;
+}
+
+.trades-list-card .card-filters > .filter-group {
+  width: 100%;
+  min-width: 0;
+}
+
+.trades-list-card .card-filters-row .filter-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.trades-list-card .card-filters .filter-group .filter-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.trades-list-card .card-header .card-title {
+  min-width: 0;
+}
+
+/* Parent Trades: pending count as amber pill + hover tooltip */
+.fa-trades-pending-badge-anchor {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  margin: 0;
+  display: inline-flex;
+  line-height: 0;
+}
+
+.fa-trades-pending-badge-anchor[hidden] {
+  display: none !important;
+}
+
+.fa-trades-pending-count-tooltip {
+  cursor: default;
+}
+
+.fa-trades-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #fff3eb;
+  color: var(--color-orange);
+  border: 1px solid color-mix(in srgb, var(--color-orange) 35%, transparent);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.trades-list-card .card-header .card-actions {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.trades-list-card .fa-parent-trades-pane-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.85rem;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
+
+.trades-list-card .fa-parent-trades-pane-toggle .fas {
+  font-size: 0.72rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.trades-list-card .fa-trades-refine-row {
+  flex-shrink: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.trades-list-card .fa-trades-refine-row .refine-icon {
+  padding: 0 var(--spacing-md);
+}
+
+/* Parent trades: Trades-style fill-height grid + scrollable body + pagination */
+.trades-list-card .fa-trades-table-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+.trades-list-card .pagination-row {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.trades-list-card .fa-trades-table-container.table-container {
+  flex: 1;
+  min-height: 0;
+}
+
+.trades-list-card .fa-trades-table-container.fa-trades-grid-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Odd rows are transparent; without a primary table/tbody base they inherit the container's
+   tertiary fill — same as striped even rows, so striping disappears. */
+.trades-list-card .fa-trades-grid.data-table,
+.trades-list-card .fa-trades-grid.data-table tbody {
+  background: var(--color-bg-primary);
+}
+
+.trades-list-card .fa-trades-grid.data-table td.fa-trades-grid-empty {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding: 24px 12px;
+  cursor: default;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+.trades-list-card .fa-trades-grid.data-table tbody tr.fa-trades-empty-row {
+  cursor: default;
+}
+
+/* Explicit zebra: table/tbody primary alone does not always paint through <tr>; match .data-table striping. */
+.trades-list-card .fa-trades-grid.data-table tbody tr:nth-child(odd):not(.fa-trades-empty-row) {
+  background: var(--color-bg-primary);
+}
+
+.trades-list-card .fa-trades-grid.data-table tbody tr:nth-child(even):not(.fa-trades-empty-row) {
+  background: var(--color-bg-secondary);
+}
+
+.trades-list-card .fa-trades-grid.data-table tbody tr:not(.fa-trades-empty-row):hover {
+  background: var(--color-bg-hover);
+}
+
+.fa-content-bottom .panel-resize-handle {
+  border-left: none;
+  border-right: none;
+}
+
+/* Left trades grid on allocations tab (FA main) */
+.fa-trades-grid {
+  width: 100%;
+  table-layout: fixed;
+  /* Former mono columns: Roboto + tabular figures (load Roboto in main.html) */
+  --fa-trades-grid-mono-font: 'Roboto', ui-sans-serif, system-ui, sans-serif;
+}
+
+.trades-list-card .fa-trades-grid.fa-trades-grid--parent-wide {
+  width: max(100%, 1020px);
+  min-width: 1020px;
+  table-layout: fixed;
+}
+
+.fa-trades-grid col.fa-trades-col-id {
+  width: 118px;
+}
+
+.fa-trades-grid col.fa-trades-col-product {
+  /* Narrower so Qty / tenors / Book peek past Price when the left pane is expanded (horizontal scroll). */
+  width: 148px;
+}
+
+.fa-trades-grid col.fa-trades-col-price {
+  width: 76px;
+}
+
+.fa-trades-grid col.fa-trades-col-qty {
+  width: 52px;
+}
+
+.fa-trades-grid col.fa-trades-col-tenor {
+  width: 96px;
+}
+
+.fa-trades-grid col.fa-trades-col-book {
+  width: 84px;
+}
+
+.fa-trades-grid col.fa-trades-col-dir {
+  width: 56px;
+}
+
+.fa-trades-grid col.fa-trades-col-uom {
+  width: 92px;
+}
+
+/* Match global FA / Market Data valuations: tbody td & thead th use 0 9px */
+.fa-trades-grid th,
+.fa-trades-grid td {
+  padding-left: var(--table-grid-cell-pad-x) !important;
+  padding-right: var(--table-grid-cell-pad-x) !important;
+}
+
+.fa-trades-grid th {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.fa-trades-grid td.fa-trades-col-id {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.fa-trades-grid .fa-trades-id-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.fa-trades-grid .fa-trades-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fa-trades-grid .fa-trades-id-text {
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-family: var(--fa-trades-grid-mono-font);
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+}
+
+.fa-trades-grid td.fa-trades-col-product {
+  vertical-align: middle;
+  overflow: hidden;
+  max-width: 148px;
+}
+
+.fa-trades-grid .fa-trades-product-label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  min-width: 0;
+  color: inherit;
+}
+
+/* Brackets + short-name: use global .bracket / .short-name (components.css — yellow ticker) */
+.fa-trades-grid .fa-trades-product-label .short-name {
+  font-family: var(--fa-trades-grid-mono-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.fa-trades-grid td.fa-trades-col-tenor,
+.fa-trades-grid td.fa-trades-col-book,
+.fa-trades-grid td.fa-trades-col-uom {
+  vertical-align: middle;
+  font-size: 0.68rem;
+  color: var(--color-text-secondary, var(--muted));
+  white-space: nowrap;
+}
+
+.fa-trades-grid th.fa-trades-col-dir,
+.fa-trades-grid td.fa-trades-col-dir {
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.fa-trades-grid td.fa-trades-num {
+  font-family: var(--fa-trades-grid-mono-font);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.68rem;
+}
+
+.fa-trades-grid th.r,
+.fa-trades-grid td.r {
+  text-align: right;
+}
+
+/* AUM — New Ticker modal (derived book cards; New Book modal patterns) */
+.modal-card--fa-aum-new-ticker {
+  width: 560px;
+  max-width: 94vw;
+  --fa-aum-nt-line-h: 30px;
+  --fa-aum-nt-line-gap: 8px;
+}
+
+.fa-aum-nt-symbol-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 140px) 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+  align-items: end;
+}
+
+.fa-aum-nt-symbol-row .form-field {
+  margin-bottom: 0;
+  gap: 0;
+}
+
+.fa-aum-nt-symbol-row .form-label {
+  margin-bottom: 0;
+}
+
+.modal-card--fa-aum-new-ticker .fa-aum-nt-lev-card > .card-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border-light);
+  min-height: 0;
+}
+
+.modal-card--fa-aum-new-ticker .fa-aum-nt-lev-card__body {
+  padding: 10px 14px 12px;
+}
+
+.fa-aum-nt-lev-head {
+  display: grid;
+  grid-template-columns: 1fr 72px 76px;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+  font-size: 0.67rem;
+  color: var(--faint);
+  font-weight: 500;
+}
+
+.fa-aum-nt-lev-head__lvg,
+.fa-aum-nt-lev-head__wtd {
+  text-align: right;
+}
+
+.fa-aum-nt-accounts-scroll {
+  max-height: calc(5 * (var(--fa-aum-nt-line-h) + var(--fa-aum-nt-line-gap)));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.fa-aum-nt-account-line {
+  display: grid;
+  grid-template-columns: 1fr 72px 76px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: var(--fa-aum-nt-line-gap);
+  --fa-aum-nt-accent: var(--muted);
+}
+
+.fa-aum-nt-account-line:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--fa-aum-nt-line-gap);
+}
+
+.fa-aum-nt-account-line__client-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.modal-card--fa-aum-new-ticker .fa-aum-nt-account-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--fa-aum-nt-accent);
+}
+
+.fa-aum-nt-account-line__client {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-card--fa-aum-new-ticker .fa-aum-nt-lev-input {
+  height: var(--fa-aum-nt-line-h);
+  font-size: 0.74rem;
+  text-align: right;
+  padding: 2px 8px;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.modal-card--fa-aum-new-ticker .fa-aum-nt-lev-input::-webkit-outer-spin-button,
+.modal-card--fa-aum-new-ticker .fa-aum-nt-lev-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.fa-aum-nt-wtd-display {
+  display: block;
+  text-align: right;
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--fa-aum-nt-accent, var(--muted));
+  padding: 0 2px 0 0;
+  line-height: var(--fa-aum-nt-line-h);
+  box-sizing: border-box;
+}
+
+/* AUM — Add Account modal (compact; same footer pattern as mapping New Book) */
+.modal-card--fa-aum-add-account {
+  width: 400px;
+  max-width: 94vw;
+}
+.fa-aum-add-account-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.fa-aum-add-account-modal-body .form-label {
+  margin-bottom: 0;
+}
+.fa-aum-add-account-row-split {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.fa-aum-add-account-row-split .form-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* View Default Leverage modal — fixed width; table scrolls horizontally */
+.modal-card--fa-aum-view-default-leverage {
+  width: 800px;
+  max-width: calc(100vw - 32px);
+}
+.fa-aum-view-default-lev-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: min(58vh, 520px);
+  max-width: 100%;
+  border: 1px solid var(--border, var(--color-border-light));
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-bg-primary, #fff);
+}
+.fa-aum-view-default-lev-table {
+  margin: 0;
+  min-width: max-content;
+  width: 100%;
+  /* Same tokens as grid-tables .data-table (Market Data / Trades) */
+  font-size: var(--table-grid-font-size);
+}
+.fa-aum-view-default-lev-table th,
+.fa-aum-view-default-lev-table td {
+  white-space: nowrap;
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  vertical-align: middle;
+}
+.fa-aum-view-default-lev-table tbody td {
+  height: var(--table-grid-row-min-height);
+  min-height: var(--table-grid-row-min-height);
+  line-height: var(--table-grid-row-min-height);
+  box-sizing: border-box;
+}
+.fa-aum-view-default-lev-table tbody td.fa-aum-ca-cell-client {
+  font-weight: 500;
+}
+.fa-aum-view-default-lev-table tbody td.fa-aum-ca-cell-acct {
+  color: var(--muted);
+}
+.fa-aum-view-default-lev-table tbody td.fa-aum-ca-cell-aum {
+  color: var(--text);
+}
+.fa-aum-view-default-lev-table th.r,
+.fa-aum-view-default-lev-table td.r {
+  text-align: right;
+}
+.fa-aum-view-default-lev-ticker-head {
+  font-weight: 600;
+  max-width: 9rem;
+  overflow: visible;
+  text-overflow: ellipsis;
+}
+
+/* Default Leverage modal: allow body overflow for layout; ticker tooltips use fixed-position layer (JS). */
+#modal-fa-aum-view-default-leverage .fa-aum-view-default-lev-modal-body {
+  overflow: visible;
+  padding: 16px;
+}
+#modal-fa-aum-view-default-leverage .fa-tooltip-wrap--portal::before,
+#modal-fa-aum-view-default-leverage .fa-tooltip-wrap--portal::after {
+  display: none !important;
+  content: none !important;
+}
+#modal-fa-aum-view-default-leverage .fa-tooltip-wrap--portal:focus-visible {
+  outline: 2px solid var(--color-blue-500, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.fa-aum-view-default-lev-fixed-tooltip {
+  position: fixed;
+  z-index: 10050;
+  padding: 8px 12px;
+  background: var(--color-gray-800);
+  color: #fff;
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 500;
+  line-height: 1.3;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  max-width: min(320px, calc(100vw - 16px));
+  text-align: center;
+  white-space: normal;
+}
+
+/* AUM — Ticker × Book matrix (aum-ticker-book-matrix.html) */
+.fa-aum-tbm-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.fa-aum-tbm-view-toggle {
+  display: inline-flex;
+  margin-left: auto;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.fa-aum-tbm-view-btn {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.fa-aum-tbm-view-btn + .fa-aum-tbm-view-btn {
+  border-left: 1px solid var(--border);
+}
+.fa-aum-tbm-view-btn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+.fa-aum-tbm-view-btn--active {
+  background: var(--color-gray-200, #e8e8ec);
+  color: var(--text);
+}
+.fa-aum-tbm-bulk-host {
+  position: relative;
+  min-height: 160px;
+  padding-bottom: 56px;
+}
+.fa-aum-tbm-filter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.fa-aum-tbm-book-filter {
+  max-width: 280px;
+  height: 30px;
+}
+.fa-aum-tbm-table-wrapper {
+  position: relative;
+  min-height: 120px;
+}
+.fa-aum-tbm-table-scroll {
+  max-height: min(70vh, 720px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+}
+/* Selection bar (same pattern as Trades / Market Data) */
+.content-area.fa-settings-layout .fa-aum-tbm-selection-bar {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-selection-bar .selection-count {
+  color: var(--text);
+  font-size: 0.81rem;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-add-to-book-select {
+  min-width: 200px;
+  max-width: 280px;
+  height: var(--row-height, 36px);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead th {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+/* Two-row thead — align with AUM book grids + Mapping FCM band pattern */
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-band > th:not(.fa-fcm-acct-th) {
+  background: var(--color-bg-primary, #fff);
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-band > th.fa-fcm-acct-th {
+  white-space: normal;
+  height: auto;
+  min-height: var(--table-grid-header-height);
+  line-height: 1.35;
+  vertical-align: middle;
+  padding-top: 6px;
+  padding-bottom: 8px;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-band > th.fa-aum-tbm-select-band,
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-band > th.fa-aum-tbm-ticker-band,
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-band > th.fa-aum-tbm-book-band {
+  border-bottom: 1px solid var(--color-border-light);
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-sub th.fa-aum-tbm-col-select {
+  border-top: 3px solid var(--color-gray-200);
+  background: var(--color-gray-200);
+  vertical-align: middle;
+  padding: 6px 4px;
+  line-height: 1.25;
+  min-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix th.fa-aum-fcm-group-th .fa-aum-fcm-th-name {
+  font-weight: 400;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix th.fa-aum-fcm-group-th .fa-aum-fcm-th-meta {
+  font-size: 0.65rem;
+  line-height: 1.35;
+  margin-top: 3px;
+  font-weight: 500;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix th.fa-aum-fcm-group-th .fa-aum-fcm-th-aum {
+  color: var(--muted);
+  font-weight: 500;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-sub th.fa-aum-tbm-lev-subth {
+  text-align: center;
+  font-weight: 500;
+  color: var(--color-text-tertiary, var(--muted));
+  border-left: 1px solid var(--border);
+  background: var(--color-gray-100);
+  vertical-align: middle;
+  padding: 6px var(--table-grid-cell-pad-x);
+  line-height: 1.25;
+  min-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-sub th.fa-aum-tbm-ticker-label {
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-text-tertiary, var(--muted));
+  border-top: 3px solid var(--color-gray-200);
+  vertical-align: middle;
+  padding: 6px var(--table-grid-cell-pad-x);
+  line-height: 1.25;
+  min-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix thead tr.fa-aum-tbm-thead-sub th.fa-aum-tbm-col-books {
+  border-top: 3px solid var(--color-gray-200);
+  vertical-align: middle;
+  padding: 6px var(--table-grid-cell-pad-x);
+  min-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix .fa-aum-tbm-col-select {
+  width: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  text-align: center;
+  vertical-align: middle;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix .fa-aum-tbm-col-select input {
+  margin: 0;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix th.fa-aum-tbm-fcm-band {
+  min-width: 88px;
+  max-width: 140px;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix td.fa-aum-tbm-ticker-cell {
+  min-width: 200px;
+  max-width: 320px;
+  width: 260px;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix td.fa-aum-tbm-ticker-cell .product-label {
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix td.fa-aum-tbm-ticker-cell .product-label .short-name {
+  font-weight: 600;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix .fa-aum-tbm-col-books {
+  min-width: 120px;
+  max-width: 280px;
+  white-space: normal;
+  vertical-align: middle;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix td.fa-aum-tbm-books-cell {
+  vertical-align: middle;
+  font-size: 0.72rem;
+  white-space: normal;
+  line-height: 1.45;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix .fa-aum-tbm-books-names {
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+.fa-aum-tbm-book-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.68rem;
+  color: var(--primary);
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.fa-aum-tbm-book-badge-gap {
+  color: var(--faint);
+  margin: 0 3px;
+  font-weight: 400;
+}
+.content-area.fa-settings-layout .fa-aum-tbm-matrix td.fa-aum-tbm-lev-cell {
+  font-size: 0.68rem;
+  vertical-align: middle;
+  white-space: normal;
+}
+.fa-aum-tbm-lev-pill {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text);
+}
+.fa-aum-tbm-lev-sub {
+  font-size: 0.58em;
+  font-weight: 700;
+  opacity: 0.75;
+  margin-left: 1px;
+}
+.fa-aum-tbm-lev-gap {
+  color: var(--faint);
+  margin: 0 2px;
+  font-weight: 400;
+}
+.fa-aum-tbm-em {
+  color: var(--faint);
+}
+.fa-aum-tbm-empty {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  white-space: normal;
+}
+
+/* List & detail layout (non-grid cross-book view) */
+.fa-aum-tbm-list-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  max-height: min(70vh, 720px);
+  min-height: 260px;
+}
+.fa-aum-tbm-list-pane {
+  flex: 0 0 min(280px, 34%);
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  overflow: hidden;
+}
+.fa-aum-tbm-list-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--color-gray-100, #f3f4f6);
+  flex-shrink: 0;
+}
+.fa-aum-tbm-list-head-check {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+.fa-aum-tbm-list-head-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.fa-aum-tbm-list-scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 120px;
+}
+.fa-aum-tbm-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 10px;
+  padding: 10px 10px 10px 8px;
+  border-bottom: 1px solid var(--color-border-light, var(--border));
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.fa-aum-tbm-list-item:hover,
+.fa-aum-tbm-list-item:focus-within {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+.fa-aum-tbm-list-item--active {
+  background: color-mix(in srgb, var(--primary) 11%, transparent);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+.fa-aum-tbm-list-check {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  margin: 0;
+  cursor: pointer;
+}
+.fa-aum-tbm-list-item-main {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fa-aum-tbm-list-sym {
+  font-weight: 700;
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.fa-aum-tbm-list-name {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.fa-aum-tbm-list-books {
+  width: 100%;
+  flex-basis: 100%;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  padding-left: 26px;
+  color: var(--muted);
+}
+.fa-aum-tbm-list-books .fa-aum-tbm-books-names {
+  font-size: inherit;
+}
+.fa-aum-tbm-detail-pane {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  overflow: auto;
+  padding: 14px 16px 18px;
+}
+.fa-aum-tbm-detail-empty {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 24px 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+.fa-aum-tbm-detail-empty--inline {
+  padding: 8px 0;
+  text-align: left;
+}
+.fa-aum-tbm-detail-inner {
+  max-width: 520px;
+}
+.fa-aum-tbm-detail-head {
+  margin-bottom: 16px;
+}
+.fa-aum-tbm-detail-title .product-label {
+  font-size: 0.88rem;
+}
+.fa-aum-tbm-detail-hint {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.fa-aum-tbm-detail-book-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.fa-aum-tbm-detail-book {
+  margin: 0;
+}
+.fa-aum-tbm-detail-book-title {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--text);
+}
+.fa-aum-tbm-detail-book-sub {
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.fa-aum-tbm-detail-fcm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.fa-aum-tbm-detail-fcm-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  border-bottom: 1px solid var(--color-border-light, var(--border));
+}
+.fa-aum-tbm-detail-fcm-row:last-child {
+  border-bottom: none;
+}
+.fa-aum-tbm-detail-fcm-row--head {
+  background: var(--color-gray-100, #f3f4f6);
+  font-size: 0.65rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted) !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+.fa-aum-tbm-detail-fcm-row--head .fa-aum-tbm-detail-fcm-lev,
+.fa-aum-tbm-detail-fcm-row--head .fa-aum-tbm-detail-fcm-pct {
+  color: var(--muted) !important;
+  font-weight: 700;
+}
+.fa-aum-tbm-detail-fcm-meta {
+  font-weight: 500;
+  color: var(--text);
+  min-width: 0;
+}
+.fa-aum-tbm-detail-fcm-acct {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.fa-aum-tbm-detail-fcm-lev {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.fa-aum-tbm-detail-fcm-pct {
+  min-width: 3.2rem;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+}
+@media (max-width: 720px) {
+  .fa-aum-tbm-list-layout {
+    flex-direction: column;
+    max-height: none;
+  }
+  .fa-aum-tbm-list-pane {
+    flex: 0 0 auto;
+    max-height: 40vh;
+  }
+  .fa-aum-tbm-detail-pane {
+    max-height: 55vh;
+  }
+  .fa-aum-tbm-view-toggle {
+    margin-left: 0;
+    width: 100%;
+    justify-content: stretch;
+  }
+  .fa-aum-tbm-view-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* Fill trades modal (Option A — parent summary row entry) */
+.modal-card--fa-alloc-fill-trades {
+  width: min(820px, 94vw);
+  max-height: 86vh;
+}
+
+.fa-alloc-fill-trades-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.fa-alloc-fill-trades-title-light {
+  font-weight: 400;
+}
+
+.fa-alloc-fill-trades-title .short-name {
+  font-weight: 600;
+}
+
+.modal-card--fa-alloc-fill-trades .fa-alloc-fill-trades-table-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-card--fa-alloc-fill-trades .fa-alloc-fill-trades-table-scroll {
+  max-height: min(52vh, 420px);
+  flex: 1;
+  min-height: 120px;
+}
+
+.modal-card--fa-alloc-fill-trades .fa-alloc-fill-trades-grid tbody tr {
+  cursor: default;
+}
+
+.fa-alloc-fill-trades-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 20px 12px !important;
+  font-size: 0.75rem;
+}

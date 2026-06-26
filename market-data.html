@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Data - Curves</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+    <link rel="stylesheet" href="css/shared.css">
+    <link rel="stylesheet" href="css/app-sidebar.css">
+    <script defer src="js/app-path.js"></script>
+    <script defer src="js/app-header.js"></script>
+    <script defer src="js/certificate-inventory-badges.js"></script>
+    <script defer src="js/app-sidebar.js"></script>
+</head>
+<body class="app-sidebar-enabled">
+    <div class="app-header-mount"></div>
+
+    <!-- Notifications Panel -->
+    <div class="notif-panel" id="notif-panel">
+        <div class="notif-panel-header">
+            <div class="notif-panel-title-row">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                    <span class="notif-panel-title" id="notif-panel-title">Notifications</span>
+                    <span class="notif-unread-pill" id="notif-unread-pill">5</span>
+                </div>
+                <div class="notif-panel-actions">
+                    <div class="notif-drop-wrap" id="notif-filter-wrap">
+                        <button type="button" class="notif-icon-btn" onclick="toggleNotifFilter()" title="Filter & sort">
+                            <i class="fas fa-sliders"></i>
+                        </button>
+                        <div class="notif-dropdown" id="notif-filter-dropdown">
+                            <div style="padding: var(--spacing-lg); min-width: 180px;">
+                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin-bottom: 5px;">Show</div>
+                                <select class="filter-select" id="notif-show-filter" onchange="renderNotifList();" style="width: 100%; padding: 6px 8px; border: 1px solid var(--color-border-light); border-radius: var(--radius-md); font-size: 12px; background: var(--color-bg-tertiary); font-family: inherit;">
+                                    <option value="all">All</option>
+                                    <option value="unread">Unread only</option>
+                                </select>
+                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin: 10px 0 5px;">Sort</div>
+                                <select class="filter-select" id="notif-sort-by" onchange="renderNotifList();" style="width: 100%; padding: 6px 8px; border: 1px solid var(--color-border-light); border-radius: var(--radius-md); font-size: 12px; background: var(--color-bg-tertiary); font-family: inherit;">
+                                    <option value="newest">Newest</option>
+                                    <option value="oldest">Oldest</option>
+                                    <option value="unread-first">Unread first</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notif-drop-wrap" id="notif-menu-wrap">
+                        <button type="button" class="notif-icon-btn" onclick="toggleNotifMenu()" title="Actions">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="notif-dropdown" id="notif-menu-dropdown">
+                            <button type="button" class="action-btn" onclick="notifMarkAllRead(); closeNotifMenu();">
+                                <i class="fas fa-check-double"></i> Mark all as read
+                            </button>
+                            <div class="notif-menu-divider"></div>
+                            <button type="button" class="action-btn" onclick="notifDeleteRead(); closeNotifMenu();">
+                                <i class="fas fa-trash"></i> Delete read
+                            </button>
+                            <button type="button" class="action-btn danger" onclick="notifDeleteAll(); closeNotifMenu();">
+                                <i class="fas fa-trash"></i> Delete all
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="notif-tab-bar" id="notif-tab-bar">
+                <button type="button" class="notif-tab-btn active" data-tab="all" onclick="setNotifTab(this,'all')">
+                    <span style="position: relative;"><i class="fas fa-bell"></i><span class="notif-tab-count" id="ntc-all"></span></span>
+                    <span>All</span>
+                </button>
+                <button type="button" class="notif-tab-btn" data-tab="trade" onclick="setNotifTab(this,'trade')">
+                    <span style="position: relative;"><i class="fas fa-right-left"></i><span class="notif-tab-count" id="ntc-trade"></span></span>
+                    <span>Trades</span>
+                </button>
+                <button type="button" class="notif-tab-btn" data-tab="market" onclick="setNotifTab(this,'market')">
+                    <span style="position: relative;"><i class="fas fa-chart-line"></i><span class="notif-tab-count" id="ntc-market"></span></span>
+                    <span>Market</span>
+                </button>
+                <button type="button" class="notif-tab-btn" data-tab="valuation" onclick="setNotifTab(this,'valuation')">
+                    <span style="position: relative;"><i class="fas fa-chart-bar"></i><span class="notif-tab-count" id="ntc-valuation"></span></span>
+                    <span>P&L</span>
+                </button>
+                <button type="button" class="notif-tab-btn" data-tab="others" onclick="setNotifTab(this,'others')">
+                    <span style="position: relative;"><i class="fas fa-upload"></i><span class="notif-tab-count" id="ntc-others"></span></span>
+                    <span>Others</span>
+                </button>
+            </div>
+        </div>
+        <div class="notif-panel-body" id="notif-panel-body"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header__title-row">
+            <h1 class="page-title">MARKET DATA<span id="page-title-filter"></span></h1>
+            <div class="needs-attention" onclick="showNeedsAttentionModal()">
+                <i class="fas fa-circle-exclamation"></i>
+                <span>3 Needs Attention</span>
+            </div>
+            </div>
+        </div>
+
+        <!-- Curves Card Container -->
+        <div class="content-card">
+            <!-- Card Header -->
+            <div class="card-header">
+                <div class="card-title card-title--preset-toolbar">
+                    <div class="custom-select" id="saved-filters-dropdown">
+                        <button type="button" class="custom-select-trigger" onclick="toggleSavedFiltersDropdown(event)">
+                            <span id="saved-filters-value">US Power</span>
+                            <i class="fas fa-caret-down arrow" aria-hidden="true"></i>
+                        </button>
+                        <div class="custom-select-dropdown" id="saved-filters-options">
+                            <div class="custom-select-item selected" data-value="us-power">
+                                <span class="custom-select-item-label">US Power</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite active" onclick="toggleFavorite(event, this)" title="Favorite">★</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="daily-gas">
+                                <span class="custom-select-item-label">Daily Gas</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="monthly-power">
+                                <span class="custom-select-item-label">Monthly Power</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="options-snapshot">
+                                <span class="custom-select-item-label">Options Snapshot</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="quarterly-metals">
+                                <span class="custom-select-item-label">Quarterly Metals</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="weekly-natural-gas">
+                                <span class="custom-select-item-label">Weekly Natural Gas</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="options-roll-over">
+                                <span class="custom-select-item-label">Options Roll Over</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="custom-select-item" data-value="power-swaps">
+                                <span class="custom-select-item-label">Power Swaps</span>
+                                <div class="custom-select-item-actions">
+                                    <button class="custom-select-item-action favorite" onclick="toggleFavorite(event, this)" title="Favorite">☆</button>
+                                    <button class="custom-select-item-action delete" onclick="deleteFilter(event, this)" title="Delete"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions action-toolbar">
+                    <button class="action-btn action-btn-primary" onclick="showDailyCurveTrackerModal()">Track Daily Curves</button>
+                    <span class="action-separator"></span>
+                    <button class="action-btn action-btn-primary" onclick="showRevalueProductsModal()">Revalue Trades</button>
+                    <span class="action-separator"></span>
+                    <button class="action-btn">Upload File</button>
+                    <div class="action-dropdown">
+                        <button class="action-btn action-dropdown__trigger">
+                            Download
+                            <i class="fas fa-caret-down" style="margin-left: 6px; font-size: 10px;"></i>
+                        </button>
+                        <div class="action-dropdown__menu">
+                            <button type="button" class="action-btn action-dropdown__item" onclick="downloadItem('curves-settles')">Curves / Settles</button>
+                            <button type="button" class="action-btn action-dropdown__item" onclick="downloadItem('option-prices')">Option Prices</button>
+                            <button type="button" class="action-btn action-dropdown__item" onclick="downloadItem('options-vols')">Options / Vols</button>
+                            <div class="action-dropdown__divider"></div>
+                            <button type="button" class="action-btn action-dropdown__item" onclick="downloadItem('current-view')">Current View</button>
+                            <button type="button" class="action-btn action-dropdown__item" onclick="showDownloadSettingsModal()">Current View + Settings</button>
+                            <div class="action-dropdown__divider"></div>
+                            <button type="button" class="action-btn action-dropdown__item" onclick="showDownloadPresetsModal()">Presets</button>
+                        </div>
+                    </div>
+                    <div class="templates-dropdown-wrapper">
+                        <button class="action-btn templates-btn-main">
+                            Get Templates
+                            <i class="fas fa-caret-down" style="margin-left: 6px; font-size: 10px;"></i>
+                        </button>
+                        <div class="templates-dropdown">
+                            <button type="button" class="action-btn templates-dropdown-item" onclick="getTemplate('curves-settles')">Curves / Settles</button>
+                            <button type="button" class="action-btn templates-dropdown-item" onclick="getTemplate('option-prices')">Option Prices</button>
+                            <button type="button" class="action-btn templates-dropdown-item" onclick="getTemplate('options-vols')">Options / Vols</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="curves-content">
+            <!-- Filter Panel -->
+            <div class="filter-panel">
+                <div class="content-card filters-card" data-fa-book-card="market-data-filters">
+                    <div class="card-header">
+                        <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="true" aria-controls="market-data-filters-collapse" aria-label="Show or hide filters">
+                            <div class="card-title">
+                                <span class="fa-card-title-text">Filters<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i></span>
+                            </div>
+                        </button>
+                        <div class="card-actions action-toolbar">
+                            <button type="button" class="action-btn" onclick="showSaveFilterModal()">Save as a Preset</button>
+                        </div>
+                    </div>
+                    <div id="market-data-filters-collapse" class="fa-book-card-collapse-target">
+                        <div class="card-body">
+                            <div class="filter-row">
+                                <div class="filter-group">
+                                    <span class="filter-label">Product</span>
+                                    <input type="text" class="filter-input search-input" placeholder="Search ticker or product...">
+                                </div>
+
+                                <div class="filter-group">
+                                    <span class="filter-label">As Of</span>
+                                    <input type="date" class="filter-input" id="as-of-date" style="min-width: 120px;">
+                                </div>
+
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" checked> Spots/Curves
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" checked> Opt/Vol
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="filters-card-more-toggle">
+                                <button type="button" class="filters-card-more-toggle__btn" id="more-btn" onclick="toggleServerFilters()" aria-expanded="false" aria-controls="server-filters">
+                                    <span class="filters-card-more-toggle__inner">
+                                        <span class="filters-card-more-toggle__row">
+                                            <span class="filters-card-more-toggle__label">More</span>
+                                            <i class="fas fa-chevron-down filters-card-more-toggle__chevron" aria-hidden="true"></i>
+                                        </span>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <!-- Expandable Server Filters -->
+                            <div class="server-filters" id="server-filters">
+                                <div class="server-filter-row">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Commodity</span>
+                                        <select class="filter-input">
+                                            <option>All</option>
+                                            <option>Crude Oil</option>
+                                            <option>Natural Gas</option>
+                                            <option>Power</option>
+                                            <option>Refined Products</option>
+                                            <option>NGLs</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <span class="filter-label">TSO</span>
+                                        <select class="filter-input region-iso-select">
+                                            <option>All</option>
+                                            <option>ERCOT</option>
+                                            <option>PJM</option>
+                                            <option>MISO</option>
+                                            <option>CAISO</option>
+                                            <option>SPP</option>
+                                            <option>NYISO</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <span class="filter-label">Mark Level</span>
+                                        <select class="filter-input">
+                                            <option>All</option>
+                                            <option>ICE</option>
+                                            <option>CME</option>
+                                            <option>Platts</option>
+                                            <option>Argus</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <span class="filter-label">Instrument</span>
+                                        <select class="filter-input">
+                                            <option>All</option>
+                                            <option>Futures</option>
+                                            <option>Swaps</option>
+                                            <option>Options</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <span class="filter-label">Currency</span>
+                                        <select class="filter-input">
+                                            <option>All</option>
+                                            <option>USD</option>
+                                            <option>EUR</option>
+                                            <option>GBP</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <span class="filter-label">Frequency</span>
+                                        <select class="filter-input">
+                                            <option>All</option>
+                                            <option>Daily</option>
+                                            <option>Weekly</option>
+                                            <option>Monthly</option>
+                                            <option>Quarterly</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="load-data-btn-secondary" id="clear-filters-btn" onclick="clearFilters()">Clear</button>
+                            <button type="button" class="load-data-btn" onclick="loadData()">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Content: Grid and Panel -->
+            <div class="panels-container">
+                <div class="content-bottom">
+                <!-- Left Side: Refine and Table -->
+                <div class="table-wrapper">
+                    <!-- Refine Results Row -->
+                    <div class="refine-row">
+                        <div class="refine-input-group">
+                            <span class="refine-icon" id="refine-toggle-icon" onclick="toggleRefineMode()" style="cursor: pointer;"><i class="fas fa-search"></i></span>
+                            <input type="text" class="refine-input" id="refine-input" placeholder="Search current results">
+                            <button class="refine-apply-btn" id="refine-apply-btn" style="display: none;">Apply</button>
+                        </div>
+                        <div class="refine-right">
+                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            <button class="icon-btn" title="Grid View"><i class="fas fa-th"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+            <div class="table-container">
+                <table class="data-table data-table--row-select">
+                    <thead>
+                        <tr>
+                            <th style="width: 35px; text-align: center;">
+                                <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)">
+                            </th>
+                            <th>Product</th>
+                            <th>Contract</th>
+                            <th>Instrument</th>
+                            <th>Commodity</th>
+                            <th>Currency</th>
+                            <th>UoM</th>
+                            <th>Frequency</th>
+                            <th>Strike</th>
+                            <th>Volatilities</th>
+                            <th>Marking Only</th>
+                            <th>Mark Level</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="loading-overlay">Loading...</div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-row">
+                <div style="position: relative;">
+                    <button class="legend-btn" onclick="toggleLegend()">
+                        <span><i class="fas fa-info-circle"></i></span>
+                        <span>Legend</span>
+                    </button>
+                    <div class="legend-popover" id="legend-popover">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #9898a5;"></span>
+                            <span>Best Available</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #4dafd4;"></span>
+                            <span>User Provided</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #708c46;"></span>
+                            <span>Settles (Automatic)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #e46f16;"></span>
+                            <span>Prelims (Automatic)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #c30000;"></span>
+                            <span>Substituted (Automatic)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #875ca6;"></span>
+                            <span>User Provided Estimate</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #dd4d4d;"></span>
+                            <span>Copied From Prior Day</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination-info">
+                    <span id="pagination-text" class="pagination-count-text">1 to 100 of many</span>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled><i class="fas fa-angle-double-left"></i></button>
+                        <button class="page-btn" disabled><i class="fas fa-angle-left"></i></button>
+                        <span class="pagination-page-text">Page 1 of 100</span>
+                        <button class="page-btn"><i class="fas fa-angle-right"></i></button>
+                        <button class="page-btn"><i class="fas fa-angle-double-right"></i></button>
+                    </div>
+                </div>
+            </div>
+                </div>
+
+                <!-- Resize Handle -->
+                <div class="panel-resize-handle" id="panel-resize-handle" style="display: none;">
+                    <i class="fas fa-grip-lines-vertical"></i>
+                </div>
+
+                <!-- Detail Panel -->
+                <div class="detail-panel hidden" id="detail-panel">
+                    <div class="detail-panel-header">
+                        <div>
+                        <div class="detail-panel-title" id="detail-panel-title"></div>
+                            <!-- Curve Summary -->
+                            <div class="curve-summary" id="curve-summary">
+                                <div class="curve-summary-meta" id="curve-summary-meta"></div>
+                            </div>
+                        </div>
+                        <button class="detail-panel-close" onclick="closeDetailPanel()" title="Close"><i class="fas fa-angles-right"></i></button>
+                    </div>
+                
+                    <!-- Source Section -->
+                    <div class="detail-section source-collapsed">
+                        <div class="detail-section-header">
+                            <div style="display: flex; align-items: center;">
+                                <span class="detail-section-title">Source</span>
+                                <button class="detail-section-toggle" onclick="toggleSourceSection()"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                        </div>
+                        <div class="detail-section-content collapsed" id="source-content">
+                            <div class="chart-placeholder">Chart Placeholder</div>
+                        </div>
+                    </div>
+                
+                    <!-- Marks Section -->
+                    <div class="detail-section marks-expanded with-tabs">
+                        <!-- Header for non-option products -->
+                        <div class="detail-section-header" id="curves-section-header" style="display: none;">
+                            <span class="detail-section-title">Curves</span>
+                            <div class="detail-section-actions" id="curves-section-actions">
+                                <!-- For non-options -->
+                                <button class="action-btn" id="add-mark-btn">Add Mark</button>
+                                <button class="action-btn" id="upload-curve-btn">Upload Curve</button>
+                                <button class="action-btn" id="download-curve-btn">Download Curve</button>
+                                <!-- For options without tabs (red X) -->
+                                <button class="action-btn" id="add-mark-plus-btn" style="display: none;"><i class="fas fa-plus"></i></button>
+                                <button class="action-btn" id="download-prices-btn" style="display: none;">Download Prices</button>
+                                <button class="action-btn" id="download-vols-btn" style="display: none;">Download Vols</button>
+                                <button class="action-btn" id="upload-file-btn" style="display: none;">Upload File</button>
+                            </div>
+                        </div>
+                        <!-- Tabs Row for option products -->
+                        <div class="detail-tabs-row" id="detail-tabs-row">
+                            <div class="detail-tabs">
+                                <div class="curves-tab active" id="detail-curves-tab" onclick="switchCurvesTab('curves')">Curves</div>
+                                <div class="curves-tab" id="detail-options-tab" onclick="if(!this.classList.contains('disabled')) switchCurvesTab('options')">
+                                    Options
+                                    <span class="options-info-icon-wrapper" data-tooltip="Options data is used to calculate option values when direct market prices aren't available">
+                                        <i class="fas fa-info-circle options-info-icon"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="actions" id="detail-tabs-actions">
+                                <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                <button class="action-btn">Download Prices</button>
+                                <button class="action-btn">Download Vols</button>
+                                <button class="action-btn">Upload File</button>
+                            </div>
+                        </div>
+                        <div class="detail-section-content">
+                            <!-- Curves Tab Content -->
+                            <div class="curves-tab-content active" id="curves-tab-content">
+                                <div class="curves-left-column">
+                                        <div class="refine-row">
+                                            <div class="refine-input-group">
+                                                <span class="refine-icon" id="curves-refine-toggle-icon" onclick="toggleRefineMode('curves')" style="cursor: pointer;"><i class="fas fa-search"></i></span>
+                                                <input type="text" class="refine-input" id="curves-refine-input" placeholder="Search current results">
+                                                <button class="refine-apply-btn" id="curves-refine-apply-btn" style="display: none;">Apply</button>
+                                        </div>
+                                            <div class="refine-right">
+                                            <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                                            <button class="icon-btn" title="Grid View"><i class="fas fa-th"></i></button>
+                                            <button class="icon-btn" title="Settings"><i class="fas fa-cog"></i></button>
+                                        </div>
+                                    </div>
+                                        <div class="curves-table-container">
+                                            <div class="curves-table-wrapper">
+                                                <table class="curves-table">
+                                                    <thead id="curves-table-header">
+                                                        <tr>
+                                                            <th style="width: 35px; text-align: center;">
+                                                                <input type="checkbox" id="curves-select-all" title="Select all" onchange="toggleCurvesSelectAll(this.checked)">
+                                                        </th>
+                                                        <th>Contract</th>
+                                                        <th>Value</th>
+                                                            <th>Mark Level</th>
+                                                        <th>Updated</th>
+                                                    </tr>
+                                                </thead>
+                                                    <tbody id="curves-table-body">
+                                                    <!-- Populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                            <div class="curves-pagination">
+                                            <span class="pagination-count-text">1 to 100 of many</span>
+                                            <div class="pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+                                                <button class="page-btn" disabled>⟨⟨</button>
+                                                <button class="page-btn" disabled>⟨</button>
+                                                <span class="pagination-page-text">Page 1 of 100</span>
+                                                <button class="page-btn">⟩</button>
+                                                <button class="page-btn">⟩⟩</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!-- Resize Handle -->
+                                    <div class="column-resize-handle" id="column-resize-handle">
+                                        <i class="fas fa-grip-lines-vertical"></i>
+                                    </div>
+                                    <!-- Right Column: Chart Container -->
+                                    <div class="curves-right-column">
+                                        <div class="curves-chart-controls" id="curves-chart-controls" style="display: none;">
+                                            <div class="call-put-toggle">
+                                                <button class="toggle-btn active" data-value="call" onclick="toggleCurvesCallPut('call', this)">Call</button>
+                                                <button class="toggle-btn" data-value="put" onclick="toggleCurvesCallPut('put', this)">Put</button>
+                            </div>
+                        </div>
+                                        <div id="curves-options-chart" class="chart-container"></div>
+                                        <div class="chart-placeholder" id="curves-chart-placeholder" style="display: none;">Chart Placeholder</div>
+                    </div>
+                </div>
+                            <!-- Options Tab Content -->
+                            <div class="curves-tab-content" id="options-tab-content">
+                                <div class="curves-left-column">
+                                        <div class="refine-row">
+                                            <div class="refine-input-group">
+                                                <span class="refine-icon" id="volatilities-marks-refine-toggle-icon" onclick="toggleRefineMode('volatilities-marks')" style="cursor: pointer;"><i class="fas fa-search"></i></span>
+                                                <input type="text" class="refine-input" id="volatilities-marks-refine-input" placeholder="Search current results">
+                                                <button class="refine-apply-btn" id="volatilities-marks-refine-apply-btn" style="display: none;">Apply</button>
+                </div>
+                                            <div class="refine-right">
+                                                <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                                                <button class="icon-btn" title="Grid View"><i class="fas fa-th"></i></button>
+                                                <button class="icon-btn" title="Settings"><i class="fas fa-cog"></i></button>
+            </div>
+        </div>
+                                        <div class="curves-table-container">
+                                            <div class="curves-table-wrapper">
+                                                <table class="curves-table">
+                                                    <thead id="volatilities-curves-table-header">
+                                                        <tr id="volatilities-strikes-header-row">
+                                                            <th>Contract</th>
+                                                            <!-- Strikes will be populated by JavaScript -->
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="volatilities-curves-table-body">
+                                                        <!-- Populated by JavaScript -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="curves-pagination">
+                                                <span class="pagination-count-text">1 to 100 of many</span>
+                                                <div class="pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+                                                    <button class="page-btn" disabled><i class="fas fa-angle-double-left"></i></button>
+                                                    <button class="page-btn" disabled><i class="fas fa-angle-left"></i></button>
+                                                    <span class="pagination-page-text">Page 1 of 100</span>
+                                                    <button class="page-btn"><i class="fas fa-angle-right"></i></button>
+                                                    <button class="page-btn"><i class="fas fa-angle-double-right"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Resize Handle -->
+                                    <div class="column-resize-handle" id="volatilities-column-resize-handle">
+                                        <i class="fas fa-grip-lines-vertical"></i>
+                                    </div>
+                                    <!-- Right Column: Chart Container -->
+                                    <div class="volatilities-right-column">
+                                        <div id="volatilities-chart" class="chart-container"></div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Selection Bar -->
+    <div class="selection-bar" id="selection-bar">
+        <span class="selection-count"><span id="selection-count">0</span> products selected</span>
+        <div class="selection-actions">
+            <button class="selection-btn secondary" onclick="showAddToPresetModal()">Add to Preset</button>
+            <div class="action-dropdown">
+                <button class="selection-btn filled action-dropdown__trigger" onclick="downloadSelected()">
+                    Download
+                </button>
+                <button class="selection-btn filled action-dropdown__chevron">
+                    ▾
+                </button>
+                <div class="action-dropdown__menu" id="selection-action-dropdown">
+                    <div class="dropdown-menu-item" onclick="showDownloadSettingsModal()">Download + Settings</div>
+                </div>
+            </div>
+        </div>
+        <button class="close-selection" onclick="clearSelection()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Save Filter Modal -->
+    <div class="modal-overlay save-filter-modal" id="save-filter-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Save As a Preset</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="filter-name-input" placeholder="Enter preset name...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeSaveFilterModal()">Cancel</button>
+                <button class="modal-btn primary" id="save-filter-btn" onclick="saveFilter()" disabled>Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Settings Modal -->
+    <div class="modal-overlay download-settings-modal" id="download-settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Download Settings</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">As Of</label>
+                    <div class="download-date-range-input">
+                        <input type="text" class="form-input" placeholder="MM/DD/YYYY - MM/DD/YYYY" id="download-as-of-date">
+                        <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contract Date</label>
+                    <div class="download-date-range-input">
+                        <input type="text" class="form-input" placeholder="MM/DD/YYYY - MM/DD/YYYY" id="download-contract-date">
+                        <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    </div>
+                </div>
+                <div class="download-settings-info">
+                    As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeDownloadSettingsModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="downloadWithSettings()">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Preset Modal -->
+    <div class="modal-overlay add-to-preset-modal" id="add-to-preset-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Add Selected Products to a Preset</span>
+            </div>
+            <div class="modal-body">
+                <div class="add-to-preset-content">
+                    <div class="selected-products-panel">
+                        <div class="options-section-title-main">Selected Products (<span id="modal-selection-count">0</span>)</div>
+                        <div class="selected-products-list" id="selected-products-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="add-to-preset-options">
+                        <div class="options-section">
+                            <div class="options-section-title-main">Add to a Preset</div>
+                            <div class="form-group">
+                                <label class="form-label">Presets</label>
+                                <select class="filter-input" id="preset-select" required>
+                                    <option value="">Select a Preset</option>
+                                    <option value="us-power">US Power</option>
+                                    <option value="daily-gas">Daily Gas</option>
+                                    <option value="monthly-power">Monthly Power</option>
+                                    <option value="options-snapshot">Options Snapshot</option>
+                                    <option value="quarterly-metals">Quarterly Metals</option>
+                                    <option value="weekly-natural-gas">Weekly Natural Gas</option>
+                                    <option value="options-roll-over">Options Roll Over</option>
+                                    <option value="power-swaps">Power Swaps</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="options-section">
+                            <div class="options-section-title-secondary">Or Create a New Preset</div>
+                            <div class="form-group">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-input" id="preset-name-input" placeholder="Preset Name">
+                            </div>
+                        </div>
+                        <div class="options-section">
+                            <div class="options-section-title-secondary">Download Settings (Optional)</div>
+                            <div class="form-group">
+                                <label class="form-label">As Of</label>
+                                <div class="download-date-range-input">
+                                    <input type="text" class="form-input" placeholder="MM/DD/YYYY - MM/DD/YYYY" id="preset-as-of-date">
+                                    <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contract Date</label>
+                                <div class="download-date-range-input">
+                                    <input type="text" class="form-input" placeholder="MM/DD/YYYY - MM/DD/YYYY" id="preset-contract-date">
+                                    <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                </div>
+                            </div>
+                            <div class="download-settings-info">
+                                As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeAddToPresetModal()">Cancel</button>
+                <button class="modal-btn secondary" id="add-download-btn" onclick="addToPresetAndDownload()">Add + Download</button>
+                <button class="modal-btn primary" id="add-btn" onclick="addToPreset()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Presets Modal -->
+    <div class="modal-overlay download-presets-modal" id="download-presets-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Download Presets</span>
+                <div class="download-subtitle">Guaranteed-complete extracts • Verified before download</div>
+            </div>
+            <div class="modal-body">
+                <div class="download-presets-content">
+                    <div class="download-list-panel">
+                        <!-- US Power -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">US Power</div>
+                                    <div class="download-item-meta">Power • All regions • All sources • 342 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('us-power', 'US Power')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Gas -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Daily Gas</div>
+                                    <div class="download-item-meta">Gas • All regions • All sources • 156 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('daily-gas', 'Daily Gas')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Power -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Monthly Power</div>
+                                    <div class="download-item-meta">Power • All regions • All sources • 89 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('monthly-power', 'Monthly Power')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Options Snapshot -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Options Snapshot</div>
+                                    <div class="download-item-meta">Options • All regions • All sources • 234 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('options-snapshot', 'Options Snapshot')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Quarterly Metals -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Quarterly Metals</div>
+                                    <div class="download-item-meta">Metals • All regions • All sources • 67 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('quarterly-metals', 'Quarterly Metals')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Weekly Natural Gas -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Weekly Natural Gas</div>
+                                    <div class="download-item-meta">Gas • All regions • All sources • 123 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('weekly-natural-gas', 'Weekly Natural Gas')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Options Roll Over -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Options Roll Over</div>
+                                    <div class="download-item-meta">Options • All regions • All sources • 178 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('options-roll-over', 'Options Roll Over')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Power Swaps -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Power Swaps</div>
+                                    <div class="download-item-meta">Power • All regions • All sources • 145 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('power-swaps', 'Power Swaps')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- ERCOT Daily Curves -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">ERCOT Daily Curves</div>
+                                    <div class="download-item-meta">Power • ERCOT • All sources • 47 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('us-power', 'US Power')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" value="06/09/2025 - 06/09/2025">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- PJM LMP Hourly -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">PJM LMP Hourly</div>
+                                    <div class="download-item-meta">Power • PJM • DA LMP • 234 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="editFromDownloadPresets('us-power', 'US Power')">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" value="06/09/2025 - 06/09/2025">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+
+                        <!-- Assorted Watchlist -->
+                        <div class="download-item">
+                            <div class="download-item-header">
+                                <div>
+                                    <div class="download-item-title">Assorted Watchlist</div>
+                                    <div class="download-item-meta">Manual selection • 101 products</div>
+                                </div>
+                                <div class="download-item-actions">
+                                    <button class="download-item-btn outline" style="padding: 6px 8px;">🗑</button>
+                                    <button class="download-item-btn outline" onclick="showEditWatchlistModal(event)">Edit</button>
+                                    <button class="download-item-btn outline" onclick="toggleDownloadDates(this)">Settings <i class="fas fa-chevron-down"></i></button>
+                                    <button class="download-item-btn filled" onclick="closeDownloadPresetsModal()">Download</button>
+                                </div>
+                            </div>
+                            <div class="download-settings-section" style="display: none;">
+                                <div class="download-settings-row">
+                                    <div class="form-group">
+                                        <label class="form-label">As Of</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" value="06/09/2025 - 06/09/2025">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Contract Date</label>
+                                        <div class="download-date-range-input">
+                                            <input type="text" class="filter-input" placeholder="MM/DD/YYYY - MM/DD/YYYY">
+                                            <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #666; margin-top: 2em;">*As Of and Contract Dates apply when downloading this item. If not set, the current view's dates will be used.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Watchlist Panel -->
+                    <div class="watchlist-panel" id="watchlist-panel">
+                        <div class="watchlist-title">Assorted Watchlist</div>
+                        <div class="watchlist-subtitle">Manual selection • 101 products</div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" value="Assorted Watchlist">
+                        </div>
+
+                        <div class="selected-products-header">Products (101)</div>
+                        <div class="watchlist-search">
+                            <input type="text" placeholder="Search">
+                            <button>Add</button>
+                        </div>
+                        <div class="watchlist-items">
+                            <div class="watchlist-item">
+                                <span>[WTI] WTI Crude Oil Front Month</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="watchlist-item">
+                                <span>[HH] Henry Hub Natural Gas</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="watchlist-item">
+                                <span>[BRT] Brent Crude Oil</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="watchlist-item">
+                                <span>[RBOB] RBOB Gasoline</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="watchlist-item">
+                                <span>[HO] Heating Oil #2</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="watchlist-item">
+                                <span>[NG] Natural Gas Basis</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="watchlist-item">
+                                <span>[ERCOT-N] ERCOT North Hub</span>
+                                <button class="remove-product"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="watchlist-footer">
+                            <button class="modal-btn cancel" onclick="hideWatchlistPanel()">Cancel</button>
+                            <button class="modal-btn secondary">Save</button>
+                            <button class="modal-btn primary" onclick="closeDownloadPresetsModal()">Save + Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeDownloadPresetsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Watchlist Modal -->
+    <div class="modal-overlay edit-watchlist-modal" id="edit-watchlist-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Assorted Watchlist</span>
+            </div>
+            <div class="modal-body" style="padding-bottom: 0;">
+                <div class="edit-watchlist-subtitle">Manual selection • 101 products</div>
+                
+                <div class="edit-watchlist-form">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label" style="display: block; margin-bottom: 6px; font-weight: 500;">Name</label>
+                        <div class="edit-watchlist-name-input">
+                            <div class="name-indicator"></div>
+                            <input type="text" class="form-input edit-watchlist-name-field" id="edit-watchlist-name" value="Assorted Watchlist">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" style="display: block; margin-bottom: 6px; font-weight: 500;">Products (101)</label>
+                        <div class="edit-watchlist-search">
+                            <input type="text" placeholder="Search" class="form-input" style="flex: 1; border-radius: 4px 0 0 4px; border-right: none;">
+                            <button class="add-product-btn">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="edit-watchlist-products">
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">WTI-CL</span>] WTI Crude Oil Front Month</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">HH-NG</span>] Henry Hub Natural Gas</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">BRT</span>] Brent Crude Oil ICE</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">RBOB</span>] RBOB Gasoline NYMEX</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">HO</span>] Heating Oil #2 NYMEX</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">ERCOT-N</span>] ERCOT North Hub DA</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">PJM-W</span>] PJM Western Hub DA</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">MISO-IN</span>] MISO Indiana Hub</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">AECO</span>] AECO Natural Gas Basis</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">TTF</span>] TTF Natural Gas ICE</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">JKM</span>] Japan Korea Marker LNG</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="edit-watchlist-item">
+                            <span>[<span class="short-name">ULSD</span>] Ultra Low Sulfur Diesel</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeEditWatchlistModal()">Cancel</button>
+                <button class="modal-btn save" onclick="saveWatchlist()">Save</button>
+                <button class="modal-btn primary" onclick="saveAndDownloadWatchlist()">Save + Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revalue Products Modal -->
+    <div class="modal-overlay revalue-products-modal" id="revalue-products-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Revalue Trades</span>
+            </div>
+            <div class="modal-body">
+                <!-- Warning/Info Section -->
+                <div class="revalue-warning">
+                    <div style="flex: 1;">
+                        This will update valuations for all trades using the given product within the selected date range, recalculating prices, profit/loss, cash flows, exposures, and any related inventory or curve values. Use this after uploading new market data or making corrections to ensure all trades using this product are revalued with the latest market data.
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="form-group">
+                    <label class="form-label">Products (<span id="revalue-products-count">11</span>)</label>
+                    <div class="revalue-products-controls">
+                        <div class="revalue-search-input">
+                            <i class="fas fa-search" style="color: #9898a5; margin-left: 12px; position: absolute; pointer-events: none;"></i>
+                            <input type="text" class="form-input" placeholder="Search" id="revalue-products-search" style="padding-left: 36px;">
+                        </div>
+                        <button class="revalue-add-btn" onclick="addProductToRevalue()">Add</button>
+                    </div>
+                    <div class="revalue-products-list" id="revalue-products-list">
+                        <!-- Products will be populated here -->
+                    </div>
+                </div>
+
+                <!-- As Of Section -->
+                <div class="form-group">
+                    <label class="form-label">As Of</label>
+                    <div class="revalue-date-range-input">
+                        <input type="text" class="form-input" placeholder="MM/DD/YYYY" id="revalue-date-range">
+                        <i class="fas fa-calendar-alt" style="color: #9898a5; position: absolute; right: 12px; pointer-events: none;"></i>
+                    </div>
+                    <div style="font-size: 11px; color: #666; margin-top: 1rem;">*Message about day after. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeRevalueProductsModal()">Close</button>
+                <button class="modal-btn primary" onclick="revalueProducts()">Revalue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track Daily Curves Modal -->
+    <div class="modal-overlay daily-curve-tracker-modal" id="daily-curve-tracker-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Daily Curve Tracker</span>
+            </div>
+            <div class="modal-body">
+                <div class="curve-tracker-container">
+                    <div class="curve-tracker-selects" id="curve-tracker-selects">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="curve-tracker-chart">
+                        <div class="curve-tracker-chart-header">
+                            <span>T-9</span>
+                            <span>Last 10 Days</span>
+                            <span>Today</span>
+                        </div>
+                        <div class="curve-tracker-heatmap" id="curve-tracker-heatmap">
+                            <!-- SVG populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="curve-tracker-legend">
+                    <div class="curve-tracker-legend-item">
+                        <div class="curve-tracker-legend-color" style="background: #708c46;"></div>
+                        <span>Received</span>
+                    </div>
+                    <div class="curve-tracker-legend-item">
+                        <div class="curve-tracker-legend-color" style="background: #e46f16;"></div>
+                        <span>Copied from Prior Day</span>
+                    </div>
+                    <div class="curve-tracker-legend-item">
+                        <div class="curve-tracker-legend-color" style="background: #c30000;"></div>
+                        <span>Not Received</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeDailyCurveTrackerModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Needs Attention Modal -->
+    <div class="modal-overlay needs-attention-modal" id="needs-attention-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <i class="fas fa-exclamation-circle" style="color: #c30000; font-size: 20px; margin-right: 4px;"></i>
+                <span class="modal-title">Curves Needing Attention</span>
+            </div>
+            <div class="modal-body">
+                <div class="attention-warning">
+                    These curves are on Copy or Substituted Prelim - may be stale data.
+                </div>
+                <div class="refine-row">
+                    <div class="refine-input-group">
+                        <span class="refine-icon" id="attention-refine-toggle-icon" onclick="toggleRefineMode('attention')" style="cursor: pointer;"><i class="fas fa-search"></i></span>
+                        <input type="text" class="refine-input" id="attention-refine-input" placeholder="Search current results">
+                        <button class="refine-apply-btn" id="attention-refine-apply-btn" style="display: none;">Apply</button>
+                </div>
+                    <div class="refine-right">
+                        <button class="icon-btn" title="Undo"><i class="fas fa-undo"></i></button>
+                        <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                        <button class="icon-btn" title="Grid View"><i class="fas fa-th"></i></button>
+                    </div>
+                </div>
+                <div class="table-container">
+                <table class="attention-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Source</th>
+                            <th>Settles</th>
+                            <th>Now</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="warning">
+                                <td>[<span class="short-name">WTI</span>] WTI Crude Oil Front Month</td>
+                            <td>Copy</td>
+                            <td>17:00 EST</td>
+                            <td class="attention-time-diff">16:45:00</td>
+                                <td><a href="#" class="view-link" onclick="showAttentionProductDetail('[WTI] WTI Crude Oil Front Month'); return false;">View</a></td>
+                        </tr>
+                        <tr class="warning">
+                                <td>[<span class="short-name">HH</span>] Henry Hub Natural Gas Prompt</td>
+                            <td>Copy</td>
+                            <td>17:00 EST</td>
+                            <td class="attention-time-diff">16:45:00</td>
+                                <td><a href="#" class="view-link" onclick="showAttentionProductDetail('[HH] Henry Hub Natural Gas Prompt'); return false;">View</a></td>
+                        </tr>
+                        <tr class="warning">
+                                <td>[<span class="short-name">ERCOT-N</span>] ERCOT North Hub DA</td>
+                            <td>Substituted</td>
+                            <td>17:00 EST</td>
+                            <td class="attention-time-diff">16:45:00</td>
+                                <td><a href="#" class="view-link" onclick="showAttentionProductDetail('[ERCOT-N] ERCOT North Hub DA'); return false;">View</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                <div class="pagination-row">
+                    <div style="position: relative;"></div>
+                    <div class="pagination-info">
+                    <span class="pagination-count-text">1 to 100 of many</span>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled><i class="fas fa-angle-double-left"></i></button>
+                        <button class="page-btn" disabled><i class="fas fa-angle-left"></i></button>
+                        <span class="pagination-page-text">Page 1 of 100</span>
+                        <button class="page-btn"><i class="fas fa-angle-right"></i></button>
+                        <button class="page-btn"><i class="fas fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeNeedsAttentionModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/shared.js"></script>
+    <script src="fund-allocations/book-card-collapse.js"></script>
+    <script src="js/filters-card.js"></script>
+    <script src="js/alerts.js"></script>
+</body>
+</html>

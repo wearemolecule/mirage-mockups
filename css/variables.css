@@ -1,0 +1,131 @@
+/* ============================================
+   CSS VARIABLES - Colors & Common Values
+   ============================================ */
+:root {
+    /* Accent Colors */
+    --color-red: #c30000;
+    --color-rose: #dd4d4d;
+    --color-yellow: #dba43a;
+    --color-blue: #4dafd4;
+    --color-green: #708c46;
+    --color-purple: #875ca6;
+    --color-orange: #e46f16;
+    --color-teal: #427676;
+    
+    /* Card-header / toolbar action buttons — default .action-btn chrome; use .action-toolbar on containers for flat text style */
+    --action-btn-border: var(--color-border-medium);
+    --action-btn-bg: var(--color-bg-primary);
+    --action-btn-bg-hover: var(--color-gray-50);
+    /* Default (non-primary) button label — darker than body secondary text */
+    --action-btn-text: var(--color-gray-800);
+    /* Primary CTA — light grey fill, dark text (same weight as default buttons) */
+    --action-primary-bg: var(--color-gray-100);
+    --action-primary-bg-hover: var(--color-gray-200);
+    --action-primary-border: var(--color-border-medium);
+    --action-primary-border-hover: var(--color-border-dark);
+    --action-primary-text: var(--color-text-primary);
+    /* Tab row uses --color-bg-tertiary (~gray-50); default primary fill (gray-100) blends in — use white + border */
+    --action-primary-on-chrome-bg: var(--color-bg-primary);
+    --action-primary-on-chrome-bg-hover: var(--color-gray-100);
+    --action-primary-on-chrome-border: var(--color-border-medium);
+    --action-primary-on-chrome-border-hover: var(--color-border-dark);
+    --action-primary-on-chrome-text: var(--color-text-primary);
+
+    /* Shared button metrics: .action-btn (components) + .btn (fund-allocations) */
+    --action-btn-height: 29px;
+    --action-btn-padding-x: 11px;
+    --action-btn-font-size: 12px;
+    --action-btn-font-weight: 400; /* normal — avoids bold primary / default buttons */
+    --action-btn-height-sm: 25px;
+    --action-btn-padding-x-sm: 9px;
+    --action-btn-font-size-sm: 11px;
+    --action-btn-height-xs: 21px;
+    --action-btn-padding-x-xs: 7px;
+    --action-btn-font-size-xs: 10px;
+    
+    /* Grays */
+    --color-gray-50: #f7f7f8;
+    --color-gray-100: #f2f2f3;
+    --color-gray-200: #e5e5e8;
+    --color-gray-300: #e0e0e4;
+    --color-gray-400: #9898a5;
+    --color-gray-500: #676776;
+    --color-gray-600: #51515c;
+    --color-gray-700: #333;
+    --color-gray-800: #1a1a1a;
+    
+    /* Borders */
+    --color-border-light: #e5e5e8;
+    --color-border-medium: #cbcbd2;
+    --color-border-dark: #b2b2bb;
+    
+    /* Backgrounds */
+    --color-bg-primary: #fff;
+    --color-bg-secondary: #f2f2f3;
+    --color-bg-tertiary: #f7f7f8;
+    --color-bg-hover: #e0f4ff;
+    --color-bg-selected: #c5e3f5;
+    --color-bg-yellow-tint: #fffef5;
+    
+    /* Text */
+    --color-text-primary: #333;
+    --color-text-secondary: #676776;
+    --color-text-tertiary: #51515c;
+    --color-text-muted: #9898a5;
+    
+    /* Status Colors */
+    --color-status-best: #9898a5;
+    --color-status-user: #4dafd4;
+    --color-status-settles: #708c46;
+    --color-status-prelims: #e46f16;
+    --color-status-substituted: #c30000;
+    --color-status-estimate: #875ca6;
+    --color-status-copied: #dd4d4d;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 6px;
+    --spacing-md: 8px;
+    --spacing-lg: 12px;
+    --spacing-xl: 16px;
+    --spacing-2xl: 20px;
+    --spacing-3xl: 24px;
+
+    /* Page header — stable height with/without as-of picker, date strip, or title filter */
+    --page-header-margin-bottom: var(--spacing-lg);
+    --page-header-title-row-min-height: 32px;
+
+    /* Filters card — shared component (Trades, Market Data, Certificate Inventory) */
+    --filters-card-control-height: 28px;
+    --filters-card-header-padding-y: 4px;
+    --filters-card-header-padding-x: var(--spacing-lg);
+    --filters-card-body-padding: 0 var(--spacing-lg) 10px;
+    --filters-card-footer-padding: 10px var(--spacing-lg);
+    
+    /* Border Radius */
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s;
+    --transition-base: 0.2s;
+    --transition-slow: 0.3s;
+    
+    /* Row Height */
+    --row-height: 30px;
+
+    /* Standard data grids — see grid-tables.css (.data-table, .table-container) */
+    --table-grid-font-size: 12px;
+    --table-grid-cell-pad-x: 9px;
+    --table-grid-cell-pad-y: 0;
+    --table-grid-header-height: 28px;
+    --table-grid-row-min-height: 30px;
+
+    /* Mol validation — wide left edge (optional / required empty / valid) */
+    --mol-validation-w: 4px;
+    --mol-validation-optional: #94a3b8;
+    --mol-validation-required: #dc2626;
+    --mol-validation-valid: var(--color-green);
+}
+

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Actualization — Nominations (Detail Panel)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/actualization.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+<script defer src="../js/tabs-stack.js"></script>
+<script defer src="nominations-app.js"></script>
+<script defer src="nominations-detail-app.js"></script>
+</head>
+<body class="act-standalone-shell app-sidebar-enabled act-nominations-page act-nominations-detail-page" data-app-header-account="Buffalo">
+<div class="app-header-mount"></div>
+<div class="main main-content act-main-shell">
+  <div class="page-header act-page-header-row">
+    <div class="act-title-line act-nom-page-header-line page-header__title-row">
+      <h1 class="page-title act-page-title act-nom-page-title">
+        <span class="act-nom-title-main">Nominations</span><span class="act-nom-title-for">for</span><select class="act-nom-pipeline-select" id="act-nom-pipeline-select" aria-label="Pipeline"><option selected>NGPL</option><option>GTS</option><option>MWP</option><option>SGP</option></select>
+      </h1>
+      <div class="act-nom-date-strip" role="group" aria-label="Gas day">
+        <button type="button" class="act-nom-date-chev" id="act-nom-date-prev" aria-label="Previous gas day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <label class="act-nom-date-trigger">
+          <span class="act-nom-date-trigger-main" id="act-nom-date-display">MAR 13, 2026</span>
+          <input type="date" class="act-nom-date-input" id="act-nom-gas-day" value="2026-03-13" aria-label="Gas day">
+        </label>
+        <button type="button" class="act-nom-date-chev" id="act-nom-date-next" aria-label="Next gas day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="content-area act-content-area act-nominations-content">
+    <div class="tabs-stack act-nominations-tabs" data-tabs-stack>
+      <div class="tabs-stack__bar">
+        <div class="tabs-stack__tabs" role="tablist" aria-label="Nomination cycle">
+          <button type="button" class="tabs-stack__tab active" role="tab" aria-selected="true" data-tab-panel="timely">Timely</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="evening">Evening</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="id1">ID1</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="id2">ID2</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="id3">ID3</button>
+        </div>
+        <div class="tabs-stack__actions actions action-toolbar">
+          <button type="button" class="action-btn">Refresh</button>
+          <button type="button" class="action-btn">Export</button>
+        </div>
+      </div>
+      <div class="tabs-stack__panels">
+        <div class="tabs-stack__panel active act-nominations-tab-panel" role="tabpanel" data-tab-panel="timely">
+
+      <!-- ── Totals strip ── -->
+      <div class="act-stats-strip">
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Tot. Nominated</div>
+          <div class="act-stat-value">721,125</div>
+          <div class="act-stat-sub" id="act-nom-stat-cycle-sub">MMBtu · Timely</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Tot. Scheduled</div>
+          <div class="act-stat-value act-stat-value--green">661,515</div>
+          <div class="act-stat-sub">91.7% of nominated</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Tot. Cut</div>
+          <div class="act-stat-value act-stat-value--red">–59,610</div>
+          <div class="act-stat-sub">8.3% cut by pipeline</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Fuel / Shrink</div>
+          <div class="act-stat-value act-stat-value--amber">–5,177</div>
+          <div class="act-stat-sub">0.78% fuel rate</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Net Deliverable</div>
+          <div class="act-stat-value">656,338</div>
+          <div class="act-stat-sub">After fuel</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Locations</div>
+          <div class="act-stat-value">8</div>
+          <div class="act-stat-sub">3 with cuts</div>
+        </div>
+      </div>
+
+        <div class="filter-panel act-nom-detail-filters">
+          <div class="filter-row act-nom-grid-filters">
+            <div class="filter-group">
+              <span class="filter-label">Direction</span>
+              <select class="filter-input">
+                <option>All Directions</option>
+                <option>Receipt</option>
+                <option>Delivery</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Location</span>
+              <input type="text" class="filter-input act-nom-filter-location" placeholder="Filter location…">
+            </div>
+          </div>
+        </div>
+
+      <div class="act-nom-panels-container panels-container">
+        <div class="content-bottom act-nom-detail-layout">
+          <div class="table-wrapper act-nom-grid-wrap">
+            <div class="refine-row act-nom-main-refine-row">
+              <div class="refine-input-group">
+                <span class="refine-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                <input type="text" class="refine-input" id="act-nom-main-refine-input" placeholder="Search current results" aria-label="Search location results">
+              </div>
+              <div class="refine-right">
+                <button type="button" class="icon-btn" id="act-nom-main-refresh" title="Refresh" aria-label="Refresh"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div class="table-container">
+            <table class="data-table act-nom-table" id="act-nom-loc-table">
+              <colgroup>
+                <col class="act-nom-col-loc">
+                <col class="act-nom-col-name">
+                <col class="act-nom-col-qty">
+                <col class="act-nom-col-qty">
+                <col class="act-nom-col-qty">
+                <col class="act-nom-col-qty">
+                <col class="act-nom-col-qty">
+                <col class="act-nom-col-qty">
+                <col class="act-nom-col-paths">
+                <col class="act-nom-col-status">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Loc</th>
+                  <th>Loc Name</th>
+                  <th class="num act-path-qty-col act-path-qty-col--receipt act-path-qty-col--dir-header" title="Receipt">Dir</th>
+                  <th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th>
+                  <th class="num act-path-qty-col act-path-qty-col--delivery act-path-qty-col--dir-header" title="Delivery">Dir</th>
+                  <th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th>
+                  <th class="num">Cut Qty</th>
+                  <th class="num">Fuel</th>
+                  <th class="num"># Paths</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="act-nom-loc-table-body">
+                <!-- ── LOC 1 ── -->
+                <tr class="loc-row" data-nom-loc="loc1" data-nom-loc-name="Gathering Hub Alpha">
+                  <td class="act-loc-code">640911</td>
+                  <td class="act-nom-loc-name">Gathering Hub Alpha</td>
+                  <td class="num">125,000</td>
+                  <td class="num">125,000</td>
+                  <td class="num">125,000</td>
+                  <td class="num">124,025</td>
+                  <td class="num" style="color:var(--gray-400)">0</td>
+                  <td class="num">–975</td>
+                  <td class="num">3</td>
+                  <td><span class="badge badge-success">AOK</span></td>
+                </tr>
+                <!-- ── LOC 2 ── -->
+                <tr class="loc-row" data-nom-loc="loc2" data-nom-loc-name="Compression Pool East">
+                  <td class="act-loc-code">44120</td>
+                  <td class="act-nom-loc-name">Compression Pool East</td>
+                  <td class="num">68,639</td>
+                  <td class="num">68,639</td>
+                  <td class="num">50,000</td>
+                  <td class="num">43,739</td>
+                  <td class="num" style="color:var(--color-red)">–6,261</td>
+                  <td class="num">–341</td>
+                  <td class="num">4</td>
+                  <td><span class="badge badge-warning">PBL</span></td>
+                </tr>
+                <!-- ── LOC 3 ── -->
+                <tr class="loc-row" data-nom-loc="loc3" data-nom-loc-name="Interconnect Pool Central">
+                  <td class="act-loc-code">51200</td>
+                  <td class="act-nom-loc-name">Interconnect Pool Central</td>
+                  <td class="num">147,500</td>
+                  <td class="num">147,500</td>
+                  <td class="num">147,500</td>
+                  <td class="num">146,349</td>
+                  <td class="num" style="color:var(--gray-400)">0</td>
+                  <td class="num">–1,151</td>
+                  <td class="num">2</td>
+                  <td><span class="badge badge-success">AOK</span></td>
+                </tr>
+                <!-- ── LOC 4 ── -->
+                <tr class="loc-row" data-nom-loc="loc4" data-nom-loc-name="Receipt Basin West">
+                  <td class="act-loc-code">32100</td>
+                  <td class="act-nom-loc-name">Receipt Basin West</td>
+                  <td class="num">95,000</td>
+                  <td class="num">85,000</td>
+                  <td class="num">95,000</td>
+                  <td class="num">84,337</td>
+                  <td class="num" style="color:var(--color-red)">–10,000</td>
+                  <td class="num">–663</td>
+                  <td class="num">2</td>
+                  <td><span class="badge badge-warning">PBA</span></td>
+                </tr>
+                <!-- ── LOC 5 ── -->
+                <tr class="loc-row" data-nom-loc="loc5" data-nom-loc-name="Zone Transfer Point South">
+                  <td class="act-loc-code">44413</td>
+                  <td class="act-nom-loc-name">Zone Transfer Point South</td>
+                  <td class="num" style="color:var(--gray-400)">—</td>
+                  <td class="num" style="color:var(--gray-400)">—</td>
+                  <td class="num">80,000</td>
+                  <td class="num">79,376</td>
+                  <td class="num" style="color:var(--gray-400)">0</td>
+                  <td class="num">–624</td>
+                  <td class="num">1</td>
+                  <td><span class="badge badge-success">AOK</span></td>
+                </tr>
+                <!-- ── LOC 6 ── -->
+                <tr class="loc-row" data-nom-loc="loc6" data-nom-loc-name="Mountain Pool West">
+                  <td class="act-loc-code">29850</td>
+                  <td class="act-nom-loc-name">Mountain Pool West</td>
+                  <td class="num">77,625</td>
+                  <td class="num">35,000</td>
+                  <td class="num">77,625</td>
+                  <td class="num">35,000</td>
+                  <td class="num" style="color:var(--color-red)">–42,625</td>
+                  <td class="num">–273</td>
+                  <td class="num">5</td>
+                  <td><span class="badge badge-danger">PBL</span></td>
+                </tr>
+
+              </tbody>
+            </table>
+            </div>
+            <div class="pagination-row act-nom-main-pagination">
+              <div style="position: relative;"></div>
+              <div class="pagination-info">
+                <span id="act-nom-main-pagination-text" class="pagination-count-text">1 to 6 of 6</span>
+                <div class="pagination-controls">
+                  <button type="button" class="page-btn" id="act-nom-main-page-first" disabled title="First page" aria-label="First page"><i class="fas fa-angle-double-left"></i></button>
+                  <button type="button" class="page-btn" id="act-nom-main-page-prev" disabled title="Previous page" aria-label="Previous page"><i class="fas fa-angle-left"></i></button>
+                  <span class="pagination-page-text" id="act-nom-main-pagination-page">Page 1 of 1</span>
+                  <button type="button" class="page-btn" id="act-nom-main-page-next" disabled title="Next page" aria-label="Next page"><i class="fas fa-angle-right"></i></button>
+                  <button type="button" class="page-btn" id="act-nom-main-page-last" disabled title="Last page" aria-label="Last page"><i class="fas fa-angle-double-right"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-resize-handle" id="act-nom-panel-resize-handle" aria-hidden="true">
+            <i class="fas fa-grip-lines-vertical" aria-hidden="true"></i>
+          </div>
+
+          <div class="detail-panel hidden act-nom-detail-panel" id="act-nom-detail-panel" aria-hidden="true">
+            <div class="detail-panel-header">
+              <div>
+                <div class="detail-panel-title" id="act-nom-detail-title"></div>
+                <div class="curve-summary">
+                  <div class="curve-summary-meta" id="act-nom-detail-summary"></div>
+                </div>
+              </div>
+              <button type="button" class="detail-panel-close" id="act-nom-detail-close" title="Close" aria-label="Close detail panel"><i class="fas fa-angles-right" aria-hidden="true"></i></button>
+            </div>
+            <div class="act-nom-detail-body">
+              <div class="refine-row act-nom-detail-refine-row">
+                <div class="refine-input-group">
+                  <span class="refine-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                  <input type="text" class="refine-input" id="act-nom-detail-refine-input" placeholder="Search current results" aria-label="Search path results">
+                </div>
+                <div class="refine-right">
+                  <button type="button" class="icon-btn" id="act-nom-detail-refresh" title="Refresh" aria-label="Refresh"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+                </div>
+              </div>
+              <div class="table-container act-nom-detail-path-host" id="act-nom-detail-path-host"></div>
+              <div class="pagination-row act-nom-detail-pagination">
+                <div style="position: relative;"></div>
+                <div class="pagination-info">
+                  <span id="act-nom-detail-pagination-text" class="pagination-count-text">0 to 0 of 0</span>
+                  <div class="pagination-controls">
+                    <button type="button" class="page-btn" id="act-nom-detail-page-first" disabled title="First page" aria-label="First page"><i class="fas fa-angle-double-left"></i></button>
+                    <button type="button" class="page-btn" id="act-nom-detail-page-prev" disabled title="Previous page" aria-label="Previous page"><i class="fas fa-angle-left"></i></button>
+                    <span class="pagination-page-text" id="act-nom-detail-pagination-page">Page 1 of 1</span>
+                    <button type="button" class="page-btn" id="act-nom-detail-page-next" disabled title="Next page" aria-label="Next page"><i class="fas fa-angle-right"></i></button>
+                    <button type="button" class="page-btn" id="act-nom-detail-page-last" disabled title="Last page" aria-label="Last page"><i class="fas fa-angle-double-right"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="act-nom-path-templates" hidden aria-hidden="true">
+  <div id="nom-path-loc1" data-nom-path-template="loc1">
+<table class="path-table act-path-table data-table">
+                      <colgroup>
+                        <col class="act-path-col-dir">
+                        <col class="act-nom-col-loc">
+                        <col class="act-path-col-svc">
+                        <col class="act-nom-col-name">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-paths">
+                        <col class="act-nom-col-status">
+                      </colgroup>
+                      <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Svc Req Name</th><th>Loc Name</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-42234</td><td>Trading Co Alpha</td><td class="muted act-nom-loc-name">Field A / NGPL Zone 1</td><td class="num">75,000</td><td class="num">75,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–585</td><td>1</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-42235</td><td>Trading Co Beta</td><td class="muted act-nom-loc-name">Basin A / NGPL Zone 2</td><td class="num">30,000</td><td class="num">30,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–234</td><td>2</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-42240</td><td>Trading Co Gamma</td><td class="muted act-nom-loc-name">Field B / NGPL Zone 3</td><td class="num">20,000</td><td class="num">20,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–156</td><td>3</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-42234</td><td>Utility Co East</td><td class="muted act-nom-loc-name">NGPL / Interconnect Point 1</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">75,000</td><td class="num">74,025</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–585</td><td>1</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-42235</td><td>Utility Co East</td><td class="muted act-nom-loc-name">NGPL / Interconnect Point 1</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">30,000</td><td class="num">29,766</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–234</td><td>2</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-42240</td><td>Utility Co East</td><td class="muted act-nom-loc-name">NGPL / Interconnect Point 1</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">20,000</td><td class="num">19,844</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–156</td><td>3</td><td><span class="badge badge-success">AOK</span></td></tr>
+                      </tbody>
+                    </table>
+  </div>
+  <div id="nom-path-loc2" data-nom-path-template="loc2">
+<table class="path-table act-path-table data-table">
+                      <colgroup>
+                        <col class="act-path-col-dir">
+                        <col class="act-nom-col-loc">
+                        <col class="act-path-col-svc">
+                        <col class="act-nom-col-name">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-paths">
+                        <col class="act-nom-col-status">
+                      </colgroup>
+                      <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Svc Req Name</th><th>Loc Name</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-88422</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Field C / NGPL Zone 4</td><td class="num">20,000</td><td class="num">20,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–150</td><td>1</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-88423</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Field C / NGPL Zone 4</td><td class="num">5,000</td><td class="num">5,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–35</td><td>2</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-88430</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Field C / NGPL Zone 4</td><td class="num">10,000</td><td class="num">10,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–78</td><td>3</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-88431</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Field C / NGPL Zone 4</td><td class="num">33,639</td><td class="num">33,639</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–78</td><td>4</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-88422</td><td>Trading Co Alpha</td><td class="muted act-nom-loc-name">Compression Pool / Interconnect A</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">20,000</td><td class="num">19,206</td><td class="num" style="color:var(--color-red)">–794</td><td class="num">–150</td><td>1</td><td><span class="badge badge-warning">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-88423</td><td>Trading Co Zeta</td><td class="muted act-nom-loc-name">Compression Pool / Interconnect B</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">5,000</td><td class="num">4,533</td><td class="num" style="color:var(--color-red)">–467</td><td class="num">–35</td><td>2</td><td><span class="badge badge-warning">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-88430</td><td>Trading Co Epsilon</td><td class="muted act-nom-loc-name">Compression Pool / Lateral C</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">10,000</td><td class="num">10,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–78</td><td>3</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-88431</td><td>Trading Co Delta</td><td class="muted act-nom-loc-name">Compression Pool / Interconnect D</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">15,000</td><td class="num">10,000</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="num">–78</td><td>4</td><td><span class="badge badge-danger">Cut</span></td></tr>
+                      </tbody>
+                    </table>
+  </div>
+  <div id="nom-path-loc3" data-nom-path-template="loc3">
+<table class="path-table act-path-table data-table">
+                      <colgroup>
+                        <col class="act-path-col-dir">
+                        <col class="act-nom-col-loc">
+                        <col class="act-path-col-svc">
+                        <col class="act-nom-col-name">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-paths">
+                        <col class="act-nom-col-status">
+                      </colgroup>
+                      <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Svc Req Name</th><th>Loc Name</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-55010</td><td>Marketing Co Alpha</td><td class="muted act-nom-loc-name">Gathering Hub / Pool Central</td><td class="num">100,000</td><td class="num">100,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num" style="color:var(--gray-400)">0</td><td>1</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-55011</td><td>Marketing Co Alpha</td><td class="muted act-nom-loc-name">Gathering Hub / Pool Central</td><td class="num">47,500</td><td class="num">47,500</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–1,151</td><td>2</td><td><span class="badge badge-secondary">Fuel</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-55010</td><td>Utility Co East</td><td class="muted act-nom-loc-name">Pool Central / Delivery Point 1</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">100,000</td><td class="num">100,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num" style="color:var(--gray-400)">0</td><td>1</td><td><span class="badge badge-success">AOK</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-55011</td><td>Utility Co Central</td><td class="muted act-nom-loc-name">Pool Central / Delivery Point 2</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">47,500</td><td class="num">46,349</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–1,151</td><td>2</td><td><span class="badge badge-secondary">Fuel</span></td></tr>
+                      </tbody>
+                    </table>
+  </div>
+  <div id="nom-path-loc4" data-nom-path-template="loc4">
+<table class="path-table act-path-table data-table">
+                      <colgroup>
+                        <col class="act-path-col-dir">
+                        <col class="act-nom-col-loc">
+                        <col class="act-path-col-svc">
+                        <col class="act-nom-col-name">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-paths">
+                        <col class="act-nom-col-status">
+                      </colgroup>
+                      <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Svc Req Name</th><th>Loc Name</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-32001</td><td>Field Services Co Alpha</td><td class="muted act-nom-loc-name">Field D / Basin West</td><td class="num">50,000</td><td class="num">45,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="num">–326</td><td>1</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-32002</td><td>Producer Co Alpha</td><td class="muted act-nom-loc-name">Field E / Basin West</td><td class="num">45,000</td><td class="num">40,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="num">–337</td><td>2</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-32001</td><td>Utility Co West</td><td class="muted act-nom-loc-name">Basin West / Delivery Pool A</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">50,000</td><td class="num">44,674</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="num">–326</td><td>1</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-32002</td><td>Utility Co West</td><td class="muted act-nom-loc-name">Basin West / Delivery Pool A</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">45,000</td><td class="num">39,663</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="num">–337</td><td>2</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                      </tbody>
+                    </table>
+  </div>
+  <div id="nom-path-loc5" data-nom-path-template="loc5">
+<table class="path-table act-path-table data-table">
+                      <colgroup>
+                        <col class="act-path-col-dir">
+                        <col class="act-nom-col-loc">
+                        <col class="act-path-col-svc">
+                        <col class="act-nom-col-name">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-paths">
+                        <col class="act-nom-col-status">
+                      </colgroup>
+                      <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Svc Req Name</th><th>Loc Name</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-44001</td><td>Marketing Co Alpha</td><td class="muted act-nom-loc-name">Gathering Hub / NGPL Zone E</td><td class="num">80,000</td><td class="num">80,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–624</td><td>1</td><td><span class="badge badge-secondary">Fuel</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-44001</td><td>Pipeline Co Alpha</td><td class="muted act-nom-loc-name">Interconnect / Zone Transfer South</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">80,000</td><td class="num">79,376</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–624</td><td>1</td><td><span class="badge badge-secondary">Fuel</span></td></tr>
+                      </tbody>
+                    </table>
+  </div>
+  <div id="nom-path-loc6" data-nom-path-template="loc6">
+<table class="path-table act-path-table data-table">
+                      <colgroup>
+                        <col class="act-path-col-dir">
+                        <col class="act-nom-col-loc">
+                        <col class="act-path-col-svc">
+                        <col class="act-nom-col-name">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-qty">
+                        <col class="act-nom-col-paths">
+                        <col class="act-nom-col-status">
+                      </colgroup>
+                      <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Svc Req Name</th><th>Loc Name</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--receipt" title="Receipt">Sch Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Nom Qty</th><th class="num act-path-qty-col act-path-qty-col--delivery" title="Delivery">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-70010</td><td>Transmission Co Alpha</td><td class="muted act-nom-loc-name">Basin B / Mountain Pool West</td><td class="num">25,000</td><td class="num">11,200</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–13,800</td><td class="num">–87</td><td>1</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-70013</td><td>Marketing Co Beta</td><td class="muted act-nom-loc-name">NGPL-Mainline / Mountain Pool West</td><td class="num">5,000</td><td class="num">5,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–47</td><td>2</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-70014</td><td>Marketing Co Gamma</td><td class="muted act-nom-loc-name">NGPL-Mainline / Mountain Pool West</td><td class="num">4,000</td><td class="num">4,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–37</td><td>3</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-70015</td><td>Utility Co North</td><td class="muted act-nom-loc-name">NGPL-Mainline / Mountain Pool West</td><td class="num">8,000</td><td class="num">8,000</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–74</td><td>4</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt">K-70016</td><td>Marketing Co Delta</td><td class="muted act-nom-loc-name">NGPL-Mainline / Mountain Pool West</td><td class="num">6,800</td><td class="num">6,800</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–63</td><td>5</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-70010</td><td>Retail Co Alpha</td><td class="muted act-nom-loc-name">Mountain Pool / Interconnect East</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">25,000</td><td class="num">11,200</td><td class="num" style="color:var(--color-red)">–13,800</td><td class="num">–87</td><td>1</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-70013</td><td>Utility Co West</td><td class="muted act-nom-loc-name">Mountain Pool / Delivery Point A</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">5,000</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="num">–47</td><td>2</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-70014</td><td>Power Co Alpha</td><td class="muted act-nom-loc-name">Mountain Pool / Hub Central</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">4,000</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–4,000</td><td class="num">–37</td><td>3</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-70015</td><td>Utility Co North</td><td class="muted act-nom-loc-name">Mountain Pool / Delivery Zone 2</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">8,000</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–8,000</td><td class="num">–74</td><td>4</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                        <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery">K-70016</td><td>Trading Co Eta</td><td class="muted act-nom-loc-name">Mountain Pool / Citygate North</td><td class="num act-path-empty">—</td><td class="num act-path-empty">—</td><td class="num">6,800</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–6,800</td><td class="num">–63</td><td>5</td><td><span class="badge badge-danger">PBL</span></td></tr>
+                      </tbody>
+                    </table>
+  </div>
+      </div>
+
+        </div><!-- /timely panel -->
+
+        <div class="tabs-stack__panel act-nominations-tab-panel" role="tabpanel" data-tab-panel="evening" hidden></div>
+        <div class="tabs-stack__panel act-nominations-tab-panel" role="tabpanel" data-tab-panel="id1" hidden></div>
+        <div class="tabs-stack__panel act-nominations-tab-panel" role="tabpanel" data-tab-panel="id2" hidden></div>
+        <div class="tabs-stack__panel act-nominations-tab-panel" role="tabpanel" data-tab-panel="id3" hidden></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

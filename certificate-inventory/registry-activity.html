@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory — Registry Activity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/trades.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<link rel="stylesheet" href="../css/certificate-inventory.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+</head>
+<body class="ci-registry-page app-sidebar-enabled" data-app-header-account="Verde Energy">
+<div class="app-header-mount"></div>
+
+<main class="main-content">
+  <div class="page-header">
+    <div class="page-header__title-row">
+      <h1 class="page-title page-nav-context page-nav-context--prefixed">
+        <span class="page-nav-context__prefix">Inventory</span>
+        <span class="page-nav-context__sep" aria-hidden="true"></span>
+        <span class="page-nav-context__leaf">
+          Registry Activity <span class="page-title-for">FOR</span>
+          <span class="trade-date-filter" id="ci-registry-date-filter">
+            <button type="button" class="trade-date-filter__trigger" id="ci-registry-date-filter-trigger" aria-expanded="false" aria-haspopup="dialog" aria-controls="ci-registry-date-filter-popover">
+              <span class="trade-date-filter__label" id="ci-registry-date-filter-label">THE LAST 5 DAYS</span>
+              <i class="fas fa-caret-down trade-date-filter__caret" aria-hidden="true"></i>
+            </button>
+            <div class="trade-date-filter__popover" id="ci-registry-date-filter-popover" role="dialog" aria-label="Registry activity date range" hidden>
+              <div class="trade-date-filter__presets">
+                <button type="button" class="trade-date-filter__preset active" data-preset="5">5</button>
+                <button type="button" class="trade-date-filter__preset" data-preset="10">10</button>
+                <button type="button" class="trade-date-filter__preset" data-preset="30">30</button>
+                <button type="button" class="trade-date-filter__preset" data-preset="60">60</button>
+                <button type="button" class="trade-date-filter__preset" data-preset="all">All</button>
+              </div>
+              <div class="trade-date-filter__divider" aria-hidden="true"></div>
+              <div class="trade-date-filter__custom">
+                <div class="trade-date-filter__range-input">
+                  <input type="text" class="filter-input" id="ci-registry-date-custom-range" placeholder="MM/DD/YYYY - MM/DD/YYYY" aria-label="Custom registry activity date range">
+                </div>
+                <button type="button" class="trade-date-filter__ok-btn" id="ci-registry-date-custom-ok">OK</button>
+              </div>
+            </div>
+          </span>
+        </span>
+      </h1>
+    </div>
+  </div>
+
+  <div id="ci-registry-content">
+    <div class="content-card ci-registry-card">
+      <div class="card-header">
+        <div class="card-title">Activity Log</div>
+        <div class="card-actions ci-registry-card-summary" id="ci-registry-card-summary" aria-live="polite"></div>
+      </div>
+
+      <div class="ci-registry-card-body">
+        <div class="filter-panel">
+          <div class="content-card filters-card" data-fa-book-card="ci-registry-filters">
+            <div class="card-header">
+              <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="true" aria-controls="ci-registry-filters-collapse" aria-label="Show or hide filters">
+                <div class="card-title">
+                  <span class="fa-card-title-text">Filters<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i></span>
+                </div>
+              </button>
+            </div>
+            <div id="ci-registry-filters-collapse" class="fa-book-card-collapse-target">
+              <div class="card-body">
+                <div class="filter-row">
+                  <div class="filter-group">
+                    <span class="filter-label">Action</span>
+                    <select class="filter-input" id="ci-registry-filter-action" aria-label="Action">
+                      <option>All</option>
+                      <option>Retirement</option>
+                      <option>Transfer</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <span class="filter-label">Status</span>
+                    <select class="filter-input" id="ci-registry-filter-status" aria-label="Status">
+                      <option>All</option>
+                      <option>Pending</option>
+                      <option>Submitted</option>
+                      <option>Confirmed</option>
+                      <option>Failed</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="button" class="load-data-btn-secondary" id="ci-registry-clear-filters-btn" onclick="ciRegistryClearFilters()">Clear</button>
+                <button type="button" class="load-data-btn" onclick="ciRegistryApplyFilters()">Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="refine-row">
+            <div class="refine-input-group">
+              <span class="refine-icon" style="cursor:pointer" title="Search current results"><i class="fas fa-search" aria-hidden="true"></i></span>
+              <input type="text" class="refine-input" placeholder="Search current results" aria-label="Search current results">
+            </div>
+            <div class="refine-right">
+              <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+              <button type="button" class="icon-btn" title="Column options" aria-label="Column options"><i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i></button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table trades-grid ci-registry-grid">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="pagination-row">
+            <div style="position:relative"></div>
+            <div class="pagination-info">
+              <span class="pagination-count-text" id="ci-registry-pagination-count">0 to 0 of 0</span>
+              <div class="pagination-controls">
+                <button type="button" class="page-btn" disabled title="First page"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+                <button type="button" class="page-btn" disabled title="Previous page"><i class="fas fa-angle-left" aria-hidden="true"></i></button>
+                <span class="pagination-page-text">Page 1 of 1</span>
+                <button type="button" class="page-btn" disabled title="Next page"><i class="fas fa-angle-right" aria-hidden="true"></i></button>
+                <button type="button" class="page-btn" disabled title="Last page"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script defer src="../fund-allocations/book-card-collapse.js"></script>
+<script defer src="../js/filters-card.js"></script>
+<script defer src="../js/trade-date-filter.js"></script>
+<script defer src="../js/certificate-inventory-shared.js"></script>
+<script defer src="../js/certificate-inventory-registry.js"></script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<link rel="stylesheet" href="../css/as-of-picker.css">
+<link rel="stylesheet" href="../css/certificate-inventory.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+</head>
+<body class="ci-portfolio-page app-sidebar-enabled" data-app-header-account="Verde Energy">
+<div class="app-header-mount"></div>
+
+<main class="main-content">
+  <div class="page-header">
+    <div class="page-header__title-row">
+      <h1 class="page-title page-nav-context page-nav-context--prefixed">
+        <span class="page-nav-context__prefix">Inventory</span>
+        <span class="page-nav-context__sep" aria-hidden="true"></span>
+        <span class="page-nav-context__leaf">Portfolio</span>
+      </h1>
+      <div class="as-of-picker" role="group" aria-label="As-of date">
+        <button type="button" class="as-of-picker__nav" id="ci-portfolio-as-of-prev" aria-label="Previous day">
+          <span class="as-of-picker__chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </span>
+        </button>
+        <button type="button" id="ci-portfolio-as-of-trigger" class="as-of-picker__trigger" aria-expanded="false" aria-haspopup="dialog" aria-controls="ci-portfolio-as-of-popover">
+          <span class="as-of-picker__label"></span>
+        </button>
+        <button type="button" class="as-of-picker__nav" id="ci-portfolio-as-of-next" aria-label="Next day">
+          <span class="as-of-picker__chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ci-portfolio-as-of-popover" class="as-of-picker__popover" hidden role="dialog" aria-label="As-of calendar" style="display:none">
+    <div class="as-of-picker__cal-head">
+      <button type="button" class="as-of-picker__cal-month-btn" id="ci-portfolio-as-of-month-prev" aria-label="Previous month"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+      <span class="as-of-picker__cal-month-label" id="ci-portfolio-as-of-month-label"></span>
+      <button type="button" class="as-of-picker__cal-month-btn" id="ci-portfolio-as-of-month-next" aria-label="Next month"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+    </div>
+    <div id="ci-portfolio-as-of-grid" class="as-of-picker__cal-grid"></div>
+  </div>
+
+  <div class="content-card">
+    <div class="card-header ci-portfolio-card-header">
+      <div class="card-title">Certificates</div>
+      <div class="card-actions action-toolbar ci-portfolio-card-actions">
+        <div class="ci-view-switch" role="group" aria-label="Certificate view">
+          <span class="ci-view-switch-label" id="ci-view-switch-label">Grouped</span>
+          <label class="ci-view-switch-toggle">
+            <input type="checkbox" id="ci-view-grouped" class="ci-view-switch-input" aria-labelledby="ci-view-switch-label" aria-checked="false">
+            <span class="ci-view-switch-slider" aria-hidden="true"></span>
+          </label>
+        </div>
+        <span class="ci-card-actions-divider" aria-hidden="true"></span>
+        <button type="button" class="action-btn action-btn-primary" id="ci-add-cert-btn">New Certificate</button>
+        <button type="button" class="action-btn">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ci-portfolio-content">
+    <div class="filter-panel">
+      <div class="content-card filters-card" data-fa-book-card="ci-portfolio-filters">
+        <div class="card-header">
+          <button type="button" class="fa-book-card-toggle" onclick="toggleFaBookCardFromEl(this)" aria-expanded="true" aria-controls="ci-portfolio-filters-collapse" aria-label="Show or hide filters">
+            <div class="card-title">
+              <span class="fa-card-title-text">Filters<i class="fas fa-chevron-down fa-book-card-caret" aria-hidden="true"></i></span>
+            </div>
+          </button>
+        </div>
+        <div id="ci-portfolio-filters-collapse" class="fa-book-card-collapse-target">
+          <div class="card-body">
+            <div class="filter-row">
+              <div class="filter-group">
+                <span class="filter-label">Status</span>
+                <select class="filter-input" id="ci-filter-status" aria-label="Status">
+                  <option>All</option>
+                  <option>Available</option>
+                  <option>Forecast</option>
+                  <option>Allocated</option>
+                  <option>Exception</option>
+                  <option>Retired</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">Registry</span>
+                <select class="filter-input" id="ci-filter-registry" aria-label="Registry">
+                  <option>All</option>
+                  <option>M-RETS</option>
+                  <option>WREGIS</option>
+                  <option>PJM-GATS</option>
+                  <option>NAR</option>
+                  <option>ERCOT</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">Vintage</span>
+                <select class="filter-input" id="ci-filter-vintage" aria-label="Vintage">
+                  <option>All</option>
+                  <option>2023</option>
+                  <option>2024</option>
+                  <option>2025</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">Technology</span>
+                <select class="filter-input" id="ci-filter-technology" aria-label="Technology">
+                  <option>All</option>
+                  <option>Solar</option>
+                  <option>Wind</option>
+                  <option>Hydro</option>
+                  <option>Biomass</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">State</span>
+                <select class="filter-input" id="ci-filter-state" aria-label="State">
+                  <option>All</option>
+                  <option>TX</option>
+                  <option>CA</option>
+                  <option>PA</option>
+                  <option>OK</option>
+                  <option>IA</option>
+                  <option>NM</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">Linked / Unlinked</span>
+                <select class="filter-input" id="ci-filter-linked" aria-label="Linked or unlinked">
+                  <option>All</option>
+                  <option>Linked</option>
+                  <option>Unlinked</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button type="button" class="load-data-btn-secondary" id="ci-clear-filters-btn" onclick="ciClearFilters()">Clear</button>
+            <button type="button" class="load-data-btn" onclick="ciApplyFilters()">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panels-container">
+      <div class="content-bottom">
+        <div class="table-wrapper">
+          <div class="refine-row">
+            <div class="refine-input-group">
+              <span class="refine-icon" style="cursor:pointer" title="Search current results"><i class="fas fa-search" aria-hidden="true"></i></span>
+              <input type="text" class="refine-input" placeholder="Search current results" aria-label="Search current results">
+            </div>
+            <div class="refine-right">
+              <button type="button" class="icon-btn" title="Refresh"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+              <button type="button" class="icon-btn" title="Column options" aria-label="Column options"><i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i></button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table data-table--row-select trades-grid ci-certificates-grid">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="pagination-row">
+            <div style="position:relative"></div>
+            <div class="pagination-info">
+              <span class="pagination-count-text">1 to 10 of 10</span>
+              <div class="pagination-controls">
+                <button type="button" class="page-btn" disabled title="First page"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+                <button type="button" class="page-btn" disabled title="Previous page"><i class="fas fa-angle-left" aria-hidden="true"></i></button>
+                <span class="pagination-page-text">Page 1 of 1</span>
+                <button type="button" class="page-btn" disabled title="Next page"><i class="fas fa-angle-right" aria-hidden="true"></i></button>
+                <button type="button" class="page-btn" disabled title="Last page"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay ci-add-cert-modal-overlay" id="ci-add-cert-modal" hidden aria-hidden="true">
+  <div class="modal ci-add-cert-modal" id="ci-add-cert-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="ci-add-cert-title" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title ci-add-cert-modal-title" id="ci-add-cert-title">
+        <span class="ci-add-cert-modal-title-label" id="ci-add-cert-title-label">New Certificate</span>
+        <span class="ci-add-cert-modal-title-serial" id="ci-add-cert-title-serial" hidden></span>
+      </span>
+    </div>
+    <div class="modal-body ci-add-cert-modal-body">
+      <div class="ci-add-cert-details">
+          <div class="ci-add-cert-grid">
+            <div class="form-field ci-add-cert-field--full ci-add-cert-edit-only" id="ci-add-cert-edit-serial-field">
+              <label class="form-label" for="ci-add-cert-edit-serial">Serial Number</label>
+              <div class="ci-input-accent mol-validation mol-validation--required">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <input type="text" class="form-input" id="ci-add-cert-edit-serial" autocomplete="off" aria-required="true">
+              </div>
+            </div>
+            <div class="form-field ci-add-cert-field--full ci-add-cert-add-only" id="ci-add-cert-source-range-field">
+              <label class="form-label" for="ci-add-cert-source-range">Serial Number</label>
+              <div class="ci-input-group mol-validation mol-validation--required ci-add-cert-source-range-group">
+                <div class="ci-input-accent ci-add-cert-source-range-accent">
+                  <input type="text" class="form-input" id="ci-add-cert-source-range" autocomplete="off" placeholder="One serial, or range, e.g. 10000001-10001000, 10000001..10001000" aria-required="true">
+                </div>
+                <div class="ci-add-cert-range-actions" id="ci-add-cert-range-actions" role="group" aria-label="Serial number actions" hidden>
+                  <button type="button" class="ci-add-cert-range-action-btn" id="ci-add-cert-range-append" title="Generate serial numbers from the range" disabled hidden>
+                    Generate
+                  </button>
+                  <button type="button" class="ci-add-cert-range-action-btn" id="ci-add-cert-range-replace" title="Replace the serial list with this serial number" disabled hidden>
+                    Replace
+                  </button>
+                </div>
+              </div>
+              <p class="ci-add-cert-field-error" id="ci-add-cert-source-range-error" hidden role="alert"></p>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-registry">Registry</label>
+              <div class="ci-input-accent mol-validation mol-validation--required">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-registry" aria-required="true">
+                  <option value=""></option>
+                  <option value="M-RETS">M-RETS</option>
+                  <option value="WREGIS">WREGIS</option>
+                  <option value="PJM-GATS">PJM-GATS</option>
+                  <option value="NAR">NAR</option>
+                  <option value="ERCOT">ERCOT</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-vintage">Vintage</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-vintage">
+                  <option value=""></option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2023">2023</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-technology">Technology</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-technology">
+                  <option value=""></option>
+                  <option value="Solar">Solar</option>
+                  <option value="Wind">Wind</option>
+                  <option value="Hydro">Hydro</option>
+                  <option value="Biomass">Biomass</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-state">State</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-state">
+                  <option value=""></option>
+                  <option value="TX">TX — ERCOT</option>
+                  <option value="CA">CA — CAISO</option>
+                  <option value="OK">OK — SPP</option>
+                  <option value="PA">PA — PJM</option>
+                  <option value="IA">IA — MISO</option>
+                  <option value="NM">NM — WECC</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field ci-add-cert-field--full">
+              <label class="form-label" for="ci-add-cert-product">Product</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-product">
+                  <option value=""></option>
+                  <option value="REC">REC — Renewable Energy Certificate</option>
+                  <option value="SREC">SREC — Solar REC</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-fuel">Fuel Type</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-fuel">
+                  <option value=""></option>
+                  <option value="Photovoltaic">Photovoltaic</option>
+                  <option value="Onshore Wind">Onshore Wind</option>
+                  <option value="Run-of-river">Run-of-river</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-certification">Certification</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <select class="form-input" id="ci-add-cert-certification">
+                  <option value=""></option>
+                  <option value="Green-e Energy">Green-e Energy</option>
+                  <option value="None">None</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-volume">Volume (MWh)</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <input type="text" class="form-input" id="ci-add-cert-volume" inputmode="decimal" placeholder="1.00">
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="ci-add-cert-cost">Cost Basis ($/MWh)</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <input type="text" class="form-input" id="ci-add-cert-cost" inputmode="decimal" placeholder="0.00">
+              </div>
+            </div>
+            <div class="form-field ci-add-cert-field--full">
+              <label class="form-label" for="ci-add-cert-project">Project ID</label>
+              <div class="ci-input-accent mol-validation mol-validation--optional">
+                <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                <input type="text" class="form-input" id="ci-add-cert-project" autocomplete="off">
+              </div>
+            </div>
+          </div>
+          <div class="ci-add-cert-links-panel" id="ci-add-cert-links-field" hidden>
+            <div class="ci-add-cert-link-attrs">
+              <div class="ci-add-cert-link-attr">
+                <div class="ci-add-cert-link-attr-label">Linked Trade</div>
+                <div class="ci-add-cert-link-attr-value" id="ci-add-cert-link-trade"></div>
+              </div>
+              <div class="ci-add-cert-link-attr">
+                <div class="ci-add-cert-link-attr-label">Linked Subleg</div>
+                <div class="ci-add-cert-link-attr-value" id="ci-add-cert-link-subleg"></div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="content-card ci-add-cert-pane-card ci-add-cert-serials-card" id="ci-add-cert-serials-card" aria-labelledby="ci-add-cert-serials-heading">
+        <div class="card-header ci-add-cert-pane-card-header">
+          <div class="card-title" id="ci-add-cert-serials-heading">Serial Number Range</div>
+        </div>
+        <div class="card-body ci-add-cert-pane-card-body ci-add-cert-serials-card-body">
+              <p class="ci-add-cert-serials-intro" id="ci-add-cert-serials-intro">Certificates to create. Generate from the left, or paste here.</p>
+              <div class="form-field ci-add-cert-serial-numbers-field">
+                <label class="form-label" for="ci-add-cert-serial-numbers">Serial Range</label>
+                <div class="ci-input-accent ci-input-accent--textarea mol-validation mol-validation--optional ci-add-cert-serial-numbers-accent">
+                  <span class="ci-input-accent__bar" aria-hidden="true"></span>
+                  <textarea class="form-input ci-add-cert-serial-numbers-textarea" id="ci-add-cert-serial-numbers" rows="8" autocomplete="off" aria-describedby="ci-add-cert-serials-intro"></textarea>
+                </div>
+                <p class="ci-add-cert-serial-count is-empty" id="ci-add-cert-serial-count" aria-live="polite">0 serial numbers</p>
+              </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" data-ci-add-close>Cancel</button>
+      <button type="button" class="modal-btn primary" id="ci-add-cert-submit" disabled>Create Certificate</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay ci-add-cert-replace-confirm-overlay" id="ci-add-cert-replace-confirm" hidden aria-hidden="true">
+  <div class="modal ci-add-cert-replace-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="ci-add-cert-replace-confirm-title" aria-describedby="ci-add-cert-replace-confirm-message" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="ci-add-cert-replace-confirm-title">Replace serial list?</span>
+    </div>
+    <div class="modal-body ci-add-cert-replace-confirm-body">
+      <p class="ci-add-cert-replace-confirm-message" id="ci-add-cert-replace-confirm-message"></p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" id="ci-add-cert-replace-confirm-cancel">Cancel</button>
+      <button type="button" class="modal-btn primary" id="ci-add-cert-replace-confirm-ok">Replace</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay ci-link-trade-modal-overlay" id="ci-link-trade-modal" hidden aria-hidden="true">
+  <div class="modal ci-link-trade-modal" id="ci-link-trade-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="ci-link-trade-title" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="ci-link-trade-title">Link to Trade</span>
+    </div>
+    <div class="modal-body ci-link-trade-modal-body">
+      <div id="ci-link-trade-context" class="ci-link-trade-context"></div>
+      <div class="content-card ci-matching-match-card ci-link-trade-search-card">
+        <div class="card-header">
+          <div class="card-title">Find Trade</div>
+        </div>
+        <div class="card-body ci-matching-match-card-body">
+          <div class="search-input-wrapper ci-matching-match-search">
+            <span class="ci-matching-match-search-icon ci-matching-demo-tooltip" id="ci-link-trade-search-tooltip" tabindex="0" role="img" aria-label="For demo only: example trade IDs available in this mockup">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            </span>
+            <input type="text" class="filter-input search-input" id="ci-link-trade-match-search" placeholder="Search trades to link — ID, counterparty, delivery month…" aria-label="Search trades to link">
+          </div>
+          <div class="ci-matching-match-panel" id="ci-link-trade-match-panel">
+            <div class="ci-matching-match-strips" id="ci-link-trade-match-strips" hidden></div>
+            <div class="ci-matching-match-empty" id="ci-link-trade-match-empty">Search for a trade to link</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" data-ci-link-trade-close>Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay ci-cert-audit-modal-overlay" id="ci-cert-audit-modal" hidden aria-hidden="true">
+  <div class="modal ci-cert-audit-modal" id="ci-cert-audit-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="ci-cert-audit-title" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title ci-cert-audit-modal-title" id="ci-cert-audit-title">
+        <span class="ci-cert-audit-modal-title-label">Audit History</span>
+        <span class="ci-cert-audit-modal-title-serial" id="ci-cert-audit-serial" hidden></span>
+      </span>
+    </div>
+    <div class="modal-body ci-cert-audit-modal-body">
+      <div class="te-audit" id="ci-cert-audit-thread" aria-label="Certificate audit history"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="modal-btn cancel" data-ci-audit-close>Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="selection-bar" id="ci-selection-bar">
+  <span class="selection-count" id="ci-selection-summary">0 certificates selected</span>
+  <div class="selection-actions" id="ci-selection-actions"></div>
+  <button type="button" class="close-selection" onclick="ciClearSelection()" aria-label="Clear selection"><i class="fas fa-times" aria-hidden="true"></i></button>
+</div>
+
+<script defer src="../fund-allocations/book-card-collapse.js"></script>
+<script defer src="../js/filters-card.js"></script>
+<script defer src="../js/certificate-inventory-shared.js"></script>
+<script defer src="../js/as-of-picker.js"></script>
+<script defer src="../js/certificate-inventory-match-catalog.js"></script>
+<script defer src="../js/certificate-inventory-portfolio.js"></script>
+<script defer src="../js/certificate-inventory-portfolio-add.js"></script>
+<script defer src="../js/certificate-inventory-portfolio-link.js"></script>
+<script defer src="../js/certificate-inventory-portfolio-audit.js"></script>
+</body>
+</html>

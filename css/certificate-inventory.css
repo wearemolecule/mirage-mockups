@@ -1,0 +1,2675 @@
+/* Certificate Inventory screens */
+
+body.ci-registry-page .page-nav-context--prefixed {
+  flex-wrap: nowrap;
+}
+
+body.ci-registry-page .page-nav-context__leaf {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35em;
+}
+
+body.ci-registry-page .page-nav-context--prefixed .page-nav-context__leaf::after {
+  content: none;
+}
+
+body.ci-portfolio-page .main-content,
+body.ci-registry-page .main-content {
+  min-height: 0;
+}
+
+body.ci-portfolio-page .content-card > .card-header.ci-portfolio-card-header {
+  border-bottom: none;
+}
+
+/* Primary CI card headers — 40px bar, standard .card-title (16px / 600) */
+body.ci-portfolio-page .content-card > .card-header.ci-portfolio-card-header,
+body.ci-matching-page .ci-matching-queue-card > .card-header,
+body.ci-registry-page .ci-registry-card > .card-header {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 var(--spacing-xl);
+  box-sizing: border-box;
+}
+
+body.ci-portfolio-page .ci-portfolio-card-actions {
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+body.ci-portfolio-page .ci-view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .ci-view-switch-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+body.ci-portfolio-page .ci-view-switch-toggle {
+  position: relative;
+  display: inline-flex;
+  width: 28px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .ci-view-switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+body.ci-portfolio-page .ci-view-switch-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--color-gray-300, #d1d5db);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+body.ci-portfolio-page .ci-view-switch-slider::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 2px;
+  top: 2px;
+  background: var(--color-bg-primary);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+body.ci-portfolio-page .ci-view-switch-input:checked + .ci-view-switch-slider {
+  background: var(--color-green);
+}
+
+body.ci-portfolio-page .ci-view-switch-input:checked + .ci-view-switch-slider::before {
+  transform: translateX(12px);
+}
+
+body.ci-portfolio-page .ci-view-switch-input:focus-visible + .ci-view-switch-slider {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+body.ci-portfolio-page .ci-card-actions-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 10px;
+  background: var(--color-border-medium);
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .ci-portfolio-card-actions .action-btn {
+  margin-left: 4px;
+}
+
+body.ci-portfolio-page .ci-portfolio-card-actions .action-btn:first-of-type {
+  margin-left: 0;
+}
+
+body.ci-portfolio-page #ci-portfolio-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ci-portfolio-page #ci-portfolio-content:has(.te-row-menu-wrap.is-open) {
+  overflow: visible;
+}
+
+body.ci-portfolio-page #ci-portfolio-content > .filter-panel {
+  padding-bottom: var(--spacing-lg);
+}
+
+body.ci-portfolio-page #ci-portfolio-content > .filter-panel .filter-row {
+  flex-wrap: wrap;
+}
+
+body.ci-portfolio-page #ci-portfolio-content > .panels-container {
+  padding-top: 0;
+}
+
+body.ci-portfolio-page .table-wrapper .refine-row,
+body.ci-registry-page .ci-registry-card-body > .table-wrapper .refine-row {
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .table-wrapper .table-container,
+body.ci-registry-page .ci-registry-card-body > .table-wrapper .table-container {
+  flex: 1;
+  min-height: 0;
+}
+
+body.ci-portfolio-page .table-wrapper .pagination-row,
+body.ci-registry-page .ci-registry-card-body > .table-wrapper .pagination-row {
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .ci-certificates-grid .trades-col-menu,
+body.ci-registry-page .ci-registry-grid .trades-col-menu {
+  width: 24px;
+  min-width: 24px;
+  max-width: 24px;
+}
+
+/* Shrink-wrap data columns; min-width adds rhythm without extra cell padding.
+   Linked Subleg (no ci-col-tight) absorbs remaining width. Serial columns excluded. */
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-tight,
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-tight,
+body.ci-registry-page .ci-registry-grid th.ci-col-tight,
+body.ci-registry-page .ci-registry-grid td.ci-col-tight {
+  width: 1%;
+  white-space: nowrap;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-tight:not(.ci-col-serial),
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-tight:not(.ci-col-serial):not(.ci-col-serial-range) {
+  min-width: 5rem;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-tech-icon,
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-tech-icon {
+  width: 1%;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 36px;
+  padding-left: 6px;
+  padding-right: 6px;
+  text-align: center;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-tech-icon {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-tech-label,
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-tech-label {
+  min-width: 4.5rem;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-num,
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-num,
+body.ci-registry-page .ci-registry-grid th.ci-col-num,
+body.ci-registry-page .ci-registry-grid td.ci-col-num {
+  min-width: 5.5rem;
+}
+
+/* Certificate status select (Invoicing pattern) */
+body.ci-portfolio-page .ci-certificates-grid th.inv-col-status,
+body.ci-portfolio-page .ci-certificates-grid td.inv-status-cell,
+body.ci-registry-page .ci-registry-grid th.inv-col-status,
+body.ci-registry-page .ci-registry-grid td.inv-status-cell {
+  overflow: visible;
+}
+
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-serial-range {
+  padding-right: 16px;
+}
+
+body.ci-portfolio-page .inv-status-select-wrap,
+body.ci-registry-page .inv-status-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+  width: auto;
+  max-width: 100%;
+  font-size: 0.63rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+body.ci-portfolio-page .inv-status-select-wrap .b-dot,
+body.ci-registry-page .inv-status-select-wrap .b-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+}
+
+body.ci-portfolio-page .inv-status-label,
+body.ci-registry-page .inv-status-label {
+  font: inherit;
+  color: inherit;
+}
+
+body.ci-portfolio-page .inv-status-select-wrap.b-green,
+body.ci-registry-page .inv-status-select-wrap.b-green { color: var(--color-green); }
+body.ci-portfolio-page .inv-status-select-wrap.b-amber,
+body.ci-registry-page .inv-status-select-wrap.b-amber { color: var(--color-orange); }
+body.ci-portfolio-page .inv-status-select-wrap.b-red,
+body.ci-registry-page .inv-status-select-wrap.b-red { color: var(--color-red); }
+body.ci-portfolio-page .inv-status-select-wrap.b-blue,
+body.ci-registry-page .inv-status-select-wrap.b-blue { color: var(--color-blue); }
+body.ci-portfolio-page .inv-status-select-wrap.b-gray,
+body.ci-registry-page .inv-status-select-wrap.b-gray { color: var(--color-text-secondary); }
+
+/* Grid — row menu (Trades / Invoicing pattern) */
+body.ci-portfolio-page .ci-certificates-grid .te-row-menu-wrap,
+body.ci-registry-page .ci-registry-grid .te-row-menu-wrap {
+  position: relative;
+  display: inline-flex;
+  z-index: 1;
+}
+
+body.ci-portfolio-page .ci-certificates-grid .te-row-menu-wrap.is-open,
+body.ci-registry-page .ci-registry-grid .te-row-menu-wrap.is-open {
+  z-index: 100;
+}
+
+body.ci-portfolio-page .ci-certificates-grid td.trades-col-menu,
+body.ci-registry-page .ci-registry-grid td.trades-col-menu {
+  overflow: visible;
+  position: relative;
+}
+
+body.ci-portfolio-page .table-wrapper .table-container:has(.te-row-menu-wrap.is-open),
+body.ci-registry-page .ci-registry-card-body > .table-wrapper .table-container:has(.te-row-menu-wrap.is-open) {
+  overflow: visible;
+}
+
+body.ci-portfolio-page .ci-certificates-grid .te-row-menu-dropdown,
+body.ci-registry-page .ci-registry-grid .te-row-menu-dropdown {
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 4px;
+  z-index: 200;
+  min-width: 168px;
+  padding: 2px 0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+body.ci-portfolio-page .ci-certificates-grid .te-row-menu-wrap.is-open .te-row-menu-dropdown,
+body.ci-registry-page .ci-registry-grid .te-row-menu-wrap.is-open .te-row-menu-dropdown {
+  display: flex;
+}
+
+body.ci-portfolio-page .ci-certificates-grid .te-row-menu-item,
+body.ci-registry-page .ci-registry-grid .te-row-menu-item {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 5px 12px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  min-height: 0;
+  height: auto;
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+body.ci-portfolio-page .ci-certificates-grid .te-row-menu-item:hover,
+body.ci-registry-page .ci-registry-grid .te-row-menu-item:hover {
+  background: var(--color-gray-100);
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr:has(.te-row-menu-wrap.is-open),
+body.ci-registry-page .ci-registry-grid tbody tr:has(.te-row-menu-wrap.is-open) {
+  position: relative;
+  z-index: 100;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-checkbox,
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-checkbox {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-checkbox {
+  position: relative;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-checkbox input[type="checkbox"] {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-checkbox input[type="checkbox"] {
+  display: block;
+  margin: 0 auto;
+}
+
+body.ci-portfolio-page .ci-certificates-grid .ci-col-num {
+  text-align: right;
+}
+
+body.ci-portfolio-page .ci-certificates-grid th.ci-col-state,
+body.ci-portfolio-page .ci-certificates-grid td.ci-col-state {
+  text-align: center;
+}
+
+body.ci-portfolio-page .ci-cell-empty,
+body.ci-registry-page .ci-cell-empty {
+  color: var(--color-text-muted);
+}
+
+body.ci-portfolio-page .ci-grid-link,
+body.ci-registry-page .ci-grid-link {
+  color: var(--color-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+body.ci-portfolio-page .ci-grid-link:hover,
+body.ci-registry-page .ci-grid-link:hover {
+  text-decoration: underline;
+}
+
+body.ci-portfolio-page .ci-serial-cell {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+body.ci-portfolio-page .ci-serial-cell--pending {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+body.ci-portfolio-page .ci-serial-cell--retired {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+body.ci-portfolio-page .ci-tech,
+body.ci-matching-page .ci-tech,
+body.ci-registry-page .ci-tech {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.ci-portfolio-page .ci-tech-icon,
+body.ci-matching-page .ci-tech-icon,
+body.ci-registry-page .ci-tech-icon {
+  flex-shrink: 0;
+  width: 14px;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+}
+
+body.ci-matching-page .ci-tech-icon {
+  font-size: 14px;
+}
+
+/* Portfolio grid — neutral icons (status column owns color) */
+body.ci-portfolio-page .ci-tech-icon,
+body.ci-portfolio-page .ci-tech-icon--solar,
+body.ci-portfolio-page .ci-tech-icon--wind,
+body.ci-portfolio-page .ci-tech-icon--hydro,
+body.ci-portfolio-page .ci-tech-icon--biomass {
+  color: var(--color-text-secondary);
+}
+
+body.ci-portfolio-page .ci-tech-dot,
+body.ci-portfolio-page .ci-tech-dot--hydro,
+body.ci-portfolio-page .ci-tech-dot--biomass {
+  background: var(--color-text-secondary);
+}
+
+/* Matching — per-technology accent (screen is otherwise mostly neutral) */
+body.ci-matching-page .ci-tech-icon--solar {
+  color: var(--color-yellow);
+}
+
+body.ci-matching-page .ci-tech-icon--wind {
+  color: var(--color-gray-400);
+}
+
+body.ci-matching-page .ci-tech-icon--hydro {
+  color: var(--color-blue);
+}
+
+body.ci-matching-page .ci-tech-icon--biomass {
+  color: var(--color-green);
+}
+
+body.ci-matching-page .ci-tech-dot {
+  background: var(--color-gray-400);
+}
+
+body.ci-matching-page .ci-tech-dot--hydro {
+  background: var(--color-blue);
+}
+
+body.ci-matching-page .ci-tech-dot--biomass {
+  background: var(--color-green);
+}
+
+body.ci-portfolio-page .ci-tech-dot,
+body.ci-matching-page .ci-tech-dot,
+body.ci-registry-page .ci-tech-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+body.ci-registry-page .ci-tech-dot {
+  background: var(--color-text-secondary);
+}
+
+body.ci-portfolio-page .ci-certificates-grid.ci-certificates-grid--grouped .ci-col-serial-range {
+  min-width: 0;
+}
+
+body.ci-portfolio-page .ci-serial-range-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+body.ci-portfolio-page .ci-serial-range-cell .ci-range-label,
+body.ci-portfolio-page .ci-serial-range-cell .ci-serial-child,
+body.ci-portfolio-page .ci-serial-range-cell .ci-cell-empty {
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+body.ci-portfolio-page .ci-range-expand,
+body.ci-portfolio-page .ci-range-expand-spacer {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+body.ci-portfolio-page .ci-range-expand {
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+body.ci-portfolio-page .ci-range-expand:hover {
+  background: var(--color-gray-100);
+  color: var(--color-text-primary);
+}
+
+body.ci-portfolio-page .ci-range-expand:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 1px;
+}
+
+body.ci-portfolio-page .ci-range-expand svg,
+body.ci-portfolio-page .ci-range-expand-chevron {
+  width: 10px;
+  height: 10px;
+  transition: transform 0.15s ease;
+}
+
+body.ci-portfolio-page tr.ci-range-row.is-expanded .ci-range-expand-chevron {
+  transform: rotate(90deg);
+}
+
+/* Expanded parent — FA alloc-strip-summary-row[aria-expanded="true"] */
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-row.is-expanded {
+  background: var(--color-gray-200);
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-row.is-expanded > td {
+  background: var(--color-gray-200);
+  border-top: 2px solid var(--color-border-dark);
+}
+
+/* Expanded children — FA alloc-strip-detail-row striping */
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-base {
+  background: var(--color-bg-primary);
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-alt {
+  background: var(--color-bg-tertiary);
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-base > td,
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-alt > td {
+  background: inherit;
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-base:hover,
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-alt:hover {
+  background: #edf3fd;
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-base:hover > td,
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-exp-alt:hover > td {
+  background: inherit;
+}
+
+body.ci-portfolio-page .ci-certificates-grid tbody tr.ci-range-child.ci-range-child-last > td {
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+body.ci-portfolio-page .ci-serial-child {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+body.ci-portfolio-page .ci-certificates-grid.ci-certificates-grid--grouped .ci-range-label--multi {
+  font-weight: 700;
+}
+
+body.ci-portfolio-page .ci-range-label,
+body.ci-matching-page .ci-range-label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+body.ci-portfolio-page .ci-range-label--multi,
+body.ci-matching-page .ci-range-label--multi {
+  font-weight: 600;
+}
+
+body.ci-portfolio-page .ci-range-label-arrow,
+body.ci-matching-page .ci-range-label-arrow {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  padding: 0 2px;
+}
+
+body.ci-portfolio-page .ci-range-label--pending {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* Matching */
+
+body.ci-matching-page .main-content {
+  min-height: 0;
+}
+
+body.ci-matching-page #ci-matching-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+body.ci-matching-page .ci-matching-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ci-matching-page .ci-matching-split.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+body.ci-matching-page .ci-matching-split-left,
+body.ci-matching-page .ci-matching-split-right {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ci-matching-page .ci-matching-split-left {
+  flex: 0 0 38%;
+  width: 38%;
+  min-width: 220px;
+}
+
+body.ci-matching-page .ci-matching-queue-card {
+  flex: 1;
+  min-height: 0;
+}
+
+body.ci-matching-page .ci-matching-queue-card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.ci-matching-page .ci-matching-queue-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--spacing-xl);
+  box-sizing: border-box;
+}
+
+body.ci-matching-page .ci-matching-queue-filters {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+body.ci-matching-page .ci-matching-queue-filters .filter-group {
+  width: 100%;
+}
+
+body.ci-matching-page .ci-matching-queue-filters .filter-label,
+body.ci-matching-page .ci-matching-queue-filters .filter-input {
+  height: var(--filters-card-control-height);
+}
+
+body.ci-matching-page .ci-matching-queue-filters .filter-label {
+  flex: 0 0 64px;
+  width: 64px;
+  justify-content: flex-start;
+}
+
+body.ci-matching-page .ci-matching-queue-filters .filter-input {
+  flex: 1;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-queue-filters-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-xs);
+}
+
+body.ci-matching-page .ci-matching-queue-filters-actions .load-data-btn,
+body.ci-matching-page .ci-matching-queue-filters-actions .load-data-btn-secondary {
+  min-height: var(--filters-card-control-height);
+  height: auto;
+  line-height: 1;
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
+body.ci-matching-page .ci-matching-queue-filters-actions .load-data-btn {
+  background: var(--color-gray-500);
+  color: #fff;
+  border: 1px solid var(--color-gray-600);
+}
+
+body.ci-matching-page .ci-matching-queue-filters-actions .load-data-btn:hover {
+  background: var(--color-gray-600);
+  border-color: var(--color-gray-700);
+  color: #fff;
+}
+
+body.ci-matching-page .ci-matching-queue-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+}
+
+body.ci-matching-page .ci-matching-queue-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border-light);
+  background: transparent;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+body.ci-matching-page .ci-matching-queue-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+body.ci-matching-page .ci-matching-queue-item.is-selected {
+  background: var(--color-bg-hover);
+}
+
+body.ci-matching-page .ci-matching-queue-item.is-selected:hover {
+  background: var(--color-bg-selected);
+}
+
+body.ci-matching-page .ci-matching-queue-item-icon {
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.ci-matching-page .ci-matching-queue-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-queue-item-top {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+body.ci-matching-page .ci-matching-source {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+body.ci-matching-page .ci-matching-queue-age {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+body.ci-matching-page .ci-matching-queue-summary,
+body.ci-matching-page .ci-matching-batch-title {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-queue-summary {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 0;
+  color: var(--color-text-primary);
+}
+
+body.ci-matching-page .ci-matching-queue-summary-count {
+  font-weight: 700;
+}
+
+body.ci-matching-page .ci-matching-queue-summary-sep {
+  display: inline-block;
+  width: 1px;
+  height: 1.1em;
+  min-height: 14px;
+  max-height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  background: var(--color-border-medium, var(--border));
+}
+
+body.ci-matching-page .ci-matching-queue-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  min-height: 200px;
+  padding: var(--spacing-3xl);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+body.ci-matching-page .ci-matching-queue-empty-icon {
+  font-size: 44px;
+  color: var(--color-border-medium);
+}
+
+body.ci-matching-page .ci-matching-queue-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+body.ci-matching-page .ci-matching-queue-empty-text {
+  font-size: 13px;
+}
+
+body.ci-matching-page .ci-matching-resize-handle {
+  display: flex;
+  flex-shrink: 0;
+}
+
+body.ci-matching-page .ci-matching-split-right {
+  flex: 1 1 auto;
+  min-width: 280px;
+}
+
+body.ci-matching-page .ci-matching-batch-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+  container-name: batch-panel;
+}
+
+body.ci-matching-page .ci-matching-batch-panel-header {
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+}
+
+body.ci-matching-page .ci-matching-batch-header-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex: 1;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-batch-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--spacing-xl);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+body.ci-matching-page .ci-matching-batch-panel--empty .ci-matching-batch-panel-body {
+  display: flex;
+}
+
+body.ci-matching-page .ci-matching-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  gap: var(--spacing-md);
+  padding: var(--spacing-3xl);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+body.ci-matching-page .ci-matching-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+body.ci-matching-page .ci-matching-empty-text {
+  font-size: 13px;
+}
+
+body.ci-matching-page .ci-matching-batch-header-icon {
+  flex: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.ci-matching-page .ci-matching-batch-header-icon .ci-tech-icon {
+  width: 20px;
+  font-size: 20px;
+}
+
+body.ci-matching-page .ci-matching-batch-header-icon .ci-tech-dot {
+  width: 10px;
+  height: 10px;
+}
+
+body.ci-matching-page .ci-matching-batch-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-batch-header-meta {
+  flex-shrink: 0;
+  margin-left: var(--spacing-lg);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+body.ci-matching-page .ci-matching-batch-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+body.ci-matching-page .ci-matching-batch-attrs {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  background: var(--color-bg-primary);
+}
+
+body.ci-matching-page .ci-matching-batch-attr {
+  padding: 5px 16px;
+  border-right: 1px dotted var(--color-border-medium);
+  border-bottom: 1px dotted var(--color-border-medium);
+}
+
+body.ci-matching-page .ci-matching-batch-attr:nth-child(3n) {
+  border-right: none;
+}
+
+body.ci-matching-page .ci-matching-batch-attr:nth-last-child(-n+3) {
+  border-bottom: none;
+}
+
+@container batch-panel (min-width: 700px) {
+  body.ci-matching-page .ci-matching-batch-attrs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  body.ci-matching-page .ci-matching-batch-attr:nth-child(3n) {
+    border-right: 1px dotted var(--color-border-medium);
+  }
+
+  body.ci-matching-page .ci-matching-batch-attr:nth-last-child(-n+3) {
+    border-bottom: 1px dotted var(--color-border-medium);
+  }
+
+  body.ci-matching-page .ci-matching-batch-attr:nth-child(6n) {
+    border-right: none;
+  }
+
+  body.ci-matching-page .ci-matching-batch-attr:nth-last-child(-n+6) {
+    border-bottom: none;
+  }
+}
+
+body.ci-matching-page .ci-matching-batch-attr-label,
+body.ci-portfolio-page .ci-add-cert-link-attr-label,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+  margin-bottom: 3px;
+}
+
+body.ci-matching-page .ci-matching-batch-attr-label {
+  text-transform: capitalize;
+}
+
+body.ci-matching-page .ci-matching-batch-attr-value,
+body.ci-portfolio-page .ci-add-cert-link-attr-value,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+body.ci-matching-page .ci-matching-batch-attr-value--serial {
+  font-size: 12px;
+}
+
+body.ci-matching-page .ci-matching-split-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--spacing-xl);
+}
+
+body.ci-matching-page .ci-matching-split-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+body.ci-matching-page .ci-matching-split-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: var(--spacing-lg) 0 0;
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--spacing-lg);
+  background: var(--color-bg-primary);
+}
+
+body.ci-matching-page .ci-matching-split-footer [data-ci-split-action="apply"].action-btn-primary {
+  background: var(--color-red) !important;
+  border: 1px solid var(--color-red) !important;
+  color: #fff !important;
+}
+
+body.ci-matching-page .ci-matching-split-footer [data-ci-split-action="apply"].action-btn-primary:hover:not(:disabled) {
+  background: #990000 !important;
+  border-color: #990000 !important;
+  color: #fff !important;
+}
+
+body.ci-matching-page .ci-matching-split-footer [data-ci-split-action="apply"].action-btn-primary:disabled {
+  background: var(--color-red) !important;
+  border-color: var(--color-red) !important;
+  color: #fff !important;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.ci-matching-page .ci-matching-result-strip,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: 9px 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  line-height: 1.35;
+  width: 100%;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+body.ci-matching-page .ci-matching-result-strip-icon,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-icon {
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.ci-matching-page .ci-matching-result-strip-main,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-result-strip-match.action-btn,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-match.action-btn {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-matching-result-strip-id,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-id {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+body.ci-matching-page .ci-matching-result-strip-id {
+  color: var(--color-text-primary);
+}
+
+body.ci-matching-page .ci-matching-result-strip-name,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-name,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-delivery {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.ci-matching-page .ci-matching-result-strip-name {
+  flex-shrink: 1;
+}
+
+body.ci-matching-page .ci-matching-result-strip-sep,
+body.ci-matching-page .ci-matching-result-strip-delivery,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-delivery,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-sep {
+  color: var(--color-text-muted);
+}
+
+body.ci-matching-page .ci-matching-result-strip-delivery {
+  flex-shrink: 0;
+}
+
+body.ci-matching-page .ci-matching-result-strip-sep {
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+body.ci-matching-page .ci-matching-result-strip.is-added,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip.is-added {
+  opacity: 0.72;
+}
+
+body.ci-matching-page .ci-matching-result-strip-qty {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip[draggable] {
+  cursor: grab;
+  user-select: none;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip[draggable]:active {
+  cursor: grabbing;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip.is-selected {
+  border-color: var(--color-blue);
+  background: color-mix(in srgb, var(--color-blue) 8%, var(--color-bg-primary));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-blue) 20%, transparent);
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip.is-dragging {
+  opacity: 0.55;
+}
+
+/* Split panes — tighter strips; ellipsis over collision */
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip,
+body.ci-matching-page .ci-split-target.ci-matching-result-strip {
+  gap: 8px;
+  padding: 7px 10px;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip-main,
+body.ci-matching-page .ci-split-target.ci-matching-result-strip .ci-matching-result-strip-main {
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip-name {
+  display: none;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip-delivery,
+body.ci-matching-page .ci-split-target.ci-matching-result-strip .ci-matching-result-strip-delivery {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip-qty {
+  margin-left: 0;
+  flex-shrink: 0;
+  max-width: 4.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip-match.action-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.ci-matching-page .ci-split-search-strips .ci-matching-result-strip-match.action-btn i {
+  font-size: 11px;
+}
+
+body.ci-matching-page .ci-split-target.ci-matching-result-strip .ci-matching-result-strip-name,
+body.ci-matching-page .ci-split-target.ci-matching-result-strip .ci-matching-result-strip-qty {
+  display: none;
+}
+
+body.ci-matching-page .ci-split-target-drop-zone.is-drag-over {
+  background: color-mix(in srgb, var(--color-blue) 6%, var(--color-bg-primary));
+  outline: 2px dashed color-mix(in srgb, var(--color-blue) 45%, var(--color-border-medium));
+  outline-offset: -2px;
+}
+
+body.ci-matching-page .ci-split-target-drop-hint {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+body.ci-matching-page .ci-split-target-drop-zone:not(.is-drag-over) .ci-split-target-drop-hint {
+  display: none;
+}
+
+body.ci-matching-page .ci-split-target-drop-zone.is-drag-over .ci-split-targets-empty {
+  border-color: color-mix(in srgb, var(--color-blue) 45%, var(--color-border-medium));
+  color: var(--color-text-secondary);
+}
+
+body.ci-matching-page .ci-matching-result-strip.is-added .ci-matching-result-strip-match:disabled {
+  opacity: 1;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-strips[hidden],
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-empty[hidden] {
+  display: none !important;
+}
+
+body.ci-matching-page .ci-split-allocation-band {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  min-height: 52px;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  background: var(--color-bg-primary);
+}
+
+body.ci-matching-page .ci-split-allocation-band-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+body.ci-matching-page .ci-split-allocation-progress {
+  min-width: 0;
+  padding: 0 8px;
+}
+
+body.ci-matching-page .ci-split-allocation-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-border-light);
+  overflow: hidden;
+}
+
+body.ci-matching-page .ci-split-allocation-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-yellow);
+  transition: width 0.2s ease;
+}
+
+body.ci-matching-page .ci-split-allocation-progress-fill.is-complete {
+  background: var(--color-green);
+}
+
+body.ci-matching-page .ci-split-allocation-fraction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+body.ci-matching-page .ci-split-allocation-fraction-denom {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+body.ci-matching-page .ci-split-allocation-meta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+
+body.ci-matching-page .ci-split-modal-cols {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: var(--color-bg-primary);
+}
+
+body.ci-matching-page .ci-split-modal-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body.ci-matching-page .ci-split-modal-col + .ci-split-modal-col {
+  border-left: 1px solid var(--color-border-light);
+}
+
+body.ci-matching-page .ci-split-modal-col-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body.ci-matching-page .ci-split-modal-col-content--search {
+  overflow: hidden;
+  padding: 0 16px 0 0;
+}
+
+body.ci-matching-page .ci-split-modal-col-content--targets {
+  gap: 10px;
+  overflow: auto;
+  padding: 0 0 0 16px;
+}
+
+body.ci-matching-page .ci-split-target-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+body.ci-matching-page .ci-split-target-toolbar-btn[data-ci-split-action="clear-amounts"] {
+  margin-left: auto;
+}
+
+body.ci-matching-page .ci-split-target-toolbar-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.ci-matching-page .ci-split-unassigned-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+body.ci-matching-page .ci-split-unassigned-value.is-zero {
+  color: var(--color-green);
+}
+
+body.ci-matching-page .ci-split-allocation-status {
+  flex-shrink: 0;
+  justify-self: end;
+  max-width: 220px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-green);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-align: right;
+}
+
+body.ci-matching-page .ci-split-allocation-status.is-pending {
+  color: var(--color-text-secondary);
+}
+
+body.ci-matching-page .ci-split-target-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+body.ci-matching-page .ci-split-search-section {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body.ci-matching-page .ci-split-search.search-input-wrapper {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+body.ci-matching-page .ci-split-search.search-input-wrapper .search-input {
+  width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box;
+  border-radius: var(--radius-md) !important;
+  background-color: var(--color-bg-primary);
+}
+
+body.ci-matching-page .ci-split-search.search-input-wrapper i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+body.ci-matching-page .ci-split-search-panel {
+  flex: 1;
+  min-height: 120px;
+  border: 1px dashed var(--color-border-medium);
+  border-radius: var(--radius-md);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.ci-matching-page .ci-split-search-panel--has-results {
+  min-height: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+body.ci-matching-page .ci-split-search-strips {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body.ci-matching-page .ci-split-search-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 12px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+body.ci-matching-page .ci-split-panel-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+body.ci-matching-page .ci-split-panel-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+body.ci-matching-page .ci-split-panel-empty-detail {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  max-width: 280px;
+}
+
+body.ci-matching-page .ci-split-target-amount {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 52px;
+  min-width: 52px !important;
+  height: 28px;
+  padding: 0 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-md) !important;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+body.ci-matching-page .ci-split-target-amount::-webkit-outer-spin-button,
+body.ci-matching-page .ci-split-target-amount::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+body.ci-matching-page .ci-split-target-amount:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-blue) 18%, transparent);
+}
+
+body.ci-matching-page .ci-split-target-remove {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 2px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+body.ci-matching-page .ci-split-target-remove:hover {
+  background: var(--color-gray-100);
+  color: var(--color-text-primary);
+}
+
+body.ci-matching-page .ci-split-targets-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  border: 1px dashed var(--color-border-medium);
+  border-radius: 9px;
+}
+
+body.ci-matching-page .ci-split-targets-empty .ci-split-panel-empty {
+  padding: 24px 12px;
+}
+
+/* Toast feedback (Matching + other CI screens) */
+.ci-toast-stack {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.ci-toast {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: min(92vw, 420px);
+  padding: 10px 16px;
+  border-radius: 9px;
+  background: var(--color-gray-800);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ci-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ci-toast.is-leaving {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.ci-toast-icon {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--color-green) 75%, #fff);
+  font-size: 13px;
+}
+
+.ci-toast-message {
+  min-width: 0;
+}
+
+/* ─── Portfolio: New Certificate modal ─── */
+body.ci-portfolio-page .ci-input-accent {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  overflow: hidden;
+  background: var(--color-bg-tertiary);
+}
+
+body.ci-portfolio-page .ci-input-accent.mol-validation {
+  border-left-width: var(--mol-validation-w);
+  border-left-style: solid;
+  border-left-color: var(--mol-v-edge);
+}
+
+body.ci-portfolio-page .ci-input-accent__bar {
+  width: 4px;
+  flex-shrink: 0;
+  background: var(--color-gray-400);
+}
+
+body.ci-portfolio-page .ci-input-accent .form-input {
+  flex: 1;
+  min-width: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent;
+  box-sizing: border-box;
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+body.ci-portfolio-page .ci-input-accent .form-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+body.ci-portfolio-page .ci-input-accent select.form-input {
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%236b7a99'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+
+body.ci-portfolio-page .ci-input-accent--textarea .form-input:not(.ci-add-cert-serial-numbers-textarea) {
+  height: auto;
+  min-height: 132px;
+  resize: vertical;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  line-height: 1.45;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal-overlay {
+  z-index: 1100;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal-overlay:not([hidden]) {
+  display: flex;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal {
+  width: min(1020px, 94vw);
+  height: auto;
+  max-height: 88vh;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode {
+  width: min(560px, 94vw);
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .ci-add-cert-modal-body {
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: auto;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .ci-add-cert-details {
+  flex: none;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .ci-add-cert-serials-card {
+  display: none;
+}
+
+/* form-field { display:flex } overrides [hidden] — mode-specific fields use classes */
+body.ci-portfolio-page .ci-add-cert-modal:not(.is-edit-mode) .ci-add-cert-edit-only {
+  display: none !important;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .ci-add-cert-add-only {
+  display: none !important;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .modal-header {
+  min-width: 0;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  min-width: 0;
+  max-width: 100%;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal-title-serial {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal-body {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: var(--spacing-lg);
+}
+
+body.ci-portfolio-page .ci-add-cert-modal:not(.is-edit-mode) .ci-add-cert-modal-body {
+  overflow: auto;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .ci-add-cert-modal-body {
+  flex: 0 1 auto;
+  align-items: flex-start;
+  overflow: auto;
+}
+
+body.ci-portfolio-page .ci-add-cert-pane-card {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ci-portfolio-page .ci-add-cert-pane-card.ci-add-cert-serials-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  align-self: stretch;
+  height: auto;
+}
+
+body.ci-portfolio-page .ci-add-cert-pane-card-header.card-header {
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .ci-add-cert-pane-card-body.card-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: var(--spacing-lg);
+  overflow: auto;
+}
+
+body.ci-portfolio-page .ci-add-cert-pane-card-body.ci-add-cert-serials-card-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  gap: 14px;
+}
+
+body.ci-portfolio-page .ci-add-cert-serials-intro {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+body.ci-portfolio-page .ci-add-cert-serial-numbers-field {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+body.ci-portfolio-page .ci-add-cert-serial-numbers-accent {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body.ci-portfolio-page .ci-add-cert-serial-numbers-accent .ci-add-cert-serial-numbers-textarea {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  resize: none;
+}
+
+body.ci-portfolio-page .ci-add-cert-details {
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: stretch;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+body.ci-portfolio-page .ci-add-cert-details .ci-add-cert-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+body.ci-portfolio-page .ci-add-cert-details .ci-add-cert-field--full {
+  grid-column: 1 / -1;
+}
+
+body.ci-portfolio-page .ci-add-cert-serials-card-body .form-field,
+body.ci-portfolio-page .ci-add-cert-details .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+body.ci-portfolio-page .ci-add-cert-serials-card-body .form-label,
+body.ci-portfolio-page .ci-add-cert-details .form-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+body.ci-portfolio-page .ci-input-group {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg-tertiary);
+}
+
+body.ci-portfolio-page .ci-input-group.mol-validation {
+  border-left-width: var(--mol-validation-w);
+  border-left-style: solid;
+  border-left-color: var(--mol-v-edge);
+}
+
+body.ci-portfolio-page .ci-input-group .ci-input-accent {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+}
+
+body.ci-portfolio-page .ci-input-group .ci-input-accent__bar {
+  display: none;
+}
+
+body.ci-portfolio-page .ci-input-group .ci-add-cert-range-actions {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+body.ci-portfolio-page .ci-input-group .ci-add-cert-range-actions[hidden] {
+  display: none !important;
+}
+
+body.ci-portfolio-page .ci-input-group .ci-add-cert-range-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 12px;
+  min-height: 34px;
+  font-size: 12px;
+  font-family: inherit;
+  white-space: nowrap;
+  background: var(--color-bg-primary);
+  border: none;
+  border-left: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+body.ci-portfolio-page .ci-input-group .ci-add-cert-range-action-btn:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+}
+
+body.ci-portfolio-page .ci-input-group .ci-add-cert-range-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+body.ci-portfolio-page .ci-input-group .ci-add-cert-range-action-btn[hidden] {
+  display: none !important;
+}
+
+body.ci-portfolio-page .ci-add-cert-source-range-group.is-invalid {
+  border-left-color: var(--color-red, #c0392b);
+}
+
+body.ci-portfolio-page .ci-add-cert-field-error {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-red, #c0392b);
+}
+
+body.ci-portfolio-page .ci-add-cert-serial-count {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  min-height: calc(11px * 1.4);
+  color: var(--color-text-muted);
+}
+
+body.ci-portfolio-page .ci-add-cert-serial-count.is-empty {
+  opacity: 0.65;
+}
+
+body.ci-portfolio-page .ci-add-cert-links-panel[hidden] {
+  display: none !important;
+}
+
+body.ci-portfolio-page .ci-add-cert-link-attrs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  background: var(--color-bg-primary);
+}
+
+body.ci-portfolio-page .ci-add-cert-link-attr {
+  padding: 5px 16px;
+  border-right: 1px dotted var(--color-border-medium);
+}
+
+body.ci-portfolio-page .ci-add-cert-link-attr:first-child {
+  border-left: 1px dotted var(--color-border-medium);
+}
+
+body.ci-portfolio-page .ci-add-cert-link-attr:last-child {
+  border-right: none;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal.is-edit-mode .ci-add-cert-details {
+  gap: 14px;
+}
+
+body.ci-portfolio-page .ci-add-cert-modal-overlay.is-replace-confirm-open {
+  pointer-events: none;
+}
+
+body.ci-portfolio-page .ci-add-cert-replace-confirm-overlay {
+  z-index: 1200;
+}
+
+body.ci-portfolio-page .ci-add-cert-replace-confirm-overlay:not([hidden]) {
+  display: flex;
+}
+
+body.ci-portfolio-page .ci-add-cert-replace-confirm-modal {
+  width: min(440px, 92vw);
+}
+
+body.ci-portfolio-page .ci-add-cert-replace-confirm-body {
+  padding-top: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+}
+
+body.ci-portfolio-page .ci-add-cert-replace-confirm-message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+
+/* ─── Portfolio: Link to Trade modal (Matching-style match picker) ─── */
+body.ci-portfolio-page .ci-link-trade-modal-overlay {
+  z-index: 1100;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal-overlay:not([hidden]) {
+  display: flex;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal {
+  width: min(560px, 94vw);
+  height: min(680px, 88vh);
+  max-height: 88vh;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: var(--spacing-lg);
+}
+
+body.ci-portfolio-page .ci-link-trade-context {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  flex: 0 0 auto;
+}
+
+body.ci-portfolio-page .ci-link-trade-search-card {
+  margin-top: var(--spacing-md);
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-header-icon {
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-header-icon .ci-tech-icon {
+  width: 24px;
+  font-size: 22px;
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-header-icon .ci-tech-dot {
+  width: 12px;
+  height: 12px;
+}
+
+/* Link to Trade modal — per-technology accent (Allocation pattern; grid stays neutral) */
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-icon--solar {
+  color: var(--color-yellow);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-icon--wind {
+  color: var(--color-gray-400);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-icon--hydro {
+  color: var(--color-blue);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-icon--biomass {
+  color: var(--color-green);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-dot {
+  background: var(--color-gray-400);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-dot--hydro {
+  background: var(--color-blue);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-tech-dot--biomass {
+  background: var(--color-green);
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-header-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+body.ci-portfolio-page .ci-link-trade-certificate-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attrs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  background: var(--color-bg-primary);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr {
+  padding: 5px 16px;
+  border-right: 1px dotted var(--color-border-medium);
+  border-bottom: 1px dotted var(--color-border-medium);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr:nth-child(3n) {
+  border-right: none;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr:nth-child(3n+1):nth-last-child(-n+3),
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr:nth-child(3n+2):nth-last-child(-n+2),
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-batch-attr:nth-child(3n):nth-last-child(-n+1) {
+  border-bottom: none;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-card.content-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-secondary);
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-card > .card-body.ci-matching-match-card-body {
+  padding: var(--spacing-lg) var(--spacing-lg) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-card .card-header {
+  padding: var(--spacing-sm) var(--spacing-lg) 0;
+  border-bottom: none;
+  background: var(--color-bg-secondary);
+  flex: 0 0 auto;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-card .card-title {
+  font-size: 14px;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-search.search-input-wrapper {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-search.search-input-wrapper .search-input {
+  width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md) !important;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-search.search-input-wrapper .ci-matching-match-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9898a5;
+  font-size: 12px;
+  cursor: help;
+  z-index: 1;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-search.search-input-wrapper .ci-matching-match-search-icon i {
+  position: static;
+  transform: none;
+  pointer-events: none;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-demo-tooltip {
+  position: relative;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-demo-tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  padding: 8px 10px;
+  background: var(--color-gray-800);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+  width: max-content;
+  max-width: 320px;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-demo-tooltip:hover::before,
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-demo-tooltip:focus-visible::before {
+  opacity: 1;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-panel {
+  --ci-link-trade-match-panel-min-h: 200px;
+  flex: 1 1 auto;
+  min-height: var(--ci-link-trade-match-panel-min-h);
+  margin-bottom: var(--spacing-lg);
+  border: 1px dashed var(--color-border-medium);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-panel--has-results {
+  flex: 0 1 auto;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-strips {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-panel--has-results .ci-matching-match-strips {
+  flex: 0 1 auto;
+  padding: 0;
+  max-height: 340px;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-match-empty {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  box-sizing: border-box;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-match.action-btn-primary {
+  background: var(--color-red) !important;
+  border: 1px solid var(--color-red) !important;
+  color: #fff !important;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-match.action-btn-primary:hover {
+  background: #990000 !important;
+  border-color: #990000 !important;
+  color: #fff !important;
+}
+
+body.ci-portfolio-page .ci-link-trade-modal .ci-matching-result-strip-qty {
+  display: none;
+}
+
+/* Registry Activity */
+
+body.ci-registry-page #ci-registry-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ci-registry-page #ci-registry-content:has(.te-row-menu-wrap.is-open) {
+  overflow: visible;
+}
+
+body.ci-registry-page .ci-registry-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.ci-registry-page .ci-registry-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.ci-registry-page .ci-registry-card-body > .filter-panel {
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  padding-bottom: var(--spacing-lg);
+  flex-shrink: 0;
+}
+
+body.ci-registry-page .ci-registry-card-body > .filter-panel .filter-row {
+  flex-wrap: wrap;
+}
+
+body.ci-registry-page .ci-registry-card-body > .table-wrapper {
+  flex: 1;
+  min-height: 0;
+  padding: 0 1em 1em;
+}
+
+body.ci-registry-page .ci-registry-card-summary {
+  justify-content: flex-end;
+  gap: 14px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.ci-registry-page .ci-registry-summary-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+body.ci-registry-page .ci-registry-summary-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+body.ci-registry-page .ci-registry-summary-dot--confirmed {
+  background: var(--color-green);
+}
+
+body.ci-registry-page .ci-registry-summary-dot--submitted {
+  background: var(--color-blue);
+}
+
+body.ci-registry-page .ci-registry-summary-dot--pending {
+  background: var(--color-text-muted);
+}
+
+body.ci-registry-page .ci-registry-summary-attn {
+  color: var(--color-red);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+body.ci-registry-page .ci-registry-confirmed-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-green);
+  font-size: 12px;
+}
+
+body.ci-registry-page .ci-registry-confirmed-ok i {
+  font-size: 11px;
+}
+
+body.ci-registry-page .ci-registry-confirmed-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-red);
+  font-size: 12px;
+}
+
+body.ci-registry-page .ci-registry-confirmed-error i {
+  font-size: 11px;
+}
+
+body.ci-registry-page .ci-registry-empty-row td {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* ─── Portfolio: View Audit modal (Trade Edit audit tab pattern) ─── */
+body.ci-portfolio-page .ci-cert-audit-modal-overlay {
+  z-index: 1100;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-overlay:not([hidden]) {
+  display: flex;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal {
+  width: min(720px, 94vw);
+  height: min(640px, 88vh);
+  max-height: 88vh;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  min-width: 0;
+  max-width: 100%;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-title-serial {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-top: var(--spacing-lg);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  color: var(--color-text-primary);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-empty {
+  margin: 0;
+  padding: var(--spacing-3xl);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-card.content-card {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-card-header.card-header {
+  min-height: 40px;
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-card-title.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--color-gray-400);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-icon.te-audit-icon--molecule {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-user-name em {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-weight: 400;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-meta {
+  flex-shrink: 0;
+  margin-left: var(--spacing-xl);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-card-body.card-body {
+  padding: 0;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table {
+  --te-audit-field-col-width: 240px;
+  --te-audit-old-col-width: 160px;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table col.te-audit-col-field {
+  width: var(--te-audit-field-col-width);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table tbody tr {
+  cursor: default;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table tbody tr:hover,
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table tbody tr:nth-child(odd):hover {
+  background: var(--color-bg-primary);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table tbody tr:nth-child(even):hover {
+  background: var(--color-bg-secondary);
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table td {
+  height: auto;
+  min-height: var(--table-grid-row-min-height);
+  line-height: 1.4;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  vertical-align: top;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-field {
+  padding-left: var(--spacing-xl);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  white-space: normal;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-values {
+  color: var(--color-text-secondary);
+  white-space: normal;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-values-inner {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  min-width: 0;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-old {
+  flex: 0 0 var(--te-audit-old-col-width);
+  min-width: 0;
+  text-align: right;
+  padding-right: var(--spacing-md);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-change-arrow {
+  flex: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-new {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-old[title]:not([title=""]),
+body.ci-portfolio-page .ci-cert-audit-modal-body .te-audit-table .te-audit-new[title]:not([title=""]) {
+  cursor: help;
+}
+

@@ -1,0 +1,186 @@
+/**
+ * Standard data grids — single source for table shell, cell padding, header/body rhythm.
+ * Use class="data-table" on tables; add data-table--row-select when the first column is checkbox selection.
+ * Screen-specific tweaks: components.css (Trades columns, Volatilities), fund-allocations.css (FA strip, mapping NAV).
+ */
+
+/* ── Scroll shell ── */
+.table-container {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-light);
+  border-top: none;
+  overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.table-container table {
+  border: none;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+}
+
+.table-container.loading .loading-overlay {
+  display: flex;
+}
+
+/* ── Core grid ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--table-grid-font-size);
+}
+
+.data-table th {
+  background: var(--color-gray-200);
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--color-border-light);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--table-grid-header-height);
+  vertical-align: middle;
+  line-height: var(--table-grid-header-height);
+  box-sizing: border-box;
+}
+
+.data-table td {
+  padding: var(--table-grid-cell-pad-y) var(--table-grid-cell-pad-x);
+  border: 0;
+  border-bottom: 1px solid var(--color-border-light);
+  white-space: nowrap;
+  min-height: var(--table-grid-row-min-height);
+  height: var(--table-grid-row-min-height);
+  vertical-align: middle;
+  line-height: var(--table-grid-row-min-height);
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Inline editors: transparent fill + no focus ring (row striping / cell bg shows through) */
+.data-table input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+.data-table select,
+.data-table textarea {
+  background-color: transparent !important;
+}
+
+.data-table input:focus,
+.data-table input:focus-visible,
+.data-table select:focus,
+.data-table select:focus-visible,
+.data-table textarea:focus,
+.data-table textarea:focus-visible {
+  outline: none;
+  background-color: transparent !important;
+}
+
+/* Row selection column (Market Data, Trades main grid) */
+.data-table--row-select th:first-child,
+.data-table--row-select td:first-child {
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#select-all-checkbox {
+  cursor: pointer;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.data-table tbody tr {
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.data-table tbody tr .status-cell,
+.data-table tbody tr .row-checkbox {
+  cursor: default;
+}
+
+.data-table tbody tr .row-checkbox {
+  cursor: pointer;
+}
+
+/* Odd rows must not stay transparent: .table-container uses --color-bg-tertiary, same as the old
+   even-row fill — both looked identical (no zebra). Primary vs secondary reads clearly on Trades / Market Data. */
+.data-table tbody tr:nth-child(odd) {
+  background: var(--color-bg-primary);
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: var(--color-bg-secondary);
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.data-table tbody tr:hover .product-link,
+#volatilities-content .data-table tbody tr:hover .product-link {
+  color: var(--color-blue);
+  text-decoration: none;
+}
+
+.data-table tbody tr:hover .product-link .short-name,
+#volatilities-content .data-table tbody tr:hover .product-link .short-name {
+  color: var(--color-yellow);
+}
+
+.attention-table tbody tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.attention-table tbody tr:hover .product-link {
+  color: var(--color-blue);
+  text-decoration: none;
+}
+
+.attention-table tbody tr:hover .product-link .short-name {
+  color: var(--color-yellow);
+}
+
+.data-table tbody tr.selected,
+.curves-table tbody tr.selected {
+  background: var(--color-bg-selected);
+}
+
+.data-table tbody tr.selected .short-name {
+  color: var(--color-yellow);
+}
+
+/*
+ * Padding contract — all `.data-table` grids:
+ * • Do not put `padding` on `td`/`th` inline styles; rhythm comes from tokens above.
+ * • Dynamic color/state may still use `style="color:..."` sparingly.
+ * • Nested / footer variants use classes below (never one-off px padding).
+ */
+.data-table td.data-table-cell--nest,
+.data-table th.data-table-cell--nest {
+  padding-left: calc(var(--table-grid-cell-pad-x) + 19px); /* visual indent ~28px total */
+}
+
+.data-table tfoot td.data-table-footer-label {
+  text-align: right;
+}

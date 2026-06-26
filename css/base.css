@@ -1,0 +1,56 @@
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    min-height: 100vh;
+}
+
+/* Standalone inputs/selects/textareas — square corners.
+   Grouped controls keep segmented radius: .filter-group, .refine-input-group,
+   .marks-search-input-group, .input-group, .fa-trueup-next-trade-group, etc. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]),
+select,
+textarea {
+    border-radius: 0;
+}
+
+/* Label-above field chrome (validation bar + input) — square, not segmented groups */
+[class*="-input-accent"] {
+    border-radius: 0;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flex-start {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+

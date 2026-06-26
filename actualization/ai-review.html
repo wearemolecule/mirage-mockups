@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Actualization — AI Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/actualization.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+<script defer src="actualization-app.js"></script>
+</head>
+<body class="act-standalone-shell app-sidebar-enabled act-ai-review-page" data-app-header-account="Buffalo">
+<div class="app-header-mount"></div>
+<div class="main main-content act-main-shell">
+  <div class="page-header act-page-header-row">
+    <div class="act-title-line page-header__title-row">
+      <h1 class="page-title act-page-title">AI Review</h1>
+      <span class="act-ai-powered-note">Powered by Claude</span>
+    </div>
+  </div>
+  <div class="content-area act-content-area act-content-area--ai-review">
+    <section class="content-card act-yaml-card">
+      <div class="card-header">
+        <div class="card-title act-yaml-card-title">
+          <span class="act-yaml-filename">alloc-20260409-1042.yaml</span>
+          <span class="act-yaml-status">PARTIAL</span>
+          <span class="act-yaml-meta">6 locations · 8.47% unallocated</span>
+        </div>
+        <div class="card-actions action-toolbar">
+          <button type="button" class="action-btn" id="yaml-download-btn">Download</button>
+          <button type="button" class="action-btn" id="open-chat-btn" aria-pressed="false">Ask Claude</button>
+        </div>
+      </div>
+      <div class="card-body act-yaml-card-body">
+        <div class="act-yaml-card-split">
+          <div class="act-yaml-view" id="act-yaml-view">
+            <pre id="yaml-content" class="act-yaml-content"></pre>
+          </div>
+          <div class="panel-resize-handle act-yaml-chat-resize-handle" id="act-yaml-chat-resize-handle" aria-hidden="true">
+            <i class="fas fa-grip-lines-vertical" aria-hidden="true"></i>
+          </div>
+          <div id="chat-panel" class="act-yaml-chat-panel" aria-hidden="true">
+            <div class="act-chat-header">
+              <span class="chat-claude-icon" aria-hidden="true">✦</span>
+              <span class="act-chat-title">Claude</span>
+              <span class="act-chat-mcp-badge">MCP</span>
+              <span class="act-chat-model">claude-sonnet-4-6</span>
+              <div class="act-chat-header-tools">
+                <button type="button" class="act-chat-close" title="Close chat" aria-label="Close chat">✕</button>
+              </div>
+            </div>
+
+            <div id="chat-messages" class="act-chat-messages">
+              <div class="chat-msg chat-user">
+                <div class="chat-bubble chat-bubble-user">Mountain Pool West came back completely unmatched — all 35,000 Dth. What happened?</div>
+                <div class="chat-time">10:43 AM</div>
+              </div>
+
+              <div class="chat-msg chat-assistant">
+                <div class="chat-avatar-row"><span class="chat-claude-icon" aria-hidden="true">✦</span><span class="chat-name">Claude</span></div>
+                <div class="tool-call-chip"><span class="tool-call-icon" aria-hidden="true">⚙</span><code>read_allocation_yaml(location="loc-F")</code><span class="tool-call-ok">✓ 342ms</span></div>
+                <div class="chat-bubble chat-bubble-assistant">
+                  <p>I looked at the full run for loc-F. The engine evaluated all five counterparty paths here but every candidate scored below the 45-point threshold. The highest scorer was Transmission Co Alpha (T-0070010, 11,200 Dth scheduled) — it found a settlement config in Molecule that lines up on counterparty, direction, and gas day, but the <strong>hub name scored only 34/40 for location similarity</strong>.</p>
+                  <p>The pipeline is reporting this location as <code>MOUNTAIN POOL WEST</code>. The settlement config linked to the Transmission Co Alpha trade has <code>hub: NGPL-WY</code>. The engine's fuzzy matcher didn't consider these the same point, so the total score stayed below the threshold.</p>
+                </div>
+              </div>
+
+              <div class="chat-msg chat-user">
+                <div class="chat-bubble chat-bubble-user">NGPL-WY is definitely the same point — that's just how we label it internally. Can you pull up the settlement config for the Transmission Co Alpha trade?</div>
+                <div class="chat-time">10:45 AM</div>
+              </div>
+
+              <div class="chat-msg chat-assistant">
+                <div class="chat-avatar-row"><span class="chat-claude-icon" aria-hidden="true">✦</span><span class="chat-name">Claude</span></div>
+                <div class="tool-call-chip"><span class="tool-call-icon" aria-hidden="true">⚙</span><code>query_settlement_configs(trade_id="T-0070010")</code><span class="tool-call-ok">✓ 189ms</span></div>
+                <div class="chat-bubble chat-bubble-assistant">
+                  <p>Here's the settlement config linked to T-0070010:</p>
+                  <div class="act-chat-config-block">
+                    <div><span class="act-chat-config-label">Config</span><strong class="act-chat-config-value act-chat-config-value--emphasis">SC-2985-WBI-R</strong></div>
+                    <div><span class="act-chat-config-label">Trade</span><span class="act-chat-config-value">T-0070010 · Transmission Co Alpha</span></div>
+                    <div><span class="act-chat-config-label">Hub</span><span class="act-chat-config-value">NGPL-WY</span></div>
+                    <div><span class="act-chat-config-label">Direction</span><span class="act-chat-config-value">Buy</span></div>
+                    <div><span class="act-chat-config-label">Qty planned</span><span class="act-chat-config-value">25,000 Dth</span></div>
+                    <div><span class="act-chat-config-label">Qty sched'd</span><span class="act-chat-config-value">11,200 Dth <span class="chat-text-warning">(PBL — pipeline prorated)</span></span></div>
+                    <div><span class="act-chat-config-label">Gas day</span><span class="act-chat-config-value">2026-04-09</span></div>
+                    <div><span class="act-chat-config-label">Actualized</span><span class="act-chat-config-value chat-text-danger">No</span></div>
+                  </div>
+                  <p>The volumes are consistent — 11,200 Dth is a prorated-below result on the full 25,000 Dth contracted volume. <strong>SC-2985-WBI-R is exactly the right settlement config to link here.</strong> The only thing blocking the auto-match is the hub label.</p>
+                </div>
+              </div>
+
+              <div class="chat-msg chat-user">
+                <div class="chat-bubble chat-bubble-user">Right. Propose the match — link T-0070010 to SC-2985-WBI-R.</div>
+                <div class="chat-time">10:47 AM</div>
+              </div>
+
+              <div class="chat-msg chat-assistant">
+                <div class="chat-avatar-row"><span class="chat-claude-icon" aria-hidden="true">✦</span><span class="chat-name">Claude</span></div>
+                <div class="tool-call-chip"><span class="tool-call-icon" aria-hidden="true">⚙</span><code>propose_amendment(pipeline_schedule="T-0070010", settlement_config="SC-2985-WBI-R", allocated_dth=11200, method="MANUAL_HUB_OVERRIDE")</code><span class="tool-call-ok">✓ 156ms</span></div>
+                <div class="chat-bubble chat-bubble-assistant">
+                  <p>Draft ready. This links the pipeline schedule for Transmission Co Alpha (11,200 Dth at <code>MOUNTAIN POOL WEST</code>) to settlement config SC-2985-WBI-R (hub: <code>NGPL-WY</code>). Method is logged as <strong>MANUAL_HUB_OVERRIDE</strong> — the audit trail will note this was a manual link due to a hub name discrepancy. <em>Nothing changes until you click Accept.</em></p>
+                  <p>What changes:</p>
+                  <ul class="chat-change-list">
+                    <li>Transmission Co Alpha <code>T-0070010</code>: <span class="chat-text-danger">0 Dth</span> → <span class="chat-text-success">11,200 Dth</span> allocated</li>
+                    <li>Mountain Pool West: <span class="chat-text-danger">Unmatched</span> → <span class="chat-text-warning">Partial</span> (23,800 Dth still unallocated)</li>
+                    <li>Run total allocated: 460,839 → <strong>472,039 Dth</strong></li>
+                  </ul>
+                  <p class="chat-note">The other 4 paths (Marketing Co Beta, Marketing Co Gamma, Utility Co North, Marketing Co Delta) have the same hub mismatch — their configs are also booked under NGPL-WY. After accepting this, consider adding <code>MOUNTAIN POOL WEST</code> as a location alias for <code>NGPL-WY</code> in Molecule Settings → Pipeline Locations so the engine resolves all of them automatically next run.</p>
+                </div>
+              </div>
+
+              <div class="chat-msg chat-user">
+                <div class="chat-bubble chat-bubble-user">Accept this one. And yes, I'll add the alias — good call.</div>
+                <div class="chat-time">10:48 AM</div>
+              </div>
+
+              <div class="chat-msg chat-assistant">
+                <div class="chat-avatar-row"><span class="chat-claude-icon" aria-hidden="true">✦</span><span class="chat-name">Claude</span></div>
+                <div class="chat-bubble chat-bubble-assistant">
+                  <p>Here's the exact patch. Review and confirm — nothing is written until you click <strong>Accept Amendment</strong>.</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="amendment-panel" class="act-amendment-panel">
+              <div class="act-amendment-header">
+                <span class="act-amendment-label">Proposed Amendment</span>
+                <span class="act-amendment-meta">alloc-20260409-1042.yaml · patch #1</span>
+              </div>
+              <pre class="act-amendment-diff"><span class="diff-context"> # LOC F: MOUNTAIN POOL WEST</span>
+<span class="diff-context">   hub: NGPL-Mainline  loc: "29850"</span>
+<span class="diff-context">   scheduled_dth: 35000</span>
+<span class="diff-removed">-  allocated_dth: 0</span>
+<span class="diff-added">+  allocated_dth: 11200</span>
+<span class="diff-removed">-  variance_dth: -35000</span>
+<span class="diff-added">+  variance_dth: -23800</span>
+<span class="diff-removed">-  status: UNMATCHED</span>
+<span class="diff-added">+  status: PARTIAL</span>
+<span class="diff-removed">-  allocation_method: null</span>
+<span class="diff-added">+  allocation_method: MANUAL_HUB_OVERRIDE</span>
+<span class="diff-removed">-  settlement_configs_used: 0</span>
+<span class="diff-added">+  settlement_configs_used: 2</span>
+<span class="diff-context">   ···</span>
+<span class="diff-context">   paths.receipts[0]:  # trade_id: T-0070010</span>
+<span class="diff-removed">-    allocated_qty_dth: 0</span>
+<span class="diff-added">+    allocated_qty_dth: 11200</span>
+<span class="diff-removed">-    variance_dth: -11200</span>
+<span class="diff-added">+    variance_dth: 0</span>
+<span class="diff-removed">-    settlement_config: null</span>
+<span class="diff-added">+    settlement_config: SC-2985-WBI-R</span>
+<span class="diff-removed">-    method: null</span>
+<span class="diff-added">+    method: MANUAL_HUB_OVERRIDE</span>
+<span class="diff-removed">-    status: UNMATCHED</span>
+<span class="diff-added">+    status: MATCHED</span>
+<span class="diff-context">   ···</span>
+<span class="diff-context"> # SUMMARY (meta)</span>
+<span class="diff-removed">-  total_allocated_dth: 460839</span>
+<span class="diff-added">+  total_allocated_dth: 472039</span>
+<span class="diff-removed">-  total_unallocated_dth: 42625</span>
+<span class="diff-added">+  total_unallocated_dth: 31425</span>
+<span class="diff-removed">-  variance_pct: 8.47</span>
+<span class="diff-added">+  variance_pct: 6.24</span></pre>
+              <div class="act-amendment-actions">
+                <button type="button" class="action-btn" id="reject-btn">Reject</button>
+                <div class="act-amendment-actions-right">
+                  <span class="act-amendment-summary">1 path · manual override</span>
+                  <button type="button" class="action-btn action-btn-primary" id="accept-btn">Accept Amendment</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="act-chat-input-row">
+              <input type="text" class="act-chat-input" placeholder="Ask about this allocation…" aria-label="Ask about this allocation">
+              <button type="button" class="action-btn action-btn-primary act-chat-send-btn" title="Send" aria-label="Send"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

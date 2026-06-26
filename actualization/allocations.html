@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Actualization — Allocations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/actualization.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+<script defer src="../js/tabs-stack.js"></script>
+<script defer src="actualization-app.js"></script>
+<script defer src="allocations-app.js"></script>
+</head>
+<body class="act-standalone-shell app-sidebar-enabled act-allocations-page" data-app-header-account="Buffalo">
+<div class="app-header-mount"></div>
+<div class="main main-content act-main-shell">
+  <div class="page-header act-page-header-row">
+    <div class="act-title-line act-nom-page-header-line page-header__title-row">
+      <h1 class="page-title act-page-title act-nom-page-title">
+        <span class="act-nom-title-main">Allocations</span><span class="act-nom-title-for">for</span><select class="act-nom-pipeline-select" id="act-alloc-pipeline-select" aria-label="Pipeline"><option selected>NGPL</option><option>GTS</option><option>MWP</option><option>SGP</option></select>
+      </h1>
+      <div class="act-nom-date-strip" role="group" aria-label="Gas day">
+        <button type="button" class="act-nom-date-chev" id="act-alloc-date-prev" aria-label="Previous gas day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <label class="act-nom-date-trigger">
+          <span class="act-nom-date-trigger-main" id="act-alloc-date-display">APR 9, 2026</span>
+          <input type="date" class="act-nom-date-input" id="act-alloc-gas-day" value="2026-04-09" aria-label="Gas day">
+        </label>
+        <button type="button" class="act-nom-date-chev" id="act-alloc-date-next" aria-label="Next gas day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="content-area act-content-area act-allocations-content">
+    <div class="tabs-stack act-allocations-tabs" data-tabs-stack>
+      <div class="tabs-stack__bar">
+        <div class="tabs-stack__tabs" role="tablist" aria-label="Allocation cycle">
+          <button type="button" class="tabs-stack__tab active" role="tab" aria-selected="true" data-tab-panel="timely">Timely</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="evening">Evening</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="id1">ID1</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="id2">ID2</button>
+          <button type="button" class="tabs-stack__tab" role="tab" aria-selected="false" data-tab-panel="id3">ID3</button>
+        </div>
+        <div class="tabs-stack__actions actions action-toolbar">
+          <button type="button" class="action-btn action-btn-primary" id="run-alloc-btn" onclick="runAllocation()">Run Auto-Allocate</button>
+          <button type="button" class="action-btn action-btn-primary">Accept</button>
+          <span class="action-separator" aria-hidden="true"></span>
+          <button type="button" class="action-btn">Refresh</button>
+          <button type="button" class="action-btn">Export</button>
+        </div>
+      </div>
+      <div class="tabs-stack__panels">
+        <div class="tabs-stack__panel active act-allocations-tab-panel" role="tabpanel" data-tab-panel="timely">
+
+      <div class="act-stats-strip">
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Locations</div>
+          <div class="act-stat-value">6</div>
+          <div class="act-stat-sub">All hubs</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Sch Qty</div>
+          <div class="act-stat-value">503,464</div>
+          <div class="act-stat-sub" id="act-alloc-stat-cycle-sub">Dth · Timely</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Allocated</div>
+          <div class="act-stat-value act-stat-value--green" id="stat-allocated">460,839</div>
+          <div class="act-stat-sub">91.5% of scheduled</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Unallocated</div>
+          <div class="act-stat-value act-stat-value--red" id="stat-unallocated">42,625</div>
+          <div class="act-stat-sub">8.5% remaining</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Fully Matched</div>
+          <div class="act-stat-value act-stat-value--green">4 / 6</div>
+          <div class="act-stat-sub">Locations</div>
+        </div>
+        <div class="act-stat-cell">
+          <div class="act-stat-label">Open Trades</div>
+          <div class="act-stat-value">18</div>
+          <div class="act-stat-sub">Pending settlement</div>
+        </div>
+      </div>
+
+      <div id="alloc-callout" class="act-alloc-callout">
+        <strong style="color:var(--blue)">Auto-Allocation completed</strong> &nbsp;—&nbsp;
+        Algorithm: <strong>EBB Agreement Match → Proration (PBL/PBA)</strong>.
+        4 of 6 locations fully matched. 1 location has partial coverage (Mountain Pool West — no settlement config found for 3 paths).
+        <span style="color:var(--gray-400);margin-left:0.5rem">Run at 09:14:22</span>
+      </div>
+
+        <div class="filter-row act-alloc-grid-filters">
+          <div class="filter-group">
+            <span class="filter-label">Direction</span>
+            <select class="filter-input">
+              <option>All Directions</option>
+              <option>Receipt</option>
+              <option>Delivery</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Location</span>
+            <input type="text" class="filter-input act-nom-filter-location" placeholder="Filter location…">
+          </div>
+        </div>
+
+      <div class="grid-wrap act-alloc-grid-wrap">
+        <table class="data-table act-alloc-table" id="alloc-table">
+          <colgroup>
+            <col class="act-nom-col-loc">
+            <col class="act-nom-col-name">
+            <col class="act-alloc-col-pipeline">
+            <col class="act-nom-col-qty">
+            <col class="act-nom-col-qty">
+            <col class="act-nom-col-qty">
+            <col class="act-nom-col-qty">
+            <col class="act-nom-col-qty">
+            <col class="act-alloc-col-method">
+            <col class="act-nom-col-status">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Loc</th>
+              <th>Loc Name</th>
+              <th>Pipeline</th>
+              <th class="num">Sch Qty</th>
+              <th class="num">Traded Qty</th>
+              <th class="num">Allocated</th>
+              <th class="num">Variance</th>
+              <th class="num">Settlement Configs</th>
+              <th>Alloc Method</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="alloc-tbody">
+
+            <!-- ── LOC A: Compression Pool East ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locA')" aria-expanded="false">
+              <td class="act-loc-code"><span class="act-loc-toggle" id="aicon-locA"><svg class="act-nom-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>44120</span></td>
+              <td class="act-nom-loc-name">Compression Pool East</td>
+              <td class="muted">NGPL</td>
+              <td class="num">43,739</td>
+              <td class="num">50,000</td>
+              <td class="num">43,739</td>
+              <td class="num" style="color:var(--color-red)">–6,261</td>
+              <td class="num">4</td>
+              <td class="act-alloc-method-cell">
+                <span class="act-alloc-method">PBL Prorata</span>
+                <span class="act-alloc-method-sub">Cut –6,261 by op rank</span>
+              </td>
+              <td><span class="badge badge-warning">Partial</span></td>
+            </tr>
+            <tr class="loc-detail" id="adetail-locA" hidden>
+              <td colspan="10" class="act-loc-detail-cell"><div class="act-loc-detail-inner">
+                <p class="act-alloc-loc-note">Receipt agmts K-88422, K-88423, K-88430, K-88431 (Midstream Co Alpha). Pipeline cut –6,261 Dth prorated across delivery paths by operational rank.</p>
+                <table class="path-table act-path-table">
+                  <colgroup>
+                    <col class="act-path-col-dir">
+                    <col class="act-nom-col-loc">
+                    <col class="act-path-col-svc">
+                    <col class="act-nom-col-name">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-alloc-col-settle">
+                    <col class="act-nom-col-status">
+                  </colgroup>
+                  <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Counterparty</th><th>Loc Name</th><th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th><th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0088422">K-88422</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF.IF</td><td class="num">20,000</td><td class="num">20,000</td><td class="num">20,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4412-DCP-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0088423">K-88423</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF.IF</td><td class="num">5,000</td><td class="num">5,000</td><td class="num">5,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4412-DCP-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0088430">K-88430</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF.IF</td><td class="num">10,000</td><td class="num">10,000</td><td class="num">10,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4412-DCP-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0088431">K-88431</td><td>Midstream Co Alpha</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF.IF</td><td class="num">33,639</td><td class="num">33,639</td><td class="num">8,739</td><td class="num" style="color:var(--color-red)">–24,900</td><td class="act-alloc-settle">SC-4412-DCP-R</td><td><span class="badge badge-warning">Partial</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0020110">K-88422</td><td>Trading Co Alpha</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF</td><td class="num">–20,000</td><td class="num">19,206</td><td class="num">–19,206</td><td class="num" style="color:var(--color-red)">–794</td><td class="act-alloc-settle">SC-4412-CNS-D</td><td><span class="badge badge-warning">PBL</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0020111">K-88431</td><td>Trading Co Delta</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF</td><td class="num">–15,000</td><td class="num">10,000</td><td class="num">–10,000</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="act-alloc-settle">SC-4412-KOC-D</td><td><span class="badge badge-danger">Cut</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0020112">K-88430</td><td>Trading Co Epsilon</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF.IF</td><td class="num">–10,000</td><td class="num">10,000</td><td class="num">–10,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4412-MIE-D</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0020113">K-88423</td><td>Trading Co Zeta</td><td class="muted act-nom-loc-name">Compression Pool East · ZAF.IF</td><td class="num">–4,533</td><td class="num">4,533</td><td class="num">–4,533</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4412-SYM-D</td><td><span class="badge badge-warning">PBL</span></td></tr>
+                  </tbody>
+                </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── LOC B: GATHERING HUB ALPHA ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locB')" aria-expanded="false">
+              <td class="act-loc-code"><span class="act-loc-toggle" id="aicon-locB"><svg class="act-nom-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>640911</span></td>
+              <td class="act-nom-loc-name">Gathering Hub Alpha</td>
+              <td class="muted">NGPL</td>
+              <td class="num">124,025</td>
+              <td class="num">125,000</td>
+              <td class="num">124,025</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">3</td>
+              <td class="act-alloc-method-cell">
+                <span class="act-alloc-method">Agmt Match</span>
+                <span class="act-alloc-method-sub">Fuel deducted –975 Dth</span>
+              </td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr class="loc-detail" id="adetail-locB" hidden>
+              <td colspan="10" class="act-loc-detail-cell"><div class="act-loc-detail-inner">
+                <p class="act-alloc-loc-note">Receipt agmts K-42234, K-42235, K-42240 (Trading Co Alpha, Trading Co Beta, Trading Co Gamma). Fuel –975 Dth deducted before delivery to Utility Co East.</p>
+                <table class="path-table act-path-table">
+                  <colgroup>
+                    <col class="act-path-col-dir">
+                    <col class="act-nom-col-loc">
+                    <col class="act-path-col-svc">
+                    <col class="act-nom-col-name">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-alloc-col-settle">
+                    <col class="act-nom-col-status">
+                  </colgroup>
+                  <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Counterparty</th><th>Loc Name</th><th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th><th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0042234">K-42234</td><td>Trading Co Alpha</td><td class="muted act-nom-loc-name">Hub Alpha · XXR</td><td class="num">75,000</td><td class="num">75,000</td><td class="num">75,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-6409-CON-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0042235">K-42235</td><td>Trading Co Beta</td><td class="muted act-nom-loc-name">Hub Alpha · XXR</td><td class="num">30,000</td><td class="num">30,000</td><td class="num">30,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-6409-SHE-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0042240">K-42240</td><td>Trading Co Gamma</td><td class="muted act-nom-loc-name">Hub Alpha · XXR</td><td class="num">20,000</td><td class="num">20,000</td><td class="num">20,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-6409-BP-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0042234">K-42234</td><td>Utility Co East</td><td class="muted act-nom-loc-name">NGPL Zone 3 · YVX.FP</td><td class="num">–125,000</td><td class="num">124,025</td><td class="num">–124,025</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-6409-SPR-D</td><td><span class="badge badge-success">Matched</span></td></tr>
+                  </tbody>
+                </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── LOC C: INTERCONNECT POOL CENTRAL ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locC')" aria-expanded="false">
+              <td class="act-loc-code"><span class="act-loc-toggle" id="aicon-locC"><svg class="act-nom-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>51200</span></td>
+              <td class="act-nom-loc-name">Interconnect Pool Central</td>
+              <td class="muted">MWP</td>
+              <td class="num">146,349</td>
+              <td class="num">147,500</td>
+              <td class="num">146,349</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">2</td>
+              <td class="act-alloc-method-cell">
+                <span class="act-alloc-method">Agmt Match</span>
+                <span class="act-alloc-method-sub">Fuel adj –1,151 Dth</span>
+              </td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr class="loc-detail" id="adetail-locC" hidden>
+              <td colspan="10" class="act-loc-detail-cell"><div class="act-loc-detail-inner">
+                <p class="act-alloc-loc-note">Receipt agmt K-55010 (Marketing Co Alpha). Fuel –1,151 Dth deducted on Utility Co Central delivery split.</p>
+                <table class="path-table act-path-table">
+                  <colgroup>
+                    <col class="act-path-col-dir">
+                    <col class="act-nom-col-loc">
+                    <col class="act-path-col-svc">
+                    <col class="act-nom-col-name">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-alloc-col-settle">
+                    <col class="act-nom-col-status">
+                  </colgroup>
+                  <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Counterparty</th><th>Loc Name</th><th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th><th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0055010">K-55010</td><td>Marketing Co Alpha</td><td class="muted act-nom-loc-name">Interconnect Point · Z01</td><td class="num">147,500</td><td class="num">147,500</td><td class="num">147,500</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-5120-IOG-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0055010">K-55010</td><td>Utility Co East</td><td class="muted act-nom-loc-name">NGPL Zone 3 · M.RZ3FXD</td><td class="num">–100,000</td><td class="num">100,000</td><td class="num">–100,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-5120-SPR-D</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0055011">K-55011</td><td>Utility Co Central</td><td class="muted act-nom-loc-name">NGPL Zone 3 · M.RZ3GDD</td><td class="num">–47,500</td><td class="num">46,349</td><td class="num">–46,349</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-5120-PSC-D</td><td><span class="badge badge-secondary">Fuel adj</span></td></tr>
+                  </tbody>
+                </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── LOC D: RECEIPT BASIN WEST ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locD')" aria-expanded="false">
+              <td class="act-loc-code"><span class="act-loc-toggle" id="aicon-locD"><svg class="act-nom-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>32100</span></td>
+              <td class="act-nom-loc-name">Receipt Basin West</td>
+              <td class="muted">GTS</td>
+              <td class="num">84,337</td>
+              <td class="num">95,000</td>
+              <td class="num">84,337</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">2</td>
+              <td class="act-alloc-method-cell">
+                <span class="act-alloc-method">PBA Prorata</span>
+                <span class="act-alloc-method-sub">Cut –10,000 pro-rata</span>
+              </td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr class="loc-detail" id="adetail-locD" hidden>
+              <td colspan="10" class="act-loc-detail-cell"><div class="act-loc-detail-inner">
+                <p class="act-alloc-loc-note">PBA cut –10,000 applied pro-rata across Field Services Co Alpha and Producer Co Alpha receipt paths. Delivery agmts K-32001, K-32002 (Utility Co West).</p>
+                <table class="path-table act-path-table">
+                  <colgroup>
+                    <col class="act-path-col-dir">
+                    <col class="act-nom-col-loc">
+                    <col class="act-path-col-svc">
+                    <col class="act-nom-col-name">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-alloc-col-settle">
+                    <col class="act-nom-col-status">
+                  </colgroup>
+                  <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Counterparty</th><th>Loc Name</th><th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th><th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0032001">K-32001</td><td>Field Services Co Alpha</td><td class="muted act-nom-loc-name">Hub West · Z45</td><td class="num">50,000</td><td class="num">45,000</td><td class="num">45,000</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="act-alloc-settle">SC-3210-WIL-R</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0032002">K-32002</td><td>Producer Co Alpha</td><td class="muted act-nom-loc-name">Hub West · Z45</td><td class="num">45,000</td><td class="num">40,000</td><td class="num">40,000</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="act-alloc-settle">SC-3210-ENC-R</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0032001">K-32001</td><td>Utility Co West</td><td class="muted act-nom-loc-name">NGPL Zone 1 · YVX</td><td class="num">–50,000</td><td class="num">44,674</td><td class="num">–44,674</td><td class="num" style="color:var(--color-red)">–5,326</td><td class="act-alloc-settle">SC-3210-XCL-D</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0032002">K-32002</td><td>Utility Co West</td><td class="muted act-nom-loc-name">NGPL Zone 1 · YVX</td><td class="num">–45,000</td><td class="num">39,663</td><td class="num">–39,663</td><td class="num" style="color:var(--color-red)">–5,337</td><td class="act-alloc-settle">SC-3210-XCL-D</td><td><span class="badge badge-warning">PBA</span></td></tr>
+                  </tbody>
+                </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── LOC E: ZONE TRANSFER POINT SOUTH ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locE')" aria-expanded="false">
+              <td class="act-loc-code"><span class="act-loc-toggle" id="aicon-locE"><svg class="act-nom-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>44413</span></td>
+              <td class="act-nom-loc-name">Zone Transfer Point South</td>
+              <td class="muted">NGPL</td>
+              <td class="num">79,376</td>
+              <td class="num">80,000</td>
+              <td class="num">79,376</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">1</td>
+              <td class="act-alloc-method-cell">
+                <span class="act-alloc-method">Agmt Match</span>
+                <span class="act-alloc-method-sub">Fuel adj –624 Dth</span>
+              </td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr class="loc-detail" id="adetail-locE" hidden>
+              <td colspan="10" class="act-loc-detail-cell"><div class="act-loc-detail-inner">
+                <p class="act-alloc-loc-note">PAL 962099 · Receipt agmt K-44001 (Marketing Co Alpha). Fuel adj –624 Dth applied on Pipeline Co Alpha delivery.</p>
+                <table class="path-table act-path-table">
+                  <colgroup>
+                    <col class="act-path-col-dir">
+                    <col class="act-nom-col-loc">
+                    <col class="act-path-col-svc">
+                    <col class="act-nom-col-name">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-alloc-col-settle">
+                    <col class="act-nom-col-status">
+                  </colgroup>
+                  <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Counterparty</th><th>Loc Name</th><th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th><th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0044001">K-44001</td><td>Marketing Co Alpha</td><td class="muted act-nom-loc-name">Zone Transfer · YVW</td><td class="num">80,000</td><td class="num">80,000</td><td class="num">80,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4441-IOG-R</td><td><span class="badge badge-success">Matched</span></td></tr>
+                    <tr class="act-path-row act-path-row--delivery act-path-row--delivery-first"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Delivery · Trade T-0044001">K-44001</td><td>Pipeline Co Alpha</td><td class="muted act-nom-loc-name">Zone Transfer · YVW</td><td class="num">–80,000</td><td class="num">79,376</td><td class="num">–79,376</td><td class="num" style="color:var(--gray-400)">0</td><td class="act-alloc-settle">SC-4441-NGL-D</td><td><span class="badge badge-secondary">Fuel adj</span></td></tr>
+                  </tbody>
+                </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── LOC F: MOUNTAIN POOL WEST — UNMATCHED ── -->
+            <tr id="alloc-locF-row" class="loc-row" onclick="toggleAlloc('locF')" aria-expanded="false">
+              <td class="act-loc-code"><span class="act-loc-toggle" id="aicon-locF"><svg class="act-nom-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>29850</span></td>
+              <td class="act-nom-loc-name" id="alloc-locF-name" title="No settlement config for 4 paths">Mountain Pool West</td>
+              <td class="muted">WGP</td>
+              <td class="num">35,000</td>
+              <td class="num">77,625</td>
+              <td id="alloc-locF-alloc" class="num" style="color:var(--color-red)">0</td>
+              <td id="alloc-locF-var" class="num" style="color:var(--color-red)">–35,000</td>
+              <td id="alloc-locF-configs" class="num" style="color:var(--color-red)">0</td>
+              <td id="alloc-locF-method" class="act-alloc-method-cell">
+                <span class="act-alloc-method" style="color:var(--color-red)">No Config</span>
+                <span class="act-alloc-method-sub act-alloc-method-sub--warn">4 paths unmatched</span>
+              </td>
+              <td id="alloc-locF-status"><span class="badge badge-danger">Unmatched</span></td>
+            </tr>
+            <tr class="loc-detail" id="adetail-locF" hidden>
+              <td colspan="10" class="act-loc-detail-cell"><div class="act-loc-detail-inner">
+                <p class="act-alloc-loc-note act-alloc-loc-note--error"><strong>Allocation failed</strong> — no settlement config in Molecule for NGPL-Mainline + Transmission Co Alpha / Retail Co Alpha. 35,000 Dth scheduled remains unallocated; add a config or apply a manual override.</p>
+                <table class="path-table act-path-table">
+                  <colgroup>
+                    <col class="act-path-col-dir">
+                    <col class="act-nom-col-loc">
+                    <col class="act-path-col-svc">
+                    <col class="act-nom-col-name">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-nom-col-qty">
+                    <col class="act-alloc-col-settle">
+                    <col class="act-nom-col-status">
+                  </colgroup>
+                  <thead><tr><th class="act-path-dir-col">Dir</th><th>ID</th><th>Counterparty</th><th>Loc Name</th><th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th><th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0070010">K-70010</td><td>Transmission Co Alpha</td><td class="muted act-nom-loc-name">NGPL-Mainline · Z45</td><td class="num">25,000</td><td class="num">11,200</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–11,200</td><td class="act-alloc-settle act-alloc-settle--missing">Missing</td><td><span class="badge badge-danger">Unmatched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0070013">K-70013</td><td>Marketing Co Beta</td><td class="muted act-nom-loc-name">NGPL-Mainline · Z45</td><td class="num">5,000</td><td class="num">5,000</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–5,000</td><td class="act-alloc-settle act-alloc-settle--missing">Missing</td><td><span class="badge badge-danger">Unmatched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0070014">K-70014</td><td>Marketing Co Gamma</td><td class="muted act-nom-loc-name">NGPL-Mainline · Z45</td><td class="num">4,000</td><td class="num">4,000</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–4,000</td><td class="act-alloc-settle act-alloc-settle--missing">Missing</td><td><span class="badge badge-danger">Unmatched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0070015">K-70015</td><td>Utility Co North</td><td class="muted act-nom-loc-name">NGPL-Mainline · Z45</td><td class="num">8,000</td><td class="num">8,000</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–8,000</td><td class="act-alloc-settle act-alloc-settle--missing">Missing</td><td><span class="badge badge-danger">Unmatched</span></td></tr>
+                    <tr class="act-path-row act-path-row--receipt"><td class="act-path-dir-col" aria-hidden="true"></td><td class="k-col" title="Receipt · Trade T-0070016">K-70016</td><td>Marketing Co Delta</td><td class="muted act-nom-loc-name">NGPL-Mainline · Z45</td><td class="num">6,800</td><td class="num">6,800</td><td class="num act-path-empty">—</td><td class="num" style="color:var(--color-red)">–6,800</td><td class="act-alloc-settle act-alloc-settle--missing">Missing</td><td><span class="badge badge-danger">Unmatched</span></td></tr>
+                  </tbody>
+                </table>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+        </div><!-- /timely panel -->
+
+        <div class="tabs-stack__panel act-allocations-tab-panel" role="tabpanel" data-tab-panel="evening" hidden></div>
+        <div class="tabs-stack__panel act-allocations-tab-panel" role="tabpanel" data-tab-panel="id1" hidden></div>
+        <div class="tabs-stack__panel act-allocations-tab-panel" role="tabpanel" data-tab-panel="id2" hidden></div>
+        <div class="tabs-stack__panel act-allocations-tab-panel" role="tabpanel" data-tab-panel="id3" hidden></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

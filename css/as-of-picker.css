@@ -1,0 +1,195 @@
+/**
+ * Mirage as-of date picker — page-header date strip + calendar popover.
+ * Used by Certificate Inventory, Fund Allocations, and other screens.
+ * Page header title-row layout lives in components.css (stable with/without picker).
+ */
+
+.as-of-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background: var(--color-gray-100);
+  border-radius: 6px;
+  margin-left: auto;
+  box-sizing: border-box;
+  min-height: var(--page-header-title-row-min-height, 32px);
+}
+
+.as-of-picker__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-gray-700);
+  flex-shrink: 0;
+}
+
+.as-of-picker__nav:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary, #4dafd4) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.as-of-picker__chev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-700);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.as-of-picker__chev svg {
+  width: 14px;
+  height: 14px;
+}
+
+.as-of-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.as-of-picker__label {
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.as-of-picker__trigger:hover .as-of-picker__label,
+.as-of-picker__trigger.is-open .as-of-picker__label {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.as-of-picker__trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary, #4dafd4) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.as-of-picker__popover {
+  position: fixed;
+  z-index: 400;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  padding: 12px 14px 14px;
+}
+
+.as-of-picker__cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.as-of-picker__cal-month-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  flex: 1;
+  text-align: center;
+}
+
+.as-of-picker__cal-month-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-gray-700);
+  cursor: pointer;
+}
+
+.as-of-picker__cal-month-btn:hover {
+  background: var(--color-gray-100);
+}
+
+.as-of-picker__cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 26px);
+  gap: 2px;
+}
+
+.as-of-picker__cal-dow {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: var(--faint, var(--color-text-muted));
+  text-align: center;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.as-of-picker__cal-day {
+  width: 26px;
+  height: 21px;
+  border-radius: 4px;
+  font-size: 0.66rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-gray-800);
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
+
+.as-of-picker__cal-day:hover {
+  background: var(--color-gray-100);
+}
+
+.as-of-picker__cal-day.is-today {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.as-of-picker__cal-day.is-selected {
+  background: color-mix(in srgb, var(--primary, #4dafd4) 18%, transparent);
+  font-weight: 600;
+}
+
+/* Fund Allocations — allocation-status calendar cells */
+.as-of-picker__cal-day.c-ok {
+  background: #eef1eb;
+  color: var(--color-green);
+  font-weight: 600;
+}
+
+.as-of-picker__cal-day.c-bad {
+  background: #fff3eb;
+  color: var(--color-orange);
+  font-weight: 600;
+}
+
+.as-of-picker__popover-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}

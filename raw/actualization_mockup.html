@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Actualization — Molecule Mockup</title>
+<style>
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Brand */
+  --blue:          #3B82EC;
+  --blue-dark:     #1659c7;
+  --blue-light:    #e8f0fd;
+  --green:         #4BBF73;
+  --green-bg:      #f0fdf4;
+  --green-text:    #166534;
+  --amber:         #f0ad4e;
+  --amber-bg:      #fffbeb;
+  --amber-text:    #92400e;
+  --red:           #d9534f;
+  --red-bg:        #fef2f2;
+  --red-text:      #991b1b;
+  --teal:          #427676;
+  --purple:        #875CA6;
+
+  /* Grays */
+  --gray-025:      #fafbfc;
+  --gray-050:      #f4f7f9;
+  --gray-100:      #f1f5f9;
+  --gray-200:      #e2e8ee;
+  --gray-300:      #dee6ed;
+  --gray-400:      #ced4da;
+  --gray-500:      #adb5bd;
+  --gray-600:      #6c757d;
+  --gray-700:      #495057;
+  --gray-800:      #343a40;
+  --gray-900:      #212529;
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --navbar-height: 52px;
+  --content-pad:   1.5rem;
+  --border:        #dee6ed;
+  --card-shadow:   0 1px 3px rgba(0,0,0,0.08);
+  --font:          'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --font-size:     0.825rem;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: var(--font);
+  font-size: var(--font-size);
+  color: var(--gray-700);
+  background: var(--gray-050);
+  line-height: 1.625;
+  height: 100vh;
+  overflow: hidden; /* outermost shell is fixed; inner areas scroll */
+}
+
+/* ── App shell ── */
+.wrapper { display: flex; width: 100%; height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  min-width: var(--sidebar-width);
+  max-width: var(--sidebar-width);
+  height: 100vh;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-brand {
+  padding: 1rem 1rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--blue);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sidebar-brand-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--blue); display: inline-block;
+}
+.sidebar-section {
+  padding: 0.75rem 0.75rem 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--gray-700);
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 1px 0.5rem;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.sidebar-item:hover { background: var(--gray-100); }
+.sidebar-item.active {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font-weight: 500;
+}
+.sidebar-icon { width: 14px; text-align: center; color: var(--gray-500); }
+.sidebar-item.active .sidebar-icon { color: var(--blue); }
+
+/* ── Main area ── */
+.main { display: flex; flex-direction: column; flex: 1; min-width: 0; height: 100vh; overflow-y: auto; }
+
+/* ── Top navbar ── */
+.top-navbar {
+  height: var(--navbar-height);
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+.nav-title { font-size: 0.95rem; font-weight: 500; color: var(--gray-800); }
+.nav-breadcrumb { font-size: 0.75rem; color: var(--gray-500); margin-left: 0.25rem; }
+.nav-spacer { flex: 1; }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-size: 0.7rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Page tabs ── */
+.page-tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 var(--content-pad);
+  flex-shrink: 0;
+}
+.page-tab {
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+}
+.page-tab:hover { color: var(--gray-900); }
+.page-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ── Content ── */
+.content {
+  flex: 1;
+  padding: var(--content-pad);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+}
+
+/* ── Toolbar (grid navbar) ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.35rem; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.775rem;
+  font-weight: 400;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-secondary {
+  background: #fff; border-color: var(--gray-400);
+  color: var(--gray-700);
+}
+.btn-secondary:hover { background: var(--gray-100); border-color: var(--gray-500); }
+.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-success { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-sm { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
+.btn-icon { padding: 0.3rem 0.5rem; }
+.btn-group { display: inline-flex; }
+.btn-group .btn + .btn { margin-left: -1px; border-radius: 0; }
+.btn-group .btn:first-child { border-radius: 3px 0 0 3px; }
+.btn-group .btn:last-child { border-radius: 0 3px 3px 0; }
+
+/* ── Form controls ── */
+.form-control, .form-select {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.775rem;
+  font-family: var(--font);
+  border: 1px solid var(--gray-400);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--gray-700);
+  height: 30px;
+}
+.form-control:focus, .form-select:focus { outline: none; border-color: var(--blue); background: #fff; }
+.input-group { display: inline-flex; }
+.input-group .form-control { border-radius: 3px 0 0 3px; border-right: none; }
+.input-group .btn { border-radius: 0 3px 3px 0; }
+
+/* ── Split layout ── */
+.split-layout {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 500px; /* ensures it's always usable even on short viewports */
+}
+.split-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.split-right { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; }
+
+/* ── Cards ── */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+}
+.card-header {
+  padding: 0.65rem 0.85rem 0;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.card-title {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  padding-bottom: 0.5rem;
+  flex: 1;
+}
+.card-body { padding: 0; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── Status badges ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 0.15em 0.55em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.badge-success { background: var(--green-bg); color: var(--green-text); }
+.badge-warning { background: var(--amber-bg); color: var(--amber-text); }
+.badge-danger  { background: var(--red-bg);   color: var(--red-text); }
+.badge-secondary { background: var(--gray-100); color: var(--gray-600); }
+.badge-primary { background: var(--blue-light); color: var(--blue-dark); }
+.badge-triage { background: #f3e8ff; color: #6b21a8; }
+
+/* ── Confidence bar ── */
+.conf-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+.conf-bar { flex: 1; height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+.conf-bar-fill { height: 100%; border-radius: 3px; }
+.conf-high .conf-bar-fill { background: var(--green); }
+.conf-med  .conf-bar-fill { background: var(--amber); }
+.conf-low  .conf-bar-fill { background: var(--red); }
+.conf-label { font-size: 0.72rem; font-weight: 600; min-width: 28px; text-align: right; }
+.conf-high .conf-label { color: var(--green-text); }
+.conf-med  .conf-label  { color: var(--amber-text); }
+.conf-low  .conf-label  { color: var(--red-text); }
+
+/* ── Grid / table ── */
+.grid-wrap { flex: 1; overflow-y: auto; min-height: 200px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.775rem; }
+.data-table thead th {
+  padding: 0.45rem 0.65rem;
+  background: var(--gray-050);
+  border-bottom: 2px solid var(--gray-200);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-align: left;
+  white-space: nowrap;
+  position: sticky; top: 0;
+  z-index: 2;
+}
+.data-table tbody tr {
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.data-table tbody tr:hover { background: var(--gray-050); }
+.data-table tbody tr.selected { background: var(--blue-light); }
+.data-table td { padding: 0.45rem 0.65rem; color: var(--gray-700); }
+.data-table thead th.num { text-align: right; }
+.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table td.muted { color: var(--gray-500); font-size: 0.72rem; }
+.data-table .sort-icon { margin-left: 0.3rem; color: var(--gray-400); font-size: 0.65rem; }
+
+/* ── Detail panel ── */
+.detail-panel { flex: 1; overflow-y: auto; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.85rem; }
+.detail-section { }
+.detail-section-title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+.detail-kv { display: flex; flex-direction: column; gap: 0.3rem; }
+.kv-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.kv-key { font-size: 0.72rem; color: var(--gray-500); flex-shrink: 0; }
+.kv-val { font-size: 0.775rem; font-weight: 500; color: var(--gray-800); text-align: right; }
+
+.match-candidate {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.match-candidate-header {
+  background: var(--gray-050);
+  padding: 0.45rem 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gray-800);
+  border-bottom: 1px solid var(--gray-200);
+}
+.match-candidate-body { padding: 0.5rem 0.65rem; }
+
+.signal-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.signal-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; }
+.signal-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.signal-dot-green { background: var(--green); }
+.signal-dot-amber { background: var(--amber); }
+.signal-dot-gray  { background: var(--gray-400); }
+.signal-label { flex: 1; color: var(--gray-600); }
+.signal-pts { font-weight: 600; color: var(--gray-700); min-width: 32px; text-align: right; }
+
+.detail-actions {
+  display: flex; gap: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-050);
+  flex-shrink: 0;
+}
+.detail-actions .btn { flex: 1; justify-content: center; }
+
+/* ── Summary stat cards ── */
+.stat-row { display: flex; gap: 0.75rem; flex-shrink: 0; }
+.stat-card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.65rem 0.85rem;
+  box-shadow: var(--card-shadow);
+}
+.stat-label { font-size: 0.68rem; font-weight: 600; color: var(--gray-500); letter-spacing: 0.04em; text-transform: uppercase; }
+.stat-value { font-size: 1.35rem; font-weight: 700; color: var(--gray-900); line-height: 1.2; margin-top: 0.15rem; }
+.stat-sub   { font-size: 0.7rem; color: var(--gray-500); margin-top: 0.1rem; }
+.stat-value.green { color: var(--green-text); }
+.stat-value.amber { color: var(--amber-text); }
+.stat-value.red   { color: var(--red-text); }
+
+/* ── Pipeline dashboard table ── */
+.dash-table { width: 100%; border-collapse: collapse; font-size: 0.775rem; }
+.dash-table thead th {
+  padding: 0.45rem 0.75rem;
+  background: var(--gray-050);
+  border-bottom: 2px solid var(--gray-200);
+  font-size: 0.7rem; font-weight: 600; color: var(--gray-600);
+  text-align: right;
+  white-space: nowrap;
+  position: sticky; top: 0; z-index: 2;
+}
+.dash-table thead th:first-child,
+.dash-table thead th:nth-child(2) { text-align: left; }
+.dash-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+.dash-table tbody tr:hover { background: var(--gray-050); }
+.dash-table tbody tr.group-row td { background: var(--gray-050); font-weight: 600; font-size: 0.75rem; color: var(--gray-700); }
+.dash-table td { padding: 0.4rem 0.75rem; }
+.dash-table td.right { text-align: right; font-variant-numeric: tabular-nums; }
+.dash-table td.muted { color: var(--gray-500); font-size: 0.72rem; }
+
+/* ── Imbalance chip ── */
+.imb-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.1em 0.55em; border-radius: 10px; font-size: 0.7rem; font-weight: 600;
+}
+.imb-ok  { background: var(--green-bg); color: var(--green-text); }
+.imb-warn{ background: var(--amber-bg); color: var(--amber-text); }
+.imb-bad { background: var(--red-bg);   color: var(--red-text); }
+
+/* ── AI triage callout ── */
+.ai-callout {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 4px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.775rem;
+}
+.ai-callout-title {
+  font-weight: 600; color: #5b21b6; font-size: 0.75rem;
+  display: flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 0.3rem;
+}
+.ai-callout p { color: var(--gray-700); margin-bottom: 0.4rem; }
+.ai-callout p:last-child { margin-bottom: 0; }
+
+/* ── Screen switcher (demo only) ── */
+.screen-switcher {
+  position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
+  background: var(--gray-900); color: #fff;
+  border-radius: 20px; padding: 0.4rem 0.75rem;
+  display: flex; gap: 0.5rem; align-items: center;
+  font-size: 0.72rem; z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.sw-btn {
+  padding: 0.2rem 0.65rem; border-radius: 12px;
+  font-size: 0.72rem; font-weight: 500; cursor: pointer;
+  border: none; font-family: var(--font);
+  transition: background 0.15s;
+  color: rgba(255,255,255,0.6); background: transparent;
+}
+.sw-btn.active { background: var(--blue); color: #fff; }
+
+/* ── Misc ── */
+.text-muted { color: var(--gray-500); }
+.fw-600 { font-weight: 600; }
+.divider { height: 1px; background: var(--gray-200); }
+.progress-mini { height: 4px; border-radius: 2px; background: var(--gray-200); overflow: hidden; }
+.progress-mini-fill { height: 100%; background: var(--blue); border-radius: 2px; }
+
+/* nomination dot indicator */
+.nom-dot {
+  width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px;
+}
+.nom-dot-match { background: var(--green); }
+.nom-dot-none  { background: var(--gray-400); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 1: ACTUALIZATION WORKBENCH
+═══════════════════════════════════════════════════ -->
+
+
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 2: PIPELINE DASHBOARD
+═══════════════════════════════════════════════════ -->
+<div id="screen-nominations" class="wrapper">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand"><span class="sidebar-brand-dot"></span> molecule</div>
+    <div class="sidebar-section">Gas Scheduling</div>
+    <a class="sidebar-item active" href="#" onclick="show('nominations');return false;">↕ Nominations</a>
+    <a class="sidebar-item" href="#" onclick="show('allocation');return false;">⚖ Allocations</a>
+    <a class="sidebar-item" href="#" onclick="show('map');return false;">🗺 Pipeline Map</a>
+    <a class="sidebar-item" href="#" onclick="show('yaml');return false;">✦ AI Review</a>
+  </nav>
+
+  <div class="main">
+    <div class="top-navbar">
+      <span class="nav-title">Actualization</span>
+      <span class="nav-breadcrumb">/ Nominations</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-avatar">SM</div>
+    </div>
+
+    <div class="page-tabs">
+      <div class="page-tab active" onclick="show('nominations')">Nominations</div>
+      <div class="page-tab" onclick="show('allocation')">Allocations</div>
+      <div class="page-tab" onclick="show('map')">Pipeline Map</div>
+      <div class="page-tab" onclick="show('yaml')" style="color:var(--purple)">✦ AI Review</div>
+    </div>
+
+    <div class="content">
+
+      <!-- Top filter bar -->
+      <div class="toolbar" style="flex-wrap:wrap; row-gap:0.5rem;">
+
+        <!-- Gas day -->
+        <div style="display:flex;align-items:center;gap:0.35rem">
+          <span style="font-size:0.72rem;color:var(--gray-500);white-space:nowrap">Gas Day</span>
+          <input type="date" class="form-control" value="2026-03-13" style="width:138px" />
+        </div>
+
+        <!-- Pipeline -->
+        <select class="form-select" style="width:120px">
+          <option selected>REX</option>
+          <option>TIGT</option>
+          <option>NNG</option>
+          <option>SSC</option>
+        </select>
+
+        <!-- Cycle pills -->
+        <div style="display:flex;gap:0;margin-left:0.25rem">
+          <button class="btn btn-secondary" style="border-radius:3px 0 0 3px;border-right:none;font-size:0.72rem">Timely</button>
+          <button class="btn btn-secondary" style="border-radius:0;border-right:none;font-size:0.72rem">Evening</button>
+          <button class="btn btn-primary" style="border-radius:0;border-right:none;font-size:0.72rem">ID1</button>
+          <button class="btn btn-secondary" style="border-radius:0;border-right:none;font-size:0.72rem">ID2</button>
+          <button class="btn btn-secondary" style="border-radius:0 3px 3px 0;font-size:0.72rem">ID3</button>
+        </div>
+
+        <!-- Direction filter -->
+        <select class="form-select" style="width:120px">
+          <option>All Directions</option>
+          <option>Receipt</option>
+          <option>Delivery</option>
+        </select>
+
+        <!-- Location search -->
+        <div class="input-group">
+          <input class="form-control" placeholder="Filter location…" style="width:160px" />
+          <button class="btn btn-secondary btn-icon">✕</button>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-icon" title="Refresh">⟳</button>
+            <button class="btn btn-secondary btn-icon" title="Export">↓</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Totals strip ── -->
+      <div style="display:flex;gap:0;background:#fff;border:1px solid var(--border);border-radius:4px;box-shadow:var(--card-shadow);overflow:hidden;flex-shrink:0">
+        <div style="flex:1;padding:0.55rem 1rem;border-right:1px solid var(--gray-200)">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Tot. Nominated</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gray-900);font-variant-numeric:tabular-nums">721,125</div>
+          <div style="font-size:0.68rem;color:var(--gray-500)">MMBtu · ID1</div>
+        </div>
+        <div style="flex:1;padding:0.55rem 1rem;border-right:1px solid var(--gray-200)">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Tot. Scheduled</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--green-text);font-variant-numeric:tabular-nums">661,515</div>
+          <div style="font-size:0.68rem;color:var(--gray-500)">91.7% of nominated</div>
+        </div>
+        <div style="flex:1;padding:0.55rem 1rem;border-right:1px solid var(--gray-200)">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Tot. Cut</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--red-text);font-variant-numeric:tabular-nums">–59,610</div>
+          <div style="font-size:0.68rem;color:var(--gray-500)">8.3% cut by pipeline</div>
+        </div>
+        <div style="flex:1;padding:0.55rem 1rem;border-right:1px solid var(--gray-200)">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Fuel / Shrink</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--amber-text);font-variant-numeric:tabular-nums">–5,177</div>
+          <div style="font-size:0.68rem;color:var(--gray-500)">0.78% fuel rate</div>
+        </div>
+        <div style="flex:1;padding:0.55rem 1rem;border-right:1px solid var(--gray-200)">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Net Deliverable</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gray-900);font-variant-numeric:tabular-nums">656,338</div>
+          <div style="font-size:0.68rem;color:var(--gray-500)">After fuel</div>
+        </div>
+        <div style="flex:1;padding:0.55rem 1rem;">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Locations</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--gray-900)">8</div>
+          <div style="font-size:0.68rem;color:var(--gray-500)">3 with cuts</div>
+        </div>
+      </div>
+
+      <!-- ── Main location table ── -->
+      <div class="card" style="flex:1">
+        <div class="card-header" style="padding-bottom:0.5rem">
+          <div class="card-title">Location Centric Nominations — REX · ID1 · Mar 13 2026</div>
+          <span style="font-size:0.7rem;color:var(--gray-500)">Click a location to expand receipt and delivery paths</span>
+        </div>
+        <div class="card-body">
+          <div class="grid-wrap">
+            <table class="data-table" style="font-size:0.74rem;min-width:860px" id="nom-table">
+              <thead>
+                <tr>
+                  <th style="width:22px"></th>
+                  <th>Loc</th>
+                  <th>Loc Name</th>
+                  <th class="num">Rec Nom Qty</th>
+                  <th class="num">Rec Sch Qty</th>
+                  <th class="num">Del Nom Qty</th>
+                  <th class="num">Del Sch Qty</th>
+                  <th class="num">Cut Qty</th>
+                  <th class="num">Fuel</th>
+                  <th class="num"># Paths</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="nom-tbody">
+
+                <!-- ── LOC 1: INTEX OPAL GFT WISE LINCOLN ── -->
+                <tr class="loc-row" onclick="toggleLoc('loc1')">
+                  <td class="expand-icon" id="icon-loc1">▶</td>
+                  <td style="font-family:monospace;font-size:0.7rem;color:var(--gray-600)">640911</td>
+                  <td class="fw-600">INTEX OPAL GFT WISE LINCOLN</td>
+                  <td class="num">125,000</td>
+                  <td class="num">125,000</td>
+                  <td class="num">125,000</td>
+                  <td class="num">124,025</td>
+                  <td class="num" style="color:var(--gray-400)">0</td>
+                  <td class="num">–975</td>
+                  <td class="num">3</td>
+                  <td><span class="badge badge-success">AOK</span></td>
+                </tr>
+                <tr class="loc-detail" id="detail-loc1" style="display:none">
+                  <td colspan="11" style="padding:0">
+                    <div class="sub-lbl">Receipt <span class="sub-lbl-sub">(Upstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-42234</td><td class="fw-600">Constellation Gas Mktg LLC</td><td class="muted">WHITE RIVER / REX MEEKER RIO BLANCO</td><td class="num">75,000</td><td class="num">75,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–585</td><td>1</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-42235</td><td class="fw-600">Shell Energy North America</td><td class="muted">PICEANCE BASIN / REX GARFIELD CO</td><td class="num">30,000</td><td class="num">30,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–234</td><td>2</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-42240</td><td class="fw-600">BP Energy Company</td><td class="muted">DOUGLAS CREEK / REX RIO BLANCO CO</td><td class="num">20,000</td><td class="num">20,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–156</td><td>3</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="sub-lbl sub-lbl-2">Delivery <span class="sub-lbl-sub">(Downstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-42234</td><td class="fw-600">Spire Missouri Inc.</td><td class="muted">REX / NGPL ST LOUIS SCOTT</td><td class="num">75,000</td><td class="num">74,025</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–585</td><td>1</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-42235</td><td class="fw-600">Spire Missouri Inc.</td><td class="muted">REX / NGPL ST LOUIS SCOTT</td><td class="num">30,000</td><td class="num">29,766</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–234</td><td>2</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-42240</td><td class="fw-600">Spire Missouri Inc.</td><td class="muted">REX / NGPL ST LOUIS SCOTT</td><td class="num">20,000</td><td class="num">19,844</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–156</td><td>3</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- ── LOC 2: REX CHEYENNE COMP POOL ── -->
+                <tr class="loc-row" onclick="toggleLoc('loc2')">
+                  <td class="expand-icon" id="icon-loc2">▶</td>
+                  <td style="font-family:monospace;font-size:0.7rem;color:var(--gray-600)">44120</td>
+                  <td class="fw-600">REX CHEYENNE COMP POOL</td>
+                  <td class="num">68,639</td>
+                  <td class="num">68,639</td>
+                  <td class="num">50,000</td>
+                  <td class="num">43,739</td>
+                  <td class="num" style="color:var(--red-text);font-weight:600">–6,261</td>
+                  <td class="num">–341</td>
+                  <td class="num">4</td>
+                  <td><span class="badge badge-warning">PBL</span></td>
+                </tr>
+                <tr class="loc-detail" id="detail-loc2" style="display:none">
+                  <td colspan="11" style="padding:0">
+                    <div class="sub-lbl">Receipt <span class="sub-lbl-sub">(Upstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-88422</td><td class="fw-600">DCP Midstream Partners</td><td class="muted">WAMSUTTER / REX SWEETWATER WY</td><td class="num">20,000</td><td class="num">20,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–150</td><td>1</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-88423</td><td class="fw-600">DCP Midstream Partners</td><td class="muted">WAMSUTTER / REX SWEETWATER WY</td><td class="num">5,000</td><td class="num">5,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–35</td><td>2</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-88430</td><td class="fw-600">DCP Midstream Partners</td><td class="muted">WAMSUTTER / REX SWEETWATER WY</td><td class="num">10,000</td><td class="num">10,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–78</td><td>3</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-88431</td><td class="fw-600">DCP Midstream Partners</td><td class="muted">WAMSUTTER / REX SWEETWATER WY</td><td class="num">33,639</td><td class="num">33,639</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–78</td><td>4</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="sub-lbl sub-lbl-2">Delivery <span class="sub-lbl-sub">(Downstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-88422</td><td class="fw-600">Constellation Energy</td><td class="muted">REX CHEYENNE / CDLR LARAMIE WY</td><td class="num">20,000</td><td class="num">19,206</td><td class="num" style="color:var(--red-text);font-weight:600">–794</td><td class="num">–150</td><td>1</td><td><span class="badge badge-warning" style="font-size:0.63rem">PBL</span></td></tr>
+                        <tr><td class="k-col">K-88423</td><td class="fw-600">Symmetry Energy Solutions</td><td class="muted">REX CHEYENNE / TENASKA ROCKY MTN</td><td class="num">5,000</td><td class="num">4,533</td><td class="num" style="color:var(--red-text);font-weight:600">–467</td><td class="num">–35</td><td>2</td><td><span class="badge badge-warning" style="font-size:0.63rem">PBL</span></td></tr>
+                        <tr><td class="k-col">K-88430</td><td class="fw-600">Mieco Energy LLC</td><td class="muted">REX CHEYENNE / CIG LATERAL WY</td><td class="num">10,000</td><td class="num">10,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–78</td><td>3</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-88431</td><td class="fw-600">Koch Energy Trading</td><td class="muted">REX CHEYENNE / NGAS COLORADO</td><td class="num">15,000</td><td class="num">10,000</td><td class="num" style="color:var(--red-text);font-weight:600">–5,000</td><td class="num">–78</td><td>4</td><td><span class="badge badge-danger" style="font-size:0.63rem">Cut</span></td></tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- ── LOC 3: NNG VENTURA POOL ── -->
+                <tr class="loc-row" onclick="toggleLoc('loc3')">
+                  <td class="expand-icon" id="icon-loc3">▶</td>
+                  <td style="font-family:monospace;font-size:0.7rem;color:var(--gray-600)">51200</td>
+                  <td class="fw-600">NNG VENTURA POOL</td>
+                  <td class="num">147,500</td>
+                  <td class="num">147,500</td>
+                  <td class="num">147,500</td>
+                  <td class="num">146,349</td>
+                  <td class="num" style="color:var(--gray-400)">0</td>
+                  <td class="num">–1,151</td>
+                  <td class="num">2</td>
+                  <td><span class="badge badge-success">AOK</span></td>
+                </tr>
+                <tr class="loc-detail" id="detail-loc3" style="display:none">
+                  <td colspan="11" style="padding:0">
+                    <div class="sub-lbl">Receipt <span class="sub-lbl-sub">(Upstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-55010</td><td class="fw-600">IO Gas Marketing LLC</td><td class="muted">INTEX LINCOLN / NNG VENTURA</td><td class="num">100,000</td><td class="num">100,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num" style="color:var(--gray-400)">0</td><td>1</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-55011</td><td class="fw-600">IO Gas Marketing LLC</td><td class="muted">INTEX LINCOLN / NNG VENTURA</td><td class="num">47,500</td><td class="num">47,500</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–1,151</td><td>2</td><td><span class="badge badge-secondary" style="font-size:0.63rem">Fuel</span></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="sub-lbl sub-lbl-2">Delivery <span class="sub-lbl-sub">(Downstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-55010</td><td class="fw-600">Spire Missouri Inc.</td><td class="muted">NNG VENTURA / MRT ST LOUIS</td><td class="num">100,000</td><td class="num">100,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num" style="color:var(--gray-400)">0</td><td>1</td><td><span class="badge badge-success" style="font-size:0.63rem">AOK</span></td></tr>
+                        <tr><td class="k-col">K-55011</td><td class="fw-600">PSCO (Xcel Energy)</td><td class="muted">NNG VENTURA / MRT IOWA</td><td class="num">47,500</td><td class="num">46,349</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–1,151</td><td>2</td><td><span class="badge badge-secondary" style="font-size:0.63rem">Fuel</span></td></tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- ── LOC 4: TIGT PICEANCE BASIN ── -->
+                <tr class="loc-row" onclick="toggleLoc('loc4')">
+                  <td class="expand-icon" id="icon-loc4">▶</td>
+                  <td style="font-family:monospace;font-size:0.7rem;color:var(--gray-600)">32100</td>
+                  <td class="fw-600">TIGT PICEANCE BASIN</td>
+                  <td class="num">95,000</td>
+                  <td class="num">85,000</td>
+                  <td class="num">95,000</td>
+                  <td class="num">84,337</td>
+                  <td class="num" style="color:var(--red-text);font-weight:600">–10,000</td>
+                  <td class="num">–663</td>
+                  <td class="num">2</td>
+                  <td><span class="badge badge-warning">PBA</span></td>
+                </tr>
+                <tr class="loc-detail" id="detail-loc4" style="display:none">
+                  <td colspan="11" style="padding:0">
+                    <div class="sub-lbl">Receipt <span class="sub-lbl-sub">(Upstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-32001</td><td class="fw-600">Williams Field Services</td><td class="muted">RULE SPRINGS / TIGT PICEANCE</td><td class="num">50,000</td><td class="num">45,000</td><td class="num" style="color:var(--red-text);font-weight:600">–5,000</td><td class="num">–326</td><td>1</td><td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td></tr>
+                        <tr><td class="k-col">K-32002</td><td class="fw-600">EnCana Oil &amp; Gas USA</td><td class="muted">GRAND VALLEY / TIGT PICEANCE</td><td class="num">45,000</td><td class="num">40,000</td><td class="num" style="color:var(--red-text);font-weight:600">–5,000</td><td class="num">–337</td><td>2</td><td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="sub-lbl sub-lbl-2">Delivery <span class="sub-lbl-sub">(Downstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-32001</td><td class="fw-600">Xcel Energy Services</td><td class="muted">TIGT PICEANCE / CIG PICEANCE WY</td><td class="num">50,000</td><td class="num">44,674</td><td class="num" style="color:var(--red-text);font-weight:600">–5,000</td><td class="num">–326</td><td>1</td><td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td></tr>
+                        <tr><td class="k-col">K-32002</td><td class="fw-600">Xcel Energy Services</td><td class="muted">TIGT PICEANCE / CIG PICEANCE WY</td><td class="num">45,000</td><td class="num">39,663</td><td class="num" style="color:var(--red-text);font-weight:600">–5,000</td><td class="num">–337</td><td>2</td><td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td></tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- ── LOC 5: NGPL / REX MOULTRIE ── -->
+                <tr class="loc-row" onclick="toggleLoc('loc5')">
+                  <td class="expand-icon" id="icon-loc5">▶</td>
+                  <td style="font-family:monospace;font-size:0.7rem;color:var(--gray-600)">44413</td>
+                  <td class="fw-600">NGPL / REX MOULTRIE</td>
+                  <td class="num" style="color:var(--gray-400)">—</td>
+                  <td class="num" style="color:var(--gray-400)">—</td>
+                  <td class="num">80,000</td>
+                  <td class="num">79,376</td>
+                  <td class="num" style="color:var(--gray-400)">0</td>
+                  <td class="num">–624</td>
+                  <td class="num">1</td>
+                  <td><span class="badge badge-success">AOK</span></td>
+                </tr>
+                <tr class="loc-detail" id="detail-loc5" style="display:none">
+                  <td colspan="11" style="padding:0">
+                    <div class="sub-lbl">Receipt <span class="sub-lbl-sub">(Upstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-44001</td><td class="fw-600">IO Gas Marketing LLC</td><td class="muted">INTEX LINCOLN / REX ZONE E</td><td class="num">80,000</td><td class="num">80,000</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–624</td><td>1</td><td><span class="badge badge-secondary" style="font-size:0.63rem">Fuel</span></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="sub-lbl sub-lbl-2">Delivery <span class="sub-lbl-sub">(Downstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-44001</td><td class="fw-600">NGPL Pipeline Co.</td><td class="muted">NGPL / REX MOULTRIE IL</td><td class="num">80,000</td><td class="num">79,376</td><td class="num" style="color:var(--gray-400)">0</td><td class="num">–624</td><td>1</td><td><span class="badge badge-secondary" style="font-size:0.63rem">Fuel</span></td></tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- ── LOC 6: CIG ROCKY MOUNTAIN POOL ── -->
+                <tr class="loc-row" onclick="toggleLoc('loc6')">
+                  <td class="expand-icon" id="icon-loc6">▶</td>
+                  <td style="font-family:monospace;font-size:0.7rem;color:var(--gray-600)">29850</td>
+                  <td class="fw-600">CIG ROCKY MOUNTAIN POOL</td>
+                  <td class="num">77,625</td>
+                  <td class="num">35,000</td>
+                  <td class="num">77,625</td>
+                  <td class="num">35,000</td>
+                  <td class="num" style="color:var(--red-text);font-weight:600">–42,625</td>
+                  <td class="num">–273</td>
+                  <td class="num">5</td>
+                  <td><span class="badge badge-danger">PBL</span></td>
+                </tr>
+                <tr class="loc-detail" id="detail-loc6" style="display:none">
+                  <td colspan="11" style="padding:0">
+                    <div class="sub-lbl">Receipt <span class="sub-lbl-sub">(Upstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-70010</td><td class="fw-600">WBI Energy Transmission</td><td class="muted">POWDER RIVER / CIG WY</td><td class="num">25,000</td><td class="num">11,200</td><td class="num" style="color:var(--red-text);font-weight:600">–13,800</td><td class="num">–87</td><td>1</td><td><span class="badge badge-danger" style="font-size:0.63rem">PBL</span></td></tr>
+                        <tr><td class="k-col" colspan="8" style="color:var(--gray-400);font-size:0.7rem">+ 4 more receipt paths (Tenaska, Targa, WPS, Sequent)…</td></tr>
+                      </tbody>
+                    </table>
+                    <div class="sub-lbl sub-lbl-2">Delivery <span class="sub-lbl-sub">(Downstream Counterparties)</span></div>
+                    <table class="path-table">
+                      <thead><tr><th>K</th><th>Svc Req Name</th><th>Loc Name</th><th class="num">Nom Qty</th><th class="num">Sch Qty</th><th class="num">Cut Qty</th><th class="num">Fuel</th><th>Op Rank</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="k-col">K-70010</td><td class="fw-600">Ambit Energy</td><td class="muted">CIG ROCKY MTN / PANHANDLE EAST</td><td class="num">25,000</td><td class="num">11,200</td><td class="num" style="color:var(--red-text);font-weight:600">–13,800</td><td class="num">–87</td><td>1</td><td><span class="badge badge-danger" style="font-size:0.63rem">PBL</span></td></tr>
+                        <tr><td class="k-col" colspan="8" style="color:var(--gray-400);font-size:0.7rem">+ 4 more delivery paths…</td></tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /screen-nominations -->
+
+
+<!-- ── Screen Switcher ── -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 3: ALLOCATION
+═══════════════════════════════════════════════════ -->
+<div id="screen-allocation" class="wrapper" style="display:none">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand"><span class="sidebar-brand-dot"></span> molecule</div>
+    <div class="sidebar-section">Gas Scheduling</div>
+    <a class="sidebar-item" href="#" onclick="show('nominations');return false;">↕ Nominations</a>
+    <a class="sidebar-item active" href="#" onclick="show('allocation');return false;">⚖ Allocations</a>
+    <a class="sidebar-item" href="#" onclick="show('map');return false;">🗺 Pipeline Map</a>
+    <a class="sidebar-item" href="#" onclick="show('yaml');return false;">✦ AI Review</a>
+  </nav>
+
+  <div class="main">
+    <div class="top-navbar">
+      <span class="nav-title">Actualization</span>
+      <span class="nav-breadcrumb">/ Allocations</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-avatar">HH</div>
+    </div>
+
+    <div class="page-tabs">
+      <div class="page-tab" onclick="show('nominations')">Nominations</div>
+      <div class="page-tab active" onclick="show('allocation')">Allocations</div>
+      <div class="page-tab" onclick="show('map')">Pipeline Map</div>
+      <div class="page-tab" onclick="show('yaml')" style="color:var(--purple)">✦ AI Review</div>
+    </div>
+
+    <div class="content" style="overflow-y:auto">
+
+      <!-- Page header + toolbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;flex-wrap:wrap;gap:0.5rem">
+        <div>
+          <h1 style="font-size:1rem;font-weight:700;color:var(--gray-900)">Allocation</h1>
+          <p style="font-size:0.75rem;color:var(--gray-500);margin-top:0.15rem">Match pipeline scheduled quantities to Molecule settlement configs</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+          <select class="form-select" style="font-size:0.75rem;padding:0.3rem 0.6rem;border:1px solid var(--gray-300);border-radius:4px;background:#fff">
+            <option>Gas Day: Apr 9, 2026</option>
+          </select>
+          <select class="form-select" style="font-size:0.75rem;padding:0.3rem 0.6rem;border:1px solid var(--gray-300);border-radius:4px;background:#fff">
+            <option>Cycle: Timely</option>
+            <option>Evening</option><option>ID1</option><option>ID2</option><option>ID3</option>
+          </select>
+          <select class="form-select" style="font-size:0.75rem;padding:0.3rem 0.6rem;border:1px solid var(--gray-300);border-radius:4px;background:#fff">
+            <option>All Pipelines</option>
+            <option>REX</option><option>NNG</option><option>TIGT</option><option>SSC</option>
+          </select>
+          <button style="font-size:0.75rem;padding:0.32rem 0.75rem;background:#fff;border:1px solid var(--gray-300);border-radius:4px;color:var(--gray-700);cursor:pointer">Export</button>
+          <button id="run-alloc-btn" onclick="runAllocation()" style="font-size:0.75rem;padding:0.32rem 0.9rem;background:var(--blue);color:#fff;border:none;border-radius:4px;font-weight:600;cursor:pointer">&#9654; Run Auto-Allocate</button>
+          <button style="font-size:0.75rem;padding:0.32rem 0.9rem;background:var(--green);color:#fff;border:none;border-radius:4px;font-weight:600;cursor:pointer">✓ Accept</button>
+        </div>
+      </div>
+
+      <!-- Summary stat bar -->
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap">
+        <div class="card" style="flex:1;min-width:130px;padding:0.65rem 0.9rem">
+          <div style="font-size:0.68rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Locations</div>
+          <div style="font-size:1.3rem;font-weight:700;color:var(--gray-900);margin-top:0.15rem">6</div>
+        </div>
+        <div class="card" style="flex:1;min-width:130px;padding:0.65rem 0.9rem">
+          <div style="font-size:0.68rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Sch Qty (Dth)</div>
+          <div style="font-size:1.3rem;font-weight:700;color:var(--gray-900);margin-top:0.15rem">503,464</div>
+        </div>
+        <div class="card" style="flex:1;min-width:130px;padding:0.65rem 0.9rem">
+          <div style="font-size:0.68rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Allocated</div>
+          <div id="stat-allocated" style="font-size:1.3rem;font-weight:700;color:var(--gray-900);margin-top:0.15rem">460,839</div>
+        </div>
+        <div class="card" style="flex:1;min-width:130px;padding:0.65rem 0.9rem">
+          <div style="font-size:0.68rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Unallocated</div>
+          <div id="stat-unallocated" style="font-size:1.3rem;font-weight:700;color:var(--red-text);margin-top:0.15rem">42,625</div>
+        </div>
+        <div class="card" style="flex:1;min-width:130px;padding:0.65rem 0.9rem">
+          <div style="font-size:0.68rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Fully Matched</div>
+          <div style="font-size:1.3rem;font-weight:700;color:var(--green);margin-top:0.15rem">4 / 6</div>
+        </div>
+        <div class="card" style="flex:1;min-width:130px;padding:0.65rem 0.9rem">
+          <div style="font-size:0.68rem;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Open Trades</div>
+          <div style="font-size:1.3rem;font-weight:700;color:var(--gray-900);margin-top:0.15rem">18</div>
+        </div>
+      </div>
+
+      <!-- Algorithm info callout -->
+      <div id="alloc-callout" style="display:none;background:var(--gray-050);border:1px solid var(--gray-200);border-radius:6px;padding:0.65rem 0.9rem;margin-bottom:1rem;font-size:0.75rem;color:var(--gray-700)">
+        <strong style="color:var(--blue)">Auto-Allocation completed</strong> &nbsp;—&nbsp;
+        Algorithm: <strong>EBB Agreement Match → Proration (PBL/PBA)</strong>.
+        4 of 6 locations fully matched. 1 location has partial coverage (CIG Rocky Mountain — no settlement config found for 3 paths).
+        <span style="color:var(--gray-400);margin-left:0.5rem">Run at 09:14:22</span>
+      </div>
+
+      <!-- Main allocation table -->
+      <div class="card" style="padding:0;overflow:auto">
+        <table class="data-table" style="font-size:0.74rem;min-width:980px" id="alloc-table">
+          <thead>
+            <tr>
+              <th style="width:22px"></th>
+              <th>Location / Hub</th>
+              <th>Pipeline</th>
+              <th class="num">Sch Qty</th>
+              <th class="num">Traded Qty</th>
+              <th class="num">Allocated</th>
+              <th class="num">Variance</th>
+              <th class="num">Settlement Configs</th>
+              <th>Alloc Method</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="alloc-tbody">
+
+            <!-- ── LOC A: REX Cheyenne Comp Pool ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locA')">
+              <td class="expand-icon" id="aicon-locA">▶</td>
+              <td>
+                <div class="fw-600">REX Cheyenne Comp Pool</div>
+                <div style="font-size:0.68rem;color:var(--gray-400);font-family:monospace">hub: REX Cheyenne Comp Pool &nbsp;·&nbsp; loc: 44120</div>
+              </td>
+              <td style="color:var(--gray-600)">REX</td>
+              <td class="num">43,739</td>
+              <td class="num">50,000</td>
+              <td class="num">43,739</td>
+              <td class="num" style="color:var(--red-text);font-weight:600">–6,261</td>
+              <td class="num">4</td>
+              <td><span style="font-size:0.68rem;color:var(--gray-600)">PBL Prorata</span></td>
+              <td><span class="badge badge-warning">Partial</span></td>
+            </tr>
+            <tr id="adetail-locA" style="display:none">
+              <td colspan="10" style="padding:0;background:var(--gray-025)">
+
+                <!-- Counterparty: DCP Midstream (Receipt/Buy) -->
+                <div class="sub-lbl">Receipt — DCP Midstream Marketing, LLC <span class="sub-lbl-sub">EBB Agmt: K-88422 / K-88423 / K-88430 / K-88431</span></div>
+                <table class="path-table">
+                  <thead><tr>
+                    <th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr>
+                      <td class="k-col">T-0088422</td>
+                      <td class="fw-600">DCP Midstream Marketing, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF.IF</td>
+                      <td class="num">20,000</td><td class="num">20,000</td><td class="num">20,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-DCP-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0088423</td>
+                      <td class="fw-600">DCP Midstream Marketing, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF.IF</td>
+                      <td class="num">5,000</td><td class="num">5,000</td><td class="num">5,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-DCP-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0088430</td>
+                      <td class="fw-600">DCP Midstream Marketing, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF.IF</td>
+                      <td class="num">10,000</td><td class="num">10,000</td><td class="num">10,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-DCP-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0088431</td>
+                      <td class="fw-600">DCP Midstream Marketing, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF.IF</td>
+                      <td class="num">33,639</td><td class="num">33,639</td><td class="num">8,739</td>
+                      <td class="num" style="color:var(--red-text);font-weight:600">–24,900</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-DCP-R</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">Partial</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Counterparty: Sell side (Delivery) -->
+                <div class="sub-lbl sub-lbl-2">Delivery — Sell-side Counterparties (PBL Prorated) <span class="sub-lbl-sub">Pipeline cut –6,261 distributed by operational rank</span></div>
+                <table class="path-table">
+                  <thead><tr>
+                    <th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr>
+                      <td class="k-col">T-0020110</td>
+                      <td class="fw-600">Constellation Energy Generation, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF</td>
+                      <td class="num">–20,000</td><td class="num">19,206</td><td class="num">–19,206</td>
+                      <td class="num" style="color:var(--red-text)">–794</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-CNS-D</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">PBL</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0020111</td>
+                      <td class="fw-600">Koch Energy Services, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF</td>
+                      <td class="num">–15,000</td><td class="num">10,000</td><td class="num">–10,000</td>
+                      <td class="num" style="color:var(--red-text);font-weight:600">–5,000</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-KOC-D</td>
+                      <td><span class="badge badge-danger" style="font-size:0.63rem">Cut</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0020112</td>
+                      <td class="fw-600">Mieco LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF.IF</td>
+                      <td class="num">–10,000</td><td class="num">10,000</td><td class="num">–10,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-MIE-D</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0020113</td>
+                      <td class="fw-600">Symmetry Energy Solutions, LLC</td>
+                      <td class="muted">REX Cheyenne Comp Pool · ZAF.IF</td>
+                      <td class="num">–4,533</td><td class="num">4,533</td><td class="num">–4,533</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4412-SYM-D</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">PBL</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </td>
+            </tr>
+
+            <!-- ── LOC B: INTEX OPAL GFT WISE LINCOLN ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locB')">
+              <td class="expand-icon" id="aicon-locB">▶</td>
+              <td>
+                <div class="fw-600">INTEX OPAL GFT WISE LINCOLN</div>
+                <div style="font-size:0.68rem;color:var(--gray-400);font-family:monospace">hub: Opal &nbsp;·&nbsp; loc: 640911</div>
+              </td>
+              <td style="color:var(--gray-600)">REX</td>
+              <td class="num">124,025</td>
+              <td class="num">125,000</td>
+              <td class="num">124,025</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">3</td>
+              <td><span style="font-size:0.68rem;color:var(--gray-600)">Agmt Match</span></td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr id="adetail-locB" style="display:none">
+              <td colspan="10" style="padding:0;background:var(--gray-025)">
+                <div class="sub-lbl">Receipt — Upstream Suppliers (Fuel deducted) <span class="sub-lbl-sub">Agmts: G294 / G88 / J15B</span></div>
+                <table class="path-table">
+                  <thead><tr>
+                    <th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr>
+                      <td class="k-col">T-0042234</td>
+                      <td class="fw-600">Constellation Gas Mktg LLC</td>
+                      <td class="muted">Opal · XXR</td>
+                      <td class="num">75,000</td><td class="num">75,000</td><td class="num">75,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-6409-CON-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0042235</td>
+                      <td class="fw-600">Shell Energy North America</td>
+                      <td class="muted">Opal · XXR</td>
+                      <td class="num">30,000</td><td class="num">30,000</td><td class="num">30,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-6409-SHE-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col">T-0042240</td>
+                      <td class="fw-600">BP Energy Company</td>
+                      <td class="muted">Opal · XXR</td>
+                      <td class="num">20,000</td><td class="num">20,000</td><td class="num">20,000</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-6409-BP-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="sub-lbl sub-lbl-2">Delivery — Spire Missouri Inc. <span class="sub-lbl-sub">EBB Delivery: REX / NGPL ST LOUIS SCOTT</span></div>
+                <table class="path-table">
+                  <thead><tr>
+                    <th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr>
+                      <td class="k-col">T-0042234</td><td class="fw-600">Spire Missouri Inc.</td>
+                      <td class="muted">REX Zone 3 · YVX.FP</td>
+                      <td class="num">–125,000</td><td class="num">124,025</td><td class="num">–124,025</td>
+                      <td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-6409-SPR-D</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <!-- ── LOC C: NNG VENTURA POOL ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locC')">
+              <td class="expand-icon" id="aicon-locC">▶</td>
+              <td>
+                <div class="fw-600">NNG VENTURA POOL</div>
+                <div style="font-size:0.68rem;color:var(--gray-400);font-family:monospace">hub: NNG Gage &nbsp;·&nbsp; loc: 51200</div>
+              </td>
+              <td style="color:var(--gray-600)">NNG</td>
+              <td class="num">146,349</td>
+              <td class="num">147,500</td>
+              <td class="num">146,349</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">2</td>
+              <td><span style="font-size:0.68rem;color:var(--gray-600)">Agmt Match</span></td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr id="adetail-locC" style="display:none">
+              <td colspan="10" style="padding:0;background:var(--gray-025)">
+                <div class="sub-lbl">Receipt — IO Gas Marketing LLC <span class="sub-lbl-sub">Agmt: GM002</span></div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="k-col">T-0055010</td><td class="fw-600">IO Gas Marketing LLC</td><td class="muted">NNG Gage · Z01</td>
+                      <td class="num">147,500</td><td class="num">147,500</td><td class="num">147,500</td><td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-5120-IOG-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="sub-lbl sub-lbl-2">Delivery — Spire Missouri / PSCO <span class="sub-lbl-sub">Fuel deducted 1,151 Dth</span></div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="k-col">T-0055010</td><td class="fw-600">Spire Missouri Inc.</td><td class="muted">REX Zone 3 · M.RZ3FXD</td>
+                      <td class="num">–100,000</td><td class="num">100,000</td><td class="num">–100,000</td><td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-5120-SPR-D</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                    <tr><td class="k-col">T-0055011</td><td class="fw-600">PSCO (Xcel Energy)</td><td class="muted">REX Zone 3 · M.RZ3GDD</td>
+                      <td class="num">–47,500</td><td class="num">46,349</td><td class="num">–46,349</td><td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-5120-PSC-D</td>
+                      <td><span class="badge badge-secondary" style="font-size:0.63rem">Fuel adj</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <!-- ── LOC D: TIGT PICEANCE BASIN ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locD')">
+              <td class="expand-icon" id="aicon-locD">▶</td>
+              <td>
+                <div class="fw-600">TIGT PICEANCE BASIN</div>
+                <div style="font-size:0.68rem;color:var(--gray-400);font-family:monospace">hub: White River Hub &nbsp;·&nbsp; loc: 32100</div>
+              </td>
+              <td style="color:var(--gray-600)">TIGT</td>
+              <td class="num">84,337</td>
+              <td class="num">95,000</td>
+              <td class="num">84,337</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">2</td>
+              <td><span style="font-size:0.68rem;color:var(--gray-600)">PBA Prorata</span></td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr id="adetail-locD" style="display:none">
+              <td colspan="10" style="padding:0;background:var(--gray-025)">
+                <div class="sub-lbl">Receipt — Williams Field Services / EnCana <span class="sub-lbl-sub">PBA cut –10,000 applied pro-rata</span></div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="k-col">T-0032001</td><td class="fw-600">Williams Field Services</td><td class="muted">White River Hub · Z45</td>
+                      <td class="num">50,000</td><td class="num">45,000</td><td class="num">45,000</td><td class="num" style="color:var(--red-text)">–5,000</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-3210-WIL-R</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td>
+                    </tr>
+                    <tr><td class="k-col">T-0032002</td><td class="fw-600">EnCana Oil &amp; Gas USA</td><td class="muted">White River Hub · Z45</td>
+                      <td class="num">45,000</td><td class="num">40,000</td><td class="num">40,000</td><td class="num" style="color:var(--red-text)">–5,000</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-3210-ENC-R</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="sub-lbl sub-lbl-2">Delivery — Xcel Energy Services <span class="sub-lbl-sub">Agmt: K-32001 / K-32002</span></div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="k-col">T-0032001</td><td class="fw-600">Xcel Energy Services</td><td class="muted">REX Zone 1 · YVX</td>
+                      <td class="num">–50,000</td><td class="num">44,674</td><td class="num">–44,674</td><td class="num" style="color:var(--red-text)">–5,326</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-3210-XCL-D</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td>
+                    </tr>
+                    <tr><td class="k-col">T-0032002</td><td class="fw-600">Xcel Energy Services</td><td class="muted">REX Zone 1 · YVX</td>
+                      <td class="num">–45,000</td><td class="num">39,663</td><td class="num">–39,663</td><td class="num" style="color:var(--red-text)">–5,337</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-3210-XCL-D</td>
+                      <td><span class="badge badge-warning" style="font-size:0.63rem">PBA</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <!-- ── LOC E: NGPL / REX MOULTRIE ── -->
+            <tr class="loc-row" onclick="toggleAlloc('locE')">
+              <td class="expand-icon" id="aicon-locE">▶</td>
+              <td>
+                <div class="fw-600">NGPL / REX MOULTRIE</div>
+                <div style="font-size:0.68rem;color:var(--gray-400);font-family:monospace">hub: REX E-NGPL &nbsp;·&nbsp; loc: 44413</div>
+              </td>
+              <td style="color:var(--gray-600)">REX</td>
+              <td class="num">79,376</td>
+              <td class="num">80,000</td>
+              <td class="num">79,376</td>
+              <td class="num" style="color:var(--gray-400)">0</td>
+              <td class="num">1</td>
+              <td><span style="font-size:0.68rem;color:var(--gray-600)">Agmt Match</span></td>
+              <td><span class="badge badge-success">Matched</span></td>
+            </tr>
+            <tr id="adetail-locE" style="display:none">
+              <td colspan="10" style="padding:0;background:var(--gray-025)">
+                <div class="sub-lbl">Receipt — IO Gas Marketing LLC <span class="sub-lbl-sub">PAL: 962099 &nbsp;·&nbsp; Agmt: 44413</span></div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="k-col">T-0044001</td><td class="fw-600">IO Gas Marketing LLC</td><td class="muted">REX E-NGPL · YVW</td>
+                      <td class="num">80,000</td><td class="num">80,000</td><td class="num">80,000</td><td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4441-IOG-R</td>
+                      <td><span class="badge badge-success" style="font-size:0.63rem">Matched</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="sub-lbl sub-lbl-2">Delivery — NGPL Pipeline Co. <span class="sub-lbl-sub">Fuel adj –624 Dth applied</span></div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="k-col">T-0044001</td><td class="fw-600">NGPL Pipeline Co.</td><td class="muted">REX E-NGPL · YVW</td>
+                      <td class="num">–80,000</td><td class="num">79,376</td><td class="num">–79,376</td><td class="num" style="color:var(--gray-400)">0</td>
+                      <td style="font-size:0.68rem;color:var(--gray-600)">SC-4441-NGL-D</td>
+                      <td><span class="badge badge-secondary" style="font-size:0.63rem">Fuel adj</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <!-- ── LOC F: CIG ROCKY MOUNTAIN POOL — UNMATCHED ── -->
+            <tr id="alloc-locF-row" class="loc-row" onclick="toggleAlloc('locF')">
+              <td class="expand-icon" id="aicon-locF">▶</td>
+              <td>
+                <div class="fw-600">CIG ROCKY MOUNTAIN POOL</div>
+                <div id="alloc-locF-sub" style="font-size:0.68rem;color:var(--red-text);font-family:monospace">hub: CIG-Mainline &nbsp;·&nbsp; loc: 29850 &nbsp;·&nbsp; ⚠ No settlement config for 4 paths</div>
+              </td>
+              <td style="color:var(--gray-600)">CIG</td>
+              <td class="num">35,000</td>
+              <td class="num">77,625</td>
+              <td id="alloc-locF-alloc" class="num" style="color:var(--red-text);font-weight:600">0</td>
+              <td id="alloc-locF-var" class="num" style="color:var(--red-text);font-weight:600">–35,000</td>
+              <td id="alloc-locF-configs" class="num" style="color:var(--red-text)">0</td>
+              <td id="alloc-locF-method"><span style="font-size:0.68rem;color:var(--red-text);font-weight:600">No Config</span></td>
+              <td id="alloc-locF-status"><span class="badge badge-danger">Unmatched</span></td>
+            </tr>
+            <tr id="adetail-locF" style="display:none">
+              <td colspan="10" style="padding:0;background:var(--gray-025)">
+                <div class="sub-lbl" style="background:#fff8f8;border-color:var(--red-bg)">
+                  ⚠ Allocation failed — no settlement config found in Molecule for CIG-Mainline + WBI Energy / Ambit Energy
+                  <span class="sub-lbl-sub">Scheduled 35,000 Dth remains unallocated. Manual override or new settlement config required.</span>
+                </div>
+                <table class="path-table">
+                  <thead><tr><th>Trade ID</th><th>Counterparty</th><th>Hub / Product</th>                    <th class="num">Trade Qty</th><th class="num">Sch Qty</th><th class="num">Allocated</th><th class="num">Variance</th>
+                    <th>Settlement Config</th><th>Action</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr style="background:#fff8f8">
+                      <td class="k-col" style="color:var(--red-text)">T-0070010</td>
+                      <td class="fw-600">WBI Energy Transmission</td>
+                      <td class="muted">CIG-Mainline · Z45</td>
+                      <td class="num">25,000</td><td class="num">11,200</td><td class="num" style="color:var(--red-text)">–</td>
+                      <td class="num" style="color:var(--red-text);font-weight:600">–11,200</td>
+                      <td style="font-size:0.68rem;color:var(--red-text)">Missing</td>
+                      <td><button style="font-size:0.68rem;padding:0.18rem 0.5rem;background:#fff;border:1px solid var(--gray-300);border-radius:3px;cursor:pointer;color:var(--blue)">+ Add Config</button></td>
+                    </tr>
+                    <tr>
+                      <td class="k-col" colspan="8" style="color:var(--gray-400);font-size:0.7rem">+ 4 more unmatched paths (Tenaska, Targa, WPS, Sequent) — 23,800 Dth unallocated</td>
+                      <td><button style="font-size:0.68rem;padding:0.18rem 0.5rem;background:#fff;border:1px solid var(--gray-300);border-radius:3px;cursor:pointer;color:var(--blue)">Bulk Map</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /screen-allocation -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN: PIPELINE MAP
+═══════════════════════════════════════════════════ -->
+<div id="screen-map" class="wrapper" style="display:none">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand"><span class="sidebar-brand-dot"></span> molecule</div>
+    <div class="sidebar-section">Gas Scheduling</div>
+    <a class="sidebar-item" href="#" onclick="show('nominations');return false;">↕ Nominations</a>
+    <a class="sidebar-item" href="#" onclick="show('allocation');return false;">⚖ Allocations</a>
+    <a class="sidebar-item active" href="#" onclick="show('map');return false;">🗺 Pipeline Map</a>
+    <a class="sidebar-item" href="#" onclick="show('yaml');return false;">✦ AI Review</a>
+  </nav>
+
+  <div class="main">
+    <div class="top-navbar">
+      <span class="nav-title">Actualization</span>
+      <span class="nav-breadcrumb">/ Pipeline Map</span>
+      <div class="nav-spacer"></div>
+      <div class="nav-avatar">SM</div>
+    </div>
+
+    <div class="page-tabs">
+      <div class="page-tab" onclick="show('nominations')">Nominations</div>
+      <div class="page-tab" onclick="show('allocation')">Allocations</div>
+      <div class="page-tab active" onclick="show('map')">Pipeline Map</div>
+      <div class="page-tab" onclick="show('yaml')" style="color:var(--purple)">✦ AI Review</div>
+    </div>
+
+    <div class="content">
+
+      <!-- Toolbar -->
+      <div class="toolbar" style="flex-wrap:wrap;row-gap:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.35rem">
+          <span style="font-size:0.72rem;color:var(--gray-500);white-space:nowrap">Pipeline</span>
+          <select class="form-select" id="map-pipeline-select" style="width:130px" onchange="updateMap()">
+            <option value="rex" selected>REX</option>
+            <option value="tigt">TIGT</option>
+            <option value="nng">NNG</option>
+            <option value="ssc">SSC</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.35rem">
+          <span style="font-size:0.72rem;color:var(--gray-500);white-space:nowrap">Map Type</span>
+          <select class="form-select" id="map-type-select" style="width:130px" onchange="updateMap()">
+            <option value="ferc">FERC System Map</option>
+            <option value="receipt">Receipt Points</option>
+            <option value="delivery">Delivery Points</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <a id="map-open-link" href="https://pipeline.tallgrassenergylp.com/Content/REX/REX_FERC_Web_Map.pdf" target="_blank" class="btn btn-secondary" style="font-size:0.72rem">↗ Open Full PDF</a>
+        </div>
+      </div>
+
+      <!-- Map embed card -->
+      <div class="card" style="flex:1;min-height:0;overflow:hidden">
+        <div class="card-header" style="padding-bottom:0.5rem">
+          <div class="card-title" id="map-card-title">REX — FERC System Map</div>
+          <span style="font-size:0.7rem;color:var(--gray-500)" id="map-card-sub">Rockies Express Pipeline · Tallgrass Energy</span>
+        </div>
+        <div class="card-body" style="flex:1;overflow:hidden">
+          <iframe
+            id="map-iframe"
+            src="https://pipeline.tallgrassenergylp.com/Content/REX/REX_FERC_Web_Map.pdf"
+            style="width:100%;height:100%;border:none;min-height:600px"
+            title="Pipeline Map">
+          </iframe>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /screen-map -->
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN: AI REVIEW
+═══════════════════════════════════════════════════ -->
+<div id="screen-yaml" class="wrapper" style="display:none">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand"><span class="sidebar-brand-dot"></span> molecule</div>
+    <div class="sidebar-section">Gas Scheduling</div>
+    <a class="sidebar-item" href="#" onclick="show('nominations');return false;">↕ Nominations</a>
+    <a class="sidebar-item" href="#" onclick="show('allocation');return false;">⚖ Allocations</a>
+    <a class="sidebar-item" href="#" onclick="show('map');return false;">🗺 Pipeline Map</a>
+    <a class="sidebar-item active" href="#" onclick="show('yaml');return false;">✦ AI Review</a>
+  </nav>
+
+  <div class="main" style="overflow:hidden;display:flex;flex-direction:column">
+    <div class="top-navbar">
+      <span class="nav-title">Actualization</span>
+      <span class="nav-breadcrumb">/ AI Review</span>
+      <div class="nav-spacer"></div>
+      <span style="font-size:0.68rem;color:var(--purple);font-weight:600;background:#f3e8ff;padding:0.2rem 0.6rem;border-radius:10px;display:flex;align-items:center;gap:0.3rem">✦ Powered by Claude</span>
+      <div class="nav-avatar">SM</div>
+    </div>
+
+    <div class="page-tabs">
+      <div class="page-tab" onclick="show('nominations')">Nominations</div>
+      <div class="page-tab" onclick="show('allocation')">Allocations</div>
+      <div class="page-tab" onclick="show('map')">Pipeline Map</div>
+      <div class="page-tab active" onclick="show('yaml')" style="color:var(--purple);border-bottom-color:var(--purple)">✦ AI Review</div>
+    </div>
+
+    <!-- Two-panel layout: YAML viewer + Chat -->
+    <div style="display:flex;flex:1;min-height:0;overflow:hidden">
+
+      <!-- ── YAML Viewer Panel (dark theme) ── -->
+      <div id="yaml-panel" style="flex:1;min-width:0;background:#1e1e2e;display:flex;flex-direction:column;overflow:hidden">
+
+        <!-- YAML toolbar -->
+        <div style="display:flex;align-items:center;padding:0.55rem 1rem;background:#181825;border-bottom:1px solid #313244;gap:0.5rem;flex-shrink:0">
+          <span style="font-size:0.7rem;color:#89b4fa;font-family:monospace;font-weight:600">alloc-20260409-1042.yaml</span>
+          <span style="font-size:0.62rem;color:#f38ba8;padding:0.1rem 0.45rem;background:#312030;border-radius:10px;font-family:monospace;font-weight:600">PARTIAL</span>
+          <span style="font-size:0.62rem;color:#6c7086;margin-left:0.25rem">· 6 locations · 8.47% unallocated</span>
+          <div style="margin-left:auto;display:flex;gap:0.5rem;align-items:center">
+            <button style="font-size:0.7rem;padding:0.22rem 0.6rem;background:transparent;border:1px solid #45475a;border-radius:3px;color:#cdd6f4;cursor:pointer;font-family:monospace">↓ Download</button>
+            <button id="open-chat-btn" onclick="toggleChat()" style="font-size:0.73rem;padding:0.25rem 0.85rem;background:#7c3aed;border:none;border-radius:3px;color:#fff;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem">✦ Ask Claude</button>
+          </div>
+        </div>
+
+        <!-- YAML content -->
+        <pre id="yaml-content" style="flex:1;overflow:auto;padding:1rem 1.5rem;font-family:'JetBrains Mono','Fira Code','Cascadia Code',monospace;font-size:0.715rem;line-height:1.72;color:#cdd6f4;margin:0;white-space:pre;tab-size:2"></pre>
+      </div>
+
+      <!-- ── Chat Panel (right side, hidden initially) ── -->
+      <div id="chat-panel" style="display:none;width:430px;min-width:430px;background:#fff;border-left:1px solid var(--border);flex-direction:column;overflow:hidden">
+
+        <!-- Chat header -->
+        <div style="display:flex;align-items:center;padding:0.7rem 1rem;border-bottom:1px solid var(--border);background:#fafbfc;flex-shrink:0;gap:0.45rem">
+          <span style="font-size:1rem;color:#7c3aed;line-height:1">✦</span>
+          <span style="font-size:0.84rem;font-weight:700;color:var(--gray-800)">Claude</span>
+          <span style="font-size:0.62rem;padding:0.12rem 0.45rem;background:#f3e8ff;color:#6b21a8;border-radius:10px;font-weight:600">MCP</span>
+          <div style="margin-left:auto;display:flex;gap:0.4rem;align-items:center">
+            <span style="font-size:0.63rem;color:var(--gray-400);font-family:monospace">claude-sonnet-4-6</span>
+            <button onclick="toggleChat()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:1.1rem;line-height:1;padding:0.1rem 0.2rem">✕</button>
+          </div>
+        </div>
+
+        <!-- Messages area -->
+        <div id="chat-messages" style="flex:1;overflow-y:auto;padding:0.9rem;display:flex;flex-direction:column;gap:0.9rem;min-height:0">
+
+          <!-- Msg 1: User -->
+          <div class="chat-msg chat-user">
+            <div class="chat-bubble chat-bubble-user">CIG Rocky Mountain Pool came back completely unmatched — all 35,000 Dth. What happened?</div>
+            <div class="chat-time">10:43 AM</div>
+          </div>
+
+          <!-- Msg 2: Claude -->
+          <div class="chat-msg chat-assistant">
+            <div class="chat-avatar-row"><span class="chat-claude-icon">✦</span><span class="chat-name">Claude</span></div>
+            <div class="tool-call-chip"><span class="tool-call-icon">⚙</span><code>read_allocation_yaml(location="loc-F")</code><span class="tool-call-ok">✓ 342ms</span></div>
+            <div class="chat-bubble chat-bubble-assistant">
+              <p>I looked at the full run for loc-F. The engine evaluated all five counterparty paths here but every candidate scored below the 45-point threshold. The highest scorer was WBI Energy (T-0070010, 11,200 Dth scheduled) — it found a settlement config in Molecule that lines up on counterparty, direction, and gas day, but the <strong>hub name scored only 34/40 for location similarity</strong>.</p>
+              <p style="margin-top:0.45rem">The pipeline is reporting this location as <code>CIG ROCKY MOUNTAIN POOL</code>. The settlement config linked to the WBI Energy trade has <code>hub: CIG-WY</code>. The engine's fuzzy matcher didn't consider these the same point, so the total score stayed below the threshold.</p>
+            </div>
+          </div>
+
+          <!-- Msg 3: User -->
+          <div class="chat-msg chat-user">
+            <div class="chat-bubble chat-bubble-user">CIG-WY is definitely the same point — that's just how we label it internally. Can you pull up the settlement config for the WBI trade?</div>
+            <div class="chat-time">10:45 AM</div>
+          </div>
+
+          <!-- Msg 4: Claude -->
+          <div class="chat-msg chat-assistant">
+            <div class="chat-avatar-row"><span class="chat-claude-icon">✦</span><span class="chat-name">Claude</span></div>
+            <div class="tool-call-chip"><span class="tool-call-icon">⚙</span><code>query_settlement_configs(trade_id="T-0070010")</code><span class="tool-call-ok">✓ 189ms</span></div>
+            <div class="chat-bubble chat-bubble-assistant">
+              <p>Here's the settlement config linked to T-0070010:</p>
+              <div style="margin:0.45rem 0;background:#f8fafc;border:1px solid #e2e8ee;border-radius:4px;padding:0.5rem 0.75rem;font-size:0.7rem;line-height:1.8;font-family:monospace">
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Config</span><strong style="color:#1659c7">SC-2985-WBI-R</strong></div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Trade</span>T-0070010 · WBI Energy Transmission, Inc.</div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Hub</span>CIG-WY</div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Direction</span>Buy</div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Qty planned</span>25,000 Dth</div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Qty sched'd</span>11,200 Dth <span style="color:#92400e">(PBL — pipeline prorated)</span></div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Gas day</span>2026-04-09</div>
+                <div><span style="color:#6c757d;display:inline-block;width:7.5rem">Actualized</span><span style="color:#991b1b">No</span></div>
+              </div>
+              <p>The volumes are consistent — 11,200 Dth is a prorated-below result on the full 25,000 Dth contracted volume. <strong>SC-2985-WBI-R is exactly the right settlement config to link here.</strong> The only thing blocking the auto-match is the hub label.</p>
+            </div>
+          </div>
+
+          <!-- Msg 5: User -->
+          <div class="chat-msg chat-user">
+            <div class="chat-bubble chat-bubble-user">Right. Propose the match — link T-0070010 to SC-2985-WBI-R.</div>
+            <div class="chat-time">10:47 AM</div>
+          </div>
+
+          <!-- Msg 6: Claude — proposes amendment -->
+          <div class="chat-msg chat-assistant">
+            <div class="chat-avatar-row"><span class="chat-claude-icon">✦</span><span class="chat-name">Claude</span></div>
+            <div class="tool-call-chip"><span class="tool-call-icon">⚙</span><code>propose_amendment(pipeline_schedule="T-0070010", settlement_config="SC-2985-WBI-R", allocated_dth=11200, method="MANUAL_HUB_OVERRIDE")</code><span class="tool-call-ok">✓ 156ms</span></div>
+            <div class="chat-bubble chat-bubble-assistant">
+              <p>Draft ready. This links the pipeline schedule for WBI Energy (11,200 Dth at <code>CIG ROCKY MOUNTAIN POOL</code>) to settlement config SC-2985-WBI-R (hub: <code>CIG-WY</code>). Method is logged as <strong>MANUAL_HUB_OVERRIDE</strong> — the audit trail will note this was a manual link due to a hub name discrepancy. <em>Nothing changes until you click Accept.</em></p>
+              <p style="margin-top:0.45rem">What changes:</p>
+              <ul style="margin:0.35rem 0 0 1rem;display:flex;flex-direction:column;gap:0.22rem;font-size:0.76rem">
+                <li>WBI Energy <code>T-0070010</code>: <span style="color:#991b1b;font-weight:600">0 Dth</span> → <span style="color:#166534;font-weight:600">11,200 Dth</span> allocated</li>
+                <li>CIG Rocky Mountain: <span style="color:#991b1b">Unmatched</span> → <span style="color:#92400e">Partial</span> (23,800 Dth still unallocated)</li>
+                <li>Run total allocated: 460,839 → <strong>472,039 Dth</strong></li>
+              </ul>
+              <p style="margin-top:0.45rem;font-size:0.75rem;color:var(--gray-500)">The other 4 paths (Tenaska, Targa, WPS, Sequent) have the same hub mismatch — their configs are also booked under CIG-WY. After accepting this, consider adding <code>CIG ROCKY MOUNTAIN POOL</code> as a location alias for <code>CIG-WY</code> in Molecule Settings → Pipeline Locations so the engine resolves all of them automatically next run.</p>
+            </div>
+          </div>
+
+          <!-- Msg 7: User -->
+          <div class="chat-msg chat-user">
+            <div class="chat-bubble chat-bubble-user">Accept this one. And yes, I'll add the alias — good call.</div>
+            <div class="chat-time">10:48 AM</div>
+          </div>
+
+          <!-- Msg 8: Claude — diff prompt -->
+          <div class="chat-msg chat-assistant">
+            <div class="chat-avatar-row"><span class="chat-claude-icon">✦</span><span class="chat-name">Claude</span></div>
+            <div class="chat-bubble chat-bubble-assistant">
+              <p>Here's the exact patch. Review and confirm — nothing is written until you click <strong>Accept Amendment</strong>.</p>
+            </div>
+          </div>
+
+        </div><!-- /chat-messages -->
+
+        <!-- YAML Diff + Accept/Reject -->
+        <div id="amendment-panel" style="background:#0d1117;border-top:2px solid #d97706;flex-shrink:0">
+          <div style="display:flex;align-items:center;padding:0.38rem 0.75rem;background:#1a1208;border-bottom:1px solid #3d2d00;gap:0.5rem">
+            <span style="font-size:0.63rem;color:#f59e0b;font-weight:700;letter-spacing:0.06em">PROPOSED AMENDMENT</span>
+            <span style="font-size:0.6rem;color:#78716c;font-family:monospace">alloc-20260409-1042.yaml · patch #1</span>
+          </div>
+          <pre style="font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.67rem;line-height:1.65;padding:0.6rem 0.9rem;margin:0;color:#e6edf3;overflow-x:auto;max-height:220px;overflow-y:auto"><span style="color:#484f58"> # LOC F: CIG ROCKY MOUNTAIN POOL</span>
+<span style="color:#484f58">   hub: CIG-Mainline  loc: "29850"</span>
+<span style="color:#484f58">   scheduled_dth: 35000</span>
+<span class="diff-removed">-  allocated_dth: 0</span>
+<span class="diff-added">+  allocated_dth: 11200</span>
+<span class="diff-removed">-  variance_dth: -35000</span>
+<span class="diff-added">+  variance_dth: -23800</span>
+<span class="diff-removed">-  status: UNMATCHED</span>
+<span class="diff-added">+  status: PARTIAL</span>
+<span class="diff-removed">-  allocation_method: null</span>
+<span class="diff-added">+  allocation_method: MANUAL_HUB_OVERRIDE</span>
+<span class="diff-removed">-  settlement_configs_used: 0</span>
+<span class="diff-added">+  settlement_configs_used: 2</span>
+<span style="color:#484f58">   ···</span>
+<span style="color:#484f58">   paths.receipts[0]:  # trade_id: T-0070010</span>
+<span class="diff-removed">-    allocated_qty_dth: 0</span>
+<span class="diff-added">+    allocated_qty_dth: 11200</span>
+<span class="diff-removed">-    variance_dth: -11200</span>
+<span class="diff-added">+    variance_dth: 0</span>
+<span class="diff-removed">-    settlement_config: null</span>
+<span class="diff-added">+    settlement_config: SC-2985-WBI-R</span>
+<span class="diff-removed">-    method: null</span>
+<span class="diff-added">+    method: MANUAL_HUB_OVERRIDE</span>
+<span class="diff-removed">-    status: UNMATCHED</span>
+<span class="diff-added">+    status: MATCHED</span>
+<span style="color:#484f58">   ···</span>
+<span style="color:#484f58"> # SUMMARY (meta)</span>
+<span class="diff-removed">-  total_allocated_dth: 460839</span>
+<span class="diff-added">+  total_allocated_dth: 472039</span>
+<span class="diff-removed">-  total_unallocated_dth: 42625</span>
+<span class="diff-added">+  total_unallocated_dth: 31425</span>
+<span class="diff-removed">-  variance_pct: 8.47</span>
+<span class="diff-added">+  variance_pct: 6.24</span></pre>
+          <div style="display:flex;gap:0.5rem;padding:0.55rem 0.85rem;border-top:1px solid #21262d;background:#0d1117;align-items:center">
+            <button id="reject-btn" onclick="rejectAmendment()" style="font-size:0.72rem;padding:0.32rem 0.85rem;background:transparent;border:1px solid #484f58;border-radius:3px;color:#8b949e;cursor:pointer">✕ Reject</button>
+            <div style="margin-left:auto;display:flex;gap:0.5rem;align-items:center">
+              <span style="font-size:0.63rem;color:#6e7681">1 path · manual override</span>
+              <button id="accept-btn" onclick="acceptAmendment()" style="font-size:0.73rem;padding:0.32rem 1.1rem;background:#1f6feb;border:none;border-radius:3px;color:#fff;font-weight:600;cursor:pointer">✓ Accept Amendment</button>
+            </div>
+          </div>
+        </div><!-- /amendment-panel -->
+
+        <!-- Input box -->
+        <div style="padding:0.6rem;border-top:1px solid var(--border);background:#fafbfc;display:flex;gap:0.4rem;flex-shrink:0;align-items:center">
+          <input type="text" placeholder="Ask about this allocation…" style="flex:1;font-size:0.775rem;padding:0.35rem 0.65rem;border:1px solid var(--gray-300);border-radius:3px;font-family:var(--font);color:var(--gray-700);background:#fff" />
+          <button style="font-size:0.72rem;padding:0.35rem 0.75rem;background:#7c3aed;border:none;border-radius:3px;color:#fff;cursor:pointer;font-weight:600">↑</button>
+        </div>
+      </div><!-- /chat-panel -->
+
+    </div><!-- /two-panel -->
+  </div><!-- /main -->
+</div><!-- /screen-yaml -->
+
+
+<div class="screen-switcher">
+  <span style="color:rgba(255,255,255,0.4);font-size:0.68rem">SCREEN</span>
+  <button class="sw-btn active" onclick="show('nominations')">Nominations</button>
+  <button class="sw-btn" onclick="show('allocation')">Allocations</button>
+  <button class="sw-btn" onclick="show('map')">Pipeline Map</button>
+  <button class="sw-btn" onclick="show('yaml')" style="color:#c4b5fd">✦ AI Review</button>
+</div>
+
+<style>
+/* ── Nominations screen ── */
+.loc-row { cursor:pointer; }
+.loc-row:hover { background: var(--gray-100) !important; }
+.expand-icon { color:var(--gray-400); font-size:0.65rem; text-align:center; user-select:none; }
+.expand-icon.open { color:var(--blue); }
+
+/* Expanded path sub-table */
+.path-table { width:100%; border-collapse:collapse; font-size:0.73rem; border-top:1px solid var(--gray-200); }
+.path-table thead th {
+  padding:0.28rem 0.6rem;
+  background:var(--gray-050);
+  font-size:0.67rem; font-weight:600; color:var(--gray-500);
+  border-bottom:1px solid var(--gray-200);
+  text-align:left; white-space:nowrap;
+}
+.path-table thead th.num { text-align:right; }
+.path-table tbody tr { border-bottom:1px solid var(--gray-100); }
+.path-table tbody tr:last-child { border-bottom:none; }
+.path-table tbody tr:hover { background:var(--gray-050); }
+.path-table td { padding:0.32rem 0.6rem; color:var(--gray-700); }
+.path-table td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.path-table td.muted { color:var(--gray-500); font-size:0.7rem; }
+.k-col { font-family:monospace; font-size:0.7rem; color:var(--gray-500); white-space:nowrap; }
+.arrow-col { text-align:center; color:var(--gray-400); padding:0 0.2rem; }
+/* Sub-section labels (Receipt / Delivery) inside expanded location rows */
+.sub-lbl { padding:0.28rem 0.65rem; background:var(--gray-050); border-top:1px solid var(--gray-200); border-bottom:1px solid var(--gray-200); font-size:0.68rem; font-weight:600; color:var(--gray-700); letter-spacing:0.03em; }
+.sub-lbl-2 { border-top:2px solid var(--gray-300); }
+.sub-lbl-sub { font-weight:400; color:var(--gray-400); margin-left:0.35rem; }
+</style>
+
+<script>
+function show(name) {
+  ['nominations','allocation','map','yaml'].forEach(function(s){
+    var el = document.getElementById('screen-'+s);
+    if(el) el.style.display = 'none';
+  });
+  var target = document.getElementById('screen-' + name);
+  if(target) target.style.display = 'flex';
+  document.querySelectorAll('.sw-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+  var swBtns = document.querySelectorAll('.sw-btn');
+  var nameMap = {nominations:0, allocation:1, map:2, yaml:3};
+  if(swBtns[nameMap[name]]) swBtns[nameMap[name]].classList.add('active');
+}
+
+var MAP_CONFIGS = {
+  rex: {
+    ferc:     { src: 'https://pipeline.tallgrassenergylp.com/Content/REX/REX_FERC_Web_Map.pdf', title: 'REX — FERC System Map', sub: 'Rockies Express Pipeline · Tallgrass Energy' },
+    receipt:  { src: 'https://pipeline.tallgrassenergylp.com/Content/REX/REX_FERC_Web_Map.pdf', title: 'REX — Receipt Points', sub: 'Rockies Express Pipeline · Tallgrass Energy' },
+    delivery: { src: 'https://pipeline.tallgrassenergylp.com/Content/REX/REX_FERC_Web_Map.pdf', title: 'REX — Delivery Points', sub: 'Rockies Express Pipeline · Tallgrass Energy' }
+  }
+};
+
+function updateMap() {
+  var pipeline = document.getElementById('map-pipeline-select').value;
+  var mapType  = document.getElementById('map-type-select').value;
+  var cfg = MAP_CONFIGS[pipeline] && MAP_CONFIGS[pipeline][mapType];
+  if(!cfg) {
+    document.getElementById('map-iframe').src = '';
+    document.getElementById('map-card-title').textContent = pipeline.toUpperCase() + ' — Map not yet configured';
+    document.getElementById('map-card-sub').textContent = 'Contact your admin to add a map URL for this pipeline.';
+    document.getElementById('map-open-link').href = '#';
+    return;
+  }
+  document.getElementById('map-iframe').src = cfg.src;
+  document.getElementById('map-card-title').textContent = cfg.title;
+  document.getElementById('map-card-sub').textContent = cfg.sub;
+  document.getElementById('map-open-link').href = cfg.src;
+}
+
+function toggleLoc(id) {
+  var detail = document.getElementById('detail-' + id);
+  var icon   = document.getElementById('icon-' + id);
+  if(!detail) return;
+  var isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'table-row';
+  if(isOpen) { icon.classList.remove('open'); icon.textContent='▶'; }
+  else        { icon.classList.add('open');    icon.textContent='▼'; }
+}
+
+function expandAll() {}
+function collapseAll() {}
+
+function toggleAlloc(id) {
+  var detail = document.getElementById('adetail-' + id);
+  var icon   = document.getElementById('aicon-' + id);
+  if(!detail) return;
+  var isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'table-row';
+  if(isOpen) { icon.classList.remove('open'); icon.textContent='▶'; }
+  else        { icon.classList.add('open');    icon.textContent='▼'; }
+}
+
+function runAllocation() {
+  var btn = document.getElementById('run-alloc-btn');
+  btn.textContent = '⟳ Running…';
+  btn.disabled = true;
+  setTimeout(function() {
+    btn.textContent = '✓ Allocated';
+    btn.style.background = 'var(--green)';
+    document.getElementById('alloc-callout').style.display = 'block';
+  }, 1200);
+}
+</script>
+
+<!-- ── AI Review: CSS ── -->
+<style>
+/* Chat layout */
+.chat-msg { display: flex; flex-direction: column; gap: 0.2rem; }
+.chat-user { align-items: flex-end; }
+.chat-assistant { align-items: flex-start; }
+.chat-bubble {
+  padding: 0.52rem 0.72rem;
+  border-radius: 8px;
+  font-size: 0.775rem;
+  line-height: 1.62;
+  max-width: 96%;
+}
+.chat-bubble-user {
+  background: #ede9fe;
+  color: #3b0764;
+  border-radius: 8px 8px 2px 8px;
+}
+.chat-bubble-assistant {
+  background: #f8fafc;
+  border: 1px solid #e2e8ee;
+  color: var(--gray-700);
+  border-radius: 8px 8px 8px 2px;
+}
+.chat-bubble p { margin: 0; }
+.chat-bubble p + p { margin-top: 0.38rem; }
+.chat-bubble code {
+  font-size: 0.71rem;
+  background: #e8edf2;
+  padding: 0.08em 0.3em;
+  border-radius: 2px;
+  font-family: monospace;
+}
+.chat-bubble ul, .chat-bubble ol { padding-left: 1.1rem; margin: 0; }
+.chat-bubble li { margin-bottom: 0.12rem; }
+.chat-time { font-size: 0.62rem; color: var(--gray-400); margin-top: 0.1rem; text-align: right; }
+.chat-avatar-row { display: flex; align-items: center; gap: 0.32rem; margin-bottom: 0.18rem; }
+.chat-claude-icon { color: #7c3aed; font-size: 0.85rem; line-height: 1; }
+.chat-name { font-size: 0.7rem; font-weight: 700; color: var(--gray-600); }
+
+/* Tool call chip */
+.tool-call-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.66rem;
+  font-family: monospace;
+  color: #14532d;
+  margin-bottom: 0.28rem;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tool-call-icon { color: #16a34a; flex-shrink: 0; }
+.tool-call-ok { color: #16a34a; font-weight: 700; flex-shrink: 0; margin-left: auto; padding-left: 0.35rem; }
+
+/* YAML diff lines */
+.diff-removed { display: block; background: rgba(248,113,113,0.13); color: #f87171; }
+.diff-added   { display: block; background: rgba(52,211,153,0.13);  color: #4ade80; }
+
+/* YAML syntax colors (Catppuccin Mocha-inspired) */
+.y-comment { color: #585b70; }
+.y-key     { color: #89b4fa; }
+.y-str     { color: #a6e3a1; }
+.y-num     { color: #f9e2af; }
+.y-null    { color: #f38ba8; }
+.y-bool    { color: #fab387; }
+.y-section { color: #89dceb; font-weight: 600; }
+.y-status-ok   { color: #a6e3a1; font-weight: 600; }
+.y-status-warn { color: #f9e2af; font-weight: 600; }
+.y-status-err  { color: #f38ba8; font-weight: 600; }
+</style>
+
+<!-- ── AI Review: JavaScript ── -->
+<script>
+var chatOpen = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var panel = document.getElementById('chat-panel');
+  if (chatOpen) {
+    panel.style.display = 'flex';
+    panel.style.flexDirection = 'column';
+    setTimeout(function() {
+      var msgs = document.getElementById('chat-messages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 60);
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function acceptAmendment() {
+  // Update allocation table row for CIG Rocky Mountain (loc-F)
+  var el;
+  el = document.getElementById('alloc-locF-alloc');
+  if (el) { el.textContent = '11,200'; el.style.color = 'var(--amber-text)'; el.style.fontWeight = '600'; }
+
+  el = document.getElementById('alloc-locF-var');
+  if (el) { el.textContent = '–23,800'; el.style.color = 'var(--amber-text)'; el.style.fontWeight = '600'; }
+
+  el = document.getElementById('alloc-locF-configs');
+  if (el) { el.textContent = '2'; el.style.color = 'var(--gray-700)'; }
+
+  el = document.getElementById('alloc-locF-method');
+  if (el) { el.innerHTML = '<span style="font-size:0.68rem;color:var(--amber-text);font-weight:600">Manual Override</span>'; }
+
+  el = document.getElementById('alloc-locF-status');
+  if (el) { el.innerHTML = '<span class="badge badge-warning">Partial</span>'; }
+
+  el = document.getElementById('alloc-locF-sub');
+  if (el) {
+    el.style.color = 'var(--amber-text)';
+    el.innerHTML = 'hub: CIG-Mainline &nbsp;·&nbsp; loc: 29850 &nbsp;·&nbsp; ⚠ Manual override · 23,800 Dth still unallocated (4 paths)';
+  }
+
+  // Update summary stats
+  el = document.getElementById('stat-allocated');
+  if (el) { el.textContent = '472,039'; }
+
+  el = document.getElementById('stat-unallocated');
+  if (el) { el.textContent = '31,425'; }
+
+  // Disable accept/reject buttons
+  var acceptBtn = document.getElementById('accept-btn');
+  var rejectBtn = document.getElementById('reject-btn');
+  if (acceptBtn) { acceptBtn.textContent = '✓ Applied'; acceptBtn.style.background = '#166534'; acceptBtn.disabled = true; }
+  if (rejectBtn) { rejectBtn.disabled = true; rejectBtn.style.opacity = '0.4'; }
+
+  // Add confirmation message to chat
+  var msgs = document.getElementById('chat-messages');
+  if (msgs) {
+    var div = document.createElement('div');
+    div.className = 'chat-msg chat-assistant';
+    div.innerHTML =
+      '<div class="chat-avatar-row"><span class="chat-claude-icon">✦</span><span class="chat-name">Claude</span></div>' +
+      '<div class="chat-bubble chat-bubble-assistant" style="background:#f0fdf4;border-color:#bbf7d0">' +
+      '<p><strong style="color:#166534">✓ Amendment applied.</strong> T-0070010 is now allocated <strong>11,200 Dth</strong> via <code>MANUAL_HUB_OVERRIDE</code> using settlement config SC-2985-WBI-R.</p>' +
+      '<p>The Allocations tab has been updated. The remaining 23,800 Dth at CIG Rocky Mountain (Tenaska, Targa, WPS, Sequent) has the same hub mismatch.</p>' +
+      '<p style="margin-top:0.4rem;color:var(--gray-500);font-size:0.74rem">Tip: Once you add <code>CIG ROCKY MOUNTAIN POOL</code> as a location alias for <code>CIG-WY</code> in Molecule Settings → Pipeline Locations, the next run will auto-match all five paths.</p>' +
+      '</div>';
+    msgs.appendChild(div);
+    setTimeout(function() { msgs.scrollTop = msgs.scrollHeight; }, 30);
+  }
+}
+
+function rejectAmendment() {
+  var panel = document.getElementById('amendment-panel');
+  if (panel) panel.style.display = 'none';
+
+  var msgs = document.getElementById('chat-messages');
+  if (msgs) {
+    var div = document.createElement('div');
+    div.className = 'chat-msg chat-assistant';
+    div.innerHTML =
+      '<div class="chat-avatar-row"><span class="chat-claude-icon">✦</span><span class="chat-name">Claude</span></div>' +
+      '<div class="chat-bubble chat-bubble-assistant">' +
+      '<p>Amendment rejected — no changes made. Let me know how you\'d like to proceed. I can help you draft a new settlement config for CIG-Mainline, or explore a different counterparty to override.</p>' +
+      '</div>';
+    msgs.appendChild(div);
+    setTimeout(function() { msgs.scrollTop = msgs.scrollHeight; }, 30);
+  }
+}
+
+// ── YAML content + syntax highlighter ──
+var ALLOC_YAML = [
+'# Molecule Actualization — Allocation Run',
+'# Gas Day: 2026-04-09  ·  Cycle: Timely',
+'# Pipeline: REX        ·  Run ID: alloc-20260409-1042',
+'# Status: PARTIAL      ·  5 of 6 locations matched',
+'# Generated: 2026-04-09T10:42:31Z  ·  Engine: actualization v2.4.1',
+'',
+'meta:',
+'  gas_day: "2026-04-09"',
+'  cycle: Timely',
+'  pipeline: REX',
+'  run_id: "alloc-20260409-1042"',
+'  run_at: "2026-04-09T10:42:31Z"',
+'  engine_version: "2.4.1"',
+'  status: PARTIAL',
+'  locations_total: 6',
+'  locations_matched: 5',
+'  locations_unmatched: 1',
+'  total_scheduled_dth: 503464',
+'  total_allocated_dth: 460839',
+'  total_unallocated_dth: 42625',
+'  variance_pct: 8.47',
+'',
+'locations:',
+'',
+'  # ─── LOC A: REX CHEYENNE COMP POOL ──────────────────────────────────────────',
+'  - id: loc-A',
+'    name: "REX CHEYENNE COMP POOL"',
+'    pipeline: REX',
+'    hub: "REX Cheyenne Comp Pool"',
+'    loc_number: "44120"',
+'    scheduled_dth: 43739',
+'    allocated_dth: 43739',
+'    variance_dth: 0',
+'    variance_pct: 0.0',
+'    status: PARTIAL',
+'    allocation_method: PBL_PRORATA',
+'    settlement_configs_used: 4',
+'    note: "Total receipts (68,639 Dth) exceeded pipeline scheduled (33,639 Dth). Prorated below."',
+'',
+'    paths:',
+'      receipts:',
+'        - trade_id: T-0088422',
+'          counterparty: "DCP Midstream Marketing, LLC"',
+'          hub_product: "REX Cheyenne Comp Pool · ZAF.IF"',
+'          trade_qty_dth: 20000',
+'          scheduled_qty_dth: 20000',
+'          allocated_qty_dth: 20000',
+'          variance_dth: 0',
+'          settlement_config: SC-4412-DCP-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0088423',
+'          counterparty: "DCP Midstream Marketing, LLC"',
+'          hub_product: "REX Cheyenne Comp Pool · ZAF.IF"',
+'          trade_qty_dth: 5000',
+'          scheduled_qty_dth: 5000',
+'          allocated_qty_dth: 5000',
+'          variance_dth: 0',
+'          settlement_config: SC-4412-DCP-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0088430',
+'          counterparty: "DCP Midstream Marketing, LLC"',
+'          hub_product: "REX Cheyenne Comp Pool · ZAF.IF"',
+'          trade_qty_dth: 10000',
+'          scheduled_qty_dth: 10000',
+'          allocated_qty_dth: 10000',
+'          variance_dth: 0',
+'          settlement_config: SC-4412-DCP-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0088431',
+'          counterparty: "DCP Midstream Marketing, LLC"',
+'          hub_product: "REX Cheyenne Comp Pool · ZAF.IF"',
+'          trade_qty_dth: 33639',
+'          scheduled_qty_dth: 33639',
+'          allocated_qty_dth: 8739',
+'          variance_dth: -24900',
+'          settlement_config: SC-4412-DCP-R',
+'          method: PBL_PRORATA',
+'          prorate_factor: 0.2598',
+'          prorate_basis: "33639 / 68639 = 0.4902 remaining after fills"',
+'          status: PARTIAL',
+'          confidence_pct: 94',
+'',
+'      deliveries:',
+'        - trade_id: T-0020110',
+'          counterparty: "Tenaska Marketing Ventures"',
+'          hub_product: "REX Cheyenne Comp Pool · ZAF.IF"',
+'          trade_qty_dth: -43739',
+'          scheduled_qty_dth: -43739',
+'          allocated_qty_dth: -43739',
+'          variance_dth: 0',
+'          settlement_config: SC-4412-TNK-D',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'  # ─── LOC B: QUESTAR PIPELINE ─────────────────────────────────────────────────',
+'  - id: loc-B',
+'    name: "QUESTAR PIPELINE"',
+'    pipeline: REX',
+'    hub: Questar',
+'    loc_number: "61200"',
+'    scheduled_dth: 85000',
+'    allocated_dth: 85000',
+'    variance_dth: 0',
+'    variance_pct: 0.0',
+'    status: MATCHED',
+'    allocation_method: EXACT_MATCH',
+'    settlement_configs_used: 2',
+'',
+'    paths:',
+'      receipts:',
+'        - trade_id: T-0042234',
+'          counterparty: "Questar Pipeline, LLC"',
+'          hub_product: "Questar · Inside"',
+'          trade_qty_dth: 50000',
+'          scheduled_qty_dth: 50000',
+'          allocated_qty_dth: 50000',
+'          variance_dth: 0',
+'          settlement_config: SC-6120-QST-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0055010',
+'          counterparty: "Questar Pipeline, LLC"',
+'          hub_product: "Questar · Inside"',
+'          trade_qty_dth: 35000',
+'          scheduled_qty_dth: 35000',
+'          allocated_qty_dth: 35000',
+'          variance_dth: 0',
+'          settlement_config: SC-6120-QST-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'      deliveries:',
+'        - trade_id: T-0042235',
+'          counterparty: "Macquarie Energy LLC"',
+'          hub_product: "Questar · Inside"',
+'          trade_qty_dth: -85000',
+'          scheduled_qty_dth: -85000',
+'          allocated_qty_dth: -85000',
+'          variance_dth: 0',
+'          settlement_config: SC-6120-MAC-D',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'  # ─── LOC C: PANHANDLE EASTERN PIPE LINE CO. ──────────────────────────────────',
+'  - id: loc-C',
+'    name: "PANHANDLE EASTERN PIPE LINE CO."',
+'    pipeline: REX',
+'    hub: PHD-Eastern',
+'    loc_number: "38950"',
+'    scheduled_dth: 120000',
+'    allocated_dth: 120000',
+'    variance_dth: 0',
+'    variance_pct: 0.0',
+'    status: MATCHED',
+'    allocation_method: PBA_PRORATA',
+'    settlement_configs_used: 3',
+'',
+'    paths:',
+'      receipts:',
+'        - trade_id: T-0032001',
+'          counterparty: "Panhandle Eastern Pipe Line Company, LP"',
+'          hub_product: "PHD-Eastern · ET"',
+'          trade_qty_dth: 60000',
+'          scheduled_qty_dth: 60000',
+'          allocated_qty_dth: 60000',
+'          variance_dth: 0',
+'          settlement_config: SC-3895-PHD-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0032002',
+'          counterparty: "Panhandle Eastern Pipe Line Company, LP"',
+'          hub_product: "PHD-Eastern · ET"',
+'          trade_qty_dth: 30000',
+'          scheduled_qty_dth: 30000',
+'          allocated_qty_dth: 30000',
+'          variance_dth: 0',
+'          settlement_config: SC-3895-PHD-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0032003',
+'          counterparty: "Panhandle Eastern Pipe Line Company, LP"',
+'          hub_product: "PHD-Eastern · ET"',
+'          trade_qty_dth: 40000',
+'          scheduled_qty_dth: 30000',
+'          allocated_qty_dth: 30000',
+'          variance_dth: 0',
+'          settlement_config: SC-3895-PHD-R',
+'          method: PBA_PRORATA',
+'          prorate_factor: 0.75',
+'          status: MATCHED',
+'          confidence_pct: 97',
+'',
+'      deliveries:',
+'        - trade_id: T-0032010',
+'          counterparty: "Shell Energy North America (US), L.P."',
+'          hub_product: "PHD-Eastern · ET"',
+'          trade_qty_dth: -70000',
+'          scheduled_qty_dth: -70000',
+'          allocated_qty_dth: -70000',
+'          variance_dth: 0',
+'          settlement_config: SC-3895-SHL-D',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0032011',
+'          counterparty: "Vitol Inc."',
+'          hub_product: "PHD-Eastern · ET"',
+'          trade_qty_dth: -50000',
+'          scheduled_qty_dth: -50000',
+'          allocated_qty_dth: -50000',
+'          variance_dth: 0',
+'          settlement_config: SC-3895-VTL-D',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'  # ─── LOC D: ANR PIPELINE CO. ─────────────────────────────────────────────────',
+'  - id: loc-D',
+'    name: "ANR PIPELINE CO."',
+'    pipeline: REX',
+'    hub: ANR-SE',
+'    loc_number: "22100"',
+'    scheduled_dth: 60000',
+'    allocated_dth: 60000',
+'    variance_dth: 0',
+'    variance_pct: 0.0',
+'    status: MATCHED',
+'    allocation_method: EBB_AGMT_MATCH',
+'    settlement_configs_used: 2',
+'    ebb_agreement_ids: [K-44001, K-44002]',
+'',
+'    paths:',
+'      receipts:',
+'        - trade_id: T-0044001',
+'          counterparty: "ANR Pipeline Co."',
+'          hub_product: "ANR-SE"',
+'          ebb_agreement: K-44001',
+'          trade_qty_dth: 40000',
+'          scheduled_qty_dth: 40000',
+'          allocated_qty_dth: 40000',
+'          variance_dth: 0',
+'          settlement_config: SC-2210-ANR-R',
+'          method: EBB_AGMT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0044002',
+'          counterparty: "ANR Pipeline Co."',
+'          hub_product: "ANR-SE"',
+'          ebb_agreement: K-44002',
+'          trade_qty_dth: 20000',
+'          scheduled_qty_dth: 20000',
+'          allocated_qty_dth: 20000',
+'          variance_dth: 0',
+'          settlement_config: SC-2210-ANR-R',
+'          method: EBB_AGMT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'      deliveries:',
+'        - trade_id: T-0044010',
+'          counterparty: "Constellation Energy Commodities Group, Inc."',
+'          hub_product: "ANR-SE"',
+'          trade_qty_dth: -60000',
+'          scheduled_qty_dth: -60000',
+'          allocated_qty_dth: -60000',
+'          variance_dth: 0',
+'          settlement_config: SC-2210-CNS-D',
+'          method: EBB_AGMT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'  # ─── LOC E: NGPL MIDCONTINENT POOL ───────────────────────────────────────────',
+'  - id: loc-E',
+'    name: "NGPL MIDCONTINENT POOL"',
+'    pipeline: REX',
+'    hub: NGPL-MidCon',
+'    loc_number: "51450"',
+'    scheduled_dth: 79100',
+'    allocated_dth: 79100',
+'    variance_dth: 0',
+'    variance_pct: 0.0',
+'    status: MATCHED',
+'    allocation_method: EXACT_MATCH',
+'    settlement_configs_used: 2',
+'    fuel_adjustment_applied: true',
+'',
+'    paths:',
+'      receipts:',
+'        - trade_id: T-0070011',
+'          counterparty: "NGPL / Southern Union Co."',
+'          hub_product: "NGPL-MidCon"',
+'          trade_qty_dth: 50000',
+'          scheduled_qty_dth: 50000',
+'          allocated_qty_dth: 50000',
+'          variance_dth: 0',
+'          settlement_config: SC-5145-NGL-R',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'',
+'        - trade_id: T-0070012',
+'          counterparty: "NGPL / Southern Union Co."',
+'          hub_product: "NGPL-MidCon"',
+'          trade_qty_dth: 29100',
+'          scheduled_qty_dth: 29100',
+'          allocated_qty_dth: 29100',
+'          variance_dth: 0',
+'          settlement_config: SC-5145-NGL-R',
+'          fuel_adjustment_dth: -724',
+'          fuel_rate: 0.0249',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 100',
+'          note: "Fuel retainage: -724 Dth @ 0.0249 MMBtu/MMBtu per tariff"',
+'',
+'      deliveries:',
+'        - trade_id: T-0044001',
+'          counterparty: "NGPL Pipeline Co."',
+'          hub_product: "NGPL-MidCon"',
+'          trade_qty_dth: -80000',
+'          scheduled_qty_dth: -79376',
+'          allocated_qty_dth: -79376',
+'          variance_dth: 624',
+'          settlement_config: SC-4441-NGL-D',
+'          fuel_adjustment_applied: true',
+'          fuel_adjustment_dth: -724',
+'          method: EXACT_MATCH',
+'          status: MATCHED',
+'          confidence_pct: 99',
+'',
+'  # ─── LOC F: CIG ROCKY MOUNTAIN POOL ── ⚠ UNMATCHED ─────────────────────────',
+'  - id: loc-F',
+'    name: "CIG ROCKY MOUNTAIN POOL"',
+'    pipeline: CIG',
+'    hub: CIG-Mainline',
+'    loc_number: "29850"',
+'    scheduled_dth: 35000',
+'    allocated_dth: 0',
+'    variance_dth: -35000',
+'    variance_pct: -100.0',
+'    status: UNMATCHED',
+'    allocation_method: null',
+'    settlement_configs_used: 0',
+'    error_code: NO_SETTLEMENT_CONFIG',
+'    error_message: >',
+'      No settlement config found in Molecule for hub=CIG-Mainline.',
+'      5 counterparty paths affected. 35,000 Dth unallocated.',
+'',
+'    paths:',
+'      receipts:',
+'        - trade_id: T-0070010',
+'          counterparty: "WBI Energy Transmission, Inc."',
+'          hub_product: "CIG-Mainline · Z45"',
+'          trade_qty_dth: 25000',
+'          scheduled_qty_dth: 11200',
+'          allocated_qty_dth: 0',
+'          variance_dth: -11200',
+'          settlement_config: null',
+'          method: null',
+'          status: UNMATCHED',
+'          error: "No settlement config: WBI Energy / CIG-Mainline"',
+'',
+'        - trade_id: T-0070013',
+'          counterparty: "Tenaska Marketing Ventures"',
+'          hub_product: "CIG-Mainline · Z45"',
+'          trade_qty_dth: 5000',
+'          scheduled_qty_dth: 5000',
+'          allocated_qty_dth: 0',
+'          variance_dth: -5000',
+'          settlement_config: null',
+'          method: null',
+'          status: UNMATCHED',
+'          error: "No settlement config: Tenaska / CIG-Mainline"',
+'',
+'        - trade_id: T-0070014',
+'          counterparty: "Targa Resources Partners, LP"',
+'          hub_product: "CIG-Mainline · Z45"',
+'          trade_qty_dth: 4000',
+'          scheduled_qty_dth: 4000',
+'          allocated_qty_dth: 0',
+'          variance_dth: -4000',
+'          settlement_config: null',
+'          method: null',
+'          status: UNMATCHED',
+'          error: "No settlement config: Targa Resources / CIG-Mainline"',
+'',
+'        - trade_id: T-0070015',
+'          counterparty: "Wisconsin Public Service Corp."',
+'          hub_product: "CIG-Mainline · Z45"',
+'          trade_qty_dth: 8000',
+'          scheduled_qty_dth: 8000',
+'          allocated_qty_dth: 0',
+'          variance_dth: -8000',
+'          settlement_config: null',
+'          method: null',
+'          status: UNMATCHED',
+'          error: "No settlement config: WPS / CIG-Mainline"',
+'',
+'        - trade_id: T-0070016',
+'          counterparty: "Sequent Energy Management, LP"',
+'          hub_product: "CIG-Mainline · Z45"',
+'          trade_qty_dth: 6800',
+'          scheduled_qty_dth: 6800',
+'          allocated_qty_dth: 0',
+'          variance_dth: -6800',
+'          settlement_config: null',
+'          method: null',
+'          status: UNMATCHED',
+'          error: "No settlement config: Sequent / CIG-Mainline"'
+].join('\n');
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function colorizeYaml(raw) {
+  var lines = raw.split('\n');
+  var html = lines.map(function(line) {
+    // Full-line comment
+    if (/^\s*#/.test(line)) {
+      return '<span class="y-comment">' + escHtml(line) + '</span>';
+    }
+    // List item that is just a scalar (- value, not - key: value)
+    var listScalar = line.match(/^(\s*-\s+)([A-Z][\w-]*)$/);
+    if (listScalar) {
+      return escHtml(listScalar[1]) + '<span class="y-bool">' + escHtml(listScalar[2]) + '</span>';
+    }
+    // Key: value
+    var kv = line.match(/^(\s*)([\w_-]+)(:\s*)(.*)$/);
+    if (kv) {
+      var indent = escHtml(kv[1]);
+      var key = '<span class="y-key">' + escHtml(kv[2]) + '</span>';
+      var colon = escHtml(kv[3]);
+      var rawVal = kv[4];
+      var val;
+      if (rawVal === '') {
+        val = '';
+      } else if (rawVal === 'null' || rawVal === 'NULL') {
+        val = '<span class="y-null">' + escHtml(rawVal) + '</span>';
+      } else if (rawVal === 'true' || rawVal === 'false') {
+        val = '<span class="y-bool">' + escHtml(rawVal) + '</span>';
+      } else if (/^(MATCHED|PARTIAL|EXACT_MATCH|EBB_AGMT_MATCH|PBL_PRORATA|PBA_PRORATA)$/.test(rawVal)) {
+        val = '<span class="y-status-ok">' + escHtml(rawVal) + '</span>';
+      } else if (/^(UNMATCHED|NO_SETTLEMENT_CONFIG)$/.test(rawVal)) {
+        val = '<span class="y-status-err">' + escHtml(rawVal) + '</span>';
+      } else if (/^(MANUAL_OVERRIDE|MANUAL_HUB_OVERRIDE)$/.test(rawVal)) {
+        val = '<span class="y-status-warn">' + escHtml(rawVal) + '</span>';
+      } else if (/^-?[\d][\d_]*(\.\d+)?$/.test(rawVal)) {
+        val = '<span class="y-num">' + escHtml(rawVal) + '</span>';
+      } else if (/^"/.test(rawVal) || /^'/.test(rawVal)) {
+        val = '<span class="y-str">' + escHtml(rawVal) + '</span>';
+      } else if (/^>/.test(rawVal)) {
+        val = '<span class="y-comment">' + escHtml(rawVal) + '</span>';
+      } else {
+        val = escHtml(rawVal);
+      }
+      return indent + key + colon + val;
+    }
+    // List item with dash (- trade_id: ...)
+    var li = line.match(/^(\s*-\s+)(.*)$/);
+    if (li) {
+      return escHtml(li[1]) + escHtml(li[2]);
+    }
+    return escHtml(line);
+  });
+  return html.join('\n');
+}
+
+window.addEventListener('load', function() {
+  var el = document.getElementById('yaml-content');
+  if (el) el.innerHTML = colorizeYaml(ALLOC_YAML);
+});
+</script>
+</body>
+</html>

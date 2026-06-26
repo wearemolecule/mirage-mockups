@@ -1,0 +1,2744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fund Allocations 2.0 v2 — Ticker Leverage</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sidebar:#293042; --primary:#3B82EC; --success:#22c55e; --warning:#f59e0b;
+  --danger:#ef4444; --bg:#f0f3f7; --card:#fff; --border:#dee6ed;
+  --input-bg:#f4f7f9; --input-border:#e2e8ee; --text:#293042;
+  --muted:#6b7a99; --faint:#9aa8c4; --row-alt:#fafbfc; --row-border:#e8edf3;
+  --font:'Poppins',sans-serif; --base:0.82rem;
+  --c0:#3B82EC; --c1:#22c55e; --c2:#8b5cf6; --c3:#f59e0b;
+}
+body { font-family:var(--font); font-size:var(--base); background:var(--bg); color:var(--text); display:flex; height:100vh; overflow:hidden; }
+
+/* ── Sidebar ── */
+.sidebar { width:210px; background:var(--sidebar); flex-shrink:0; display:flex; flex-direction:column; }
+.sidebar-logo { padding:15px 15px 11px; border-bottom:1px solid rgba(255,255,255,.07); display:flex; align-items:center; gap:9px; }
+.logo-mark { width:26px; height:26px; background:var(--primary); border-radius:5px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:.72rem; }
+.logo-text { color:#fff; font-weight:600; font-size:.88rem; }
+.nav-section { padding:14px 9px 4px; }
+.nav-label { font-size:.57rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.28); padding:0 6px; margin-bottom:3px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:6px 8px; border-radius:5px; cursor:pointer; color:rgba(255,255,255,.55); font-size:.77rem; margin-bottom:1px; }
+.nav-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.85); }
+.nav-item.active { background:rgba(59,130,236,.18); color:#7eb8f5; font-weight:500; }
+.nav-item svg { width:14px; height:14px; flex-shrink:0; }
+.nav-badge { margin-left:auto; background:var(--primary); color:#fff; font-size:.58rem; font-weight:600; padding:1px 5px; border-radius:8px; }
+.nav-badge.warn { background:var(--warning); }
+
+/* ── Main ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── Topbar ── */
+.topbar { background:var(--card); border-bottom:1px solid var(--border); padding:0 18px; height:48px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.topbar-title { font-size:.88rem; font-weight:600; }
+.topbar-sep { width:1px; height:18px; background:var(--border); }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:7px; }
+
+/* ── Summary strip ── */
+.summary-strip { background:var(--card); border-bottom:1px solid var(--border); padding:8px 18px; display:flex; align-items:center; gap:20px; flex-shrink:0; }
+.stat-item { display:flex; flex-direction:column; gap:1px; }
+.stat-label { font-size:.6rem; color:var(--faint); text-transform:uppercase; letter-spacing:.04em; }
+.stat-val { font-size:.88rem; font-weight:600; }
+.stat-sep { width:1px; height:28px; background:var(--border); }
+
+/* ── Tabs ── */
+.tabs-bar { background:var(--card); border-bottom:1px solid var(--border); padding:0 18px; display:flex; flex-shrink:0; }
+.tab { padding:9px 14px; font-size:.78rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; align-items:center; gap:6px; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+.tab-count { background:#eef2fd; color:var(--primary); font-size:.62rem; font-weight:600; padding:1px 6px; border-radius:8px; }
+.tab.active .tab-count { background:var(--primary); color:#fff; }
+.tab-count.warn { background:#fef3c7; color:#92400e; }
+
+/* ── Filters ── */
+.filters { background:var(--card); border-bottom:1px solid var(--border); padding:6px 18px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.f-label { font-size:.69rem; color:var(--muted); white-space:nowrap; }
+.f-select,.f-input { background:var(--input-bg); border:1px solid var(--input-border); border-radius:4px; padding:3px 8px; font-family:var(--font); font-size:.74rem; color:var(--text); height:27px; outline:none; }
+.f-select { padding-right:22px; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%236b7a99'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 7px center; cursor:pointer; }
+.f-sep { width:1px; height:15px; background:var(--border); margin:0 2px; }
+
+/* ── Layout ── */
+.content-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.tab-panel { display:none; flex:1; overflow:hidden; }
+.tab-panel.active { display:flex; }
+.split { flex:1; display:flex; overflow:hidden; }
+.split-left { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--border); }
+.split-right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.panel-label { padding:7px 13px; background:var(--card); border-bottom:1px solid var(--border); font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); display:flex; align-items:center; gap:7px; }
+.scroll { flex:1; overflow-y:auto; }
+
+/* ── Table ── */
+table { width:100%; border-collapse:collapse; font-size:.76rem; }
+thead tr { background:#f1f4f8; position:sticky; top:0; z-index:2; }
+thead th { text-align:left; padding:0 9px; height:28px; font-weight:500; font-size:.69rem; color:var(--muted); border-right:1px solid var(--row-border); border-bottom:1px solid var(--row-border); white-space:nowrap; }
+thead th.r { text-align:right; }
+thead th:last-child { border-right:none; }
+tbody tr { height:27px; border-bottom:1px solid var(--row-border); cursor:pointer; }
+tbody tr:nth-child(even) { background:var(--row-alt); }
+tbody tr:hover { background:#edf3fd; }
+tbody tr.selected { background:#deeafc !important; }
+tbody td { padding:0 9px; border-right:1px solid var(--row-border); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+tbody td.r { text-align:right; }
+tbody td:last-child { border-right:none; }
+.mono { font-family:'Courier New',monospace; font-size:.72rem; }
+.pos { color:var(--success); } .neg { color:var(--danger); }
+
+/* ── Badges ── */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:9px; font-size:.63rem; font-weight:500; }
+.b-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.b-green { background:#dcfce7; color:#15803d; } .b-green .b-dot { background:#22c55e; }
+.b-amber { background:#fef3c7; color:#92400e; } .b-amber .b-dot { background:#f59e0b; }
+.b-red   { background:#fee2e2; color:#991b1b; } .b-red   .b-dot { background:#ef4444; }
+.b-blue  { background:#dbeafe; color:#1d4ed8; } .b-blue  .b-dot { background:#3b82f6; }
+.b-gray  { background:#f1f5f9; color:#475569; } .b-gray  .b-dot { background:#94a3b8; }
+
+/* ── Buttons ── */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; border:none; border-radius:4px; cursor:pointer; font-family:var(--font); font-size:.76rem; font-weight:500; height:29px; padding:0 11px; white-space:nowrap; }
+.btn svg { width:12px; height:12px; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { background:#2b72dc; }
+.btn-success { background:var(--success); color:#fff; }
+.btn-success:hover { background:#16a34a; }
+.btn-outline { background:transparent; border:1px solid var(--border); color:var(--muted); }
+.btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+.btn-ghost { background:transparent; color:var(--muted); border:none; }
+.btn-ghost:hover { background:var(--input-bg); color:var(--text); }
+.btn-danger { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+.btn-danger:hover { background:#fecaca; }
+.btn-sm { height:25px; font-size:.7rem; padding:0 9px; }
+.btn-xs { height:21px; font-size:.66rem; padding:0 7px; border-radius:3px; }
+
+/* ── Empty ── */
+.empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--faint); }
+.empty svg { width:34px; height:34px; opacity:.22; }
+.empty-title { font-size:.82rem; font-weight:500; }
+.empty-sub { font-size:.71rem; text-align:center; max-width:210px; }
+
+/* ── KV ── */
+.kv { display:grid; gap:5px 14px; }
+.kv2 { grid-template-columns:1fr 1fr; }
+.kv3 { grid-template-columns:1fr 1fr 1fr; }
+.kv4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+.kv5 { grid-template-columns:1fr 1fr 1fr 1fr 1fr; }
+.kv-item { display:flex; flex-direction:column; gap:1px; }
+.kv-l { font-size:.62rem; color:var(--faint); text-transform:uppercase; letter-spacing:.03em; }
+.kv-v { font-size:.78rem; font-weight:500; }
+
+/* ── Fund dot ── */
+.fund-chip { display:inline-flex; align-items:center; gap:6px; }
+.fund-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ── Alloc bar ── */
+.alloc-bar-track { position:relative; width:80px; height:5px; background:#e5e7eb; border-radius:3px; overflow:hidden; flex-shrink:0; }
+.alloc-bar-target { position:absolute; top:0; left:0; height:100%; background:#d1d5db; border-radius:3px; }
+.alloc-bar-actual { position:absolute; top:0; left:0; height:100%; border-radius:3px; }
+
+/* ── Qty input ── */
+.qty-input { width:50px; height:22px; text-align:right; border:1px solid var(--input-border); border-radius:3px; background:var(--input-bg); font-family:var(--font); font-size:.77rem; font-weight:500; color:var(--text); padding:0 5px; outline:none; }
+.qty-input:focus { border-color:var(--primary); background:#fff; }
+.qty-input.changed { border-color:var(--warning); background:#fffbeb; }
+
+/* ── Remainder ── */
+.remainder-row { display:flex; align-items:center; gap:8px; padding:7px 13px; border-top:1px solid var(--row-border); background:var(--card); flex-shrink:0; }
+.rem-label { font-size:.71rem; color:var(--muted); }
+.rem-val { font-size:.79rem; font-weight:600; }
+.rem-ok { color:var(--success); } .rem-bad { color:var(--danger); }
+
+/* ── Detail actions ── */
+.detail-actions { padding:9px 13px; border-top:1px solid var(--border); display:flex; gap:7px; flex-shrink:0; background:var(--card); align-items:center; }
+
+/* ── Section divider ── */
+.section-divider { padding:6px 13px; background:#f8fafc; border-top:1px solid var(--border); border-bottom:1px solid var(--row-border); font-size:.67rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); display:flex; align-items:center; gap:7px; }
+
+/* ── Inner tabs ── */
+.inner-tabs { display:flex; border-bottom:1px solid var(--border); background:var(--card); flex-shrink:0; padding:0 13px; }
+.inner-tab { padding:7px 11px; font-size:.74rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.inner-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+/* ── Trade entry form ── */
+.form-section { padding:14px 20px; border-bottom:1px solid var(--border); }
+.form-section-title { font-size:.69rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); margin-bottom:10px; }
+.form-grid { display:grid; gap:10px 16px; }
+.form-g2 { grid-template-columns:1fr 1fr; }
+.form-g3 { grid-template-columns:1fr 1fr 1fr; }
+.form-g4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+.form-field { display:flex; flex-direction:column; gap:4px; }
+.form-label { font-size:.68rem; color:var(--muted); font-weight:500; }
+.form-input,.form-select { background:var(--input-bg); border:1px solid var(--input-border); border-radius:4px; padding:5px 9px; font-family:var(--font); font-size:.78rem; color:var(--text); height:30px; outline:none; width:100%; }
+.form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%236b7a99'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; cursor:pointer; padding-right:24px; }
+.form-input:focus,.form-select:focus { border-color:var(--primary); background:#fff; }
+.dir-toggle { display:flex; border:1px solid var(--input-border); border-radius:4px; overflow:hidden; height:30px; }
+.dir-btn { flex:1; display:flex; align-items:center; justify-content:center; font-size:.77rem; font-weight:500; cursor:pointer; color:var(--muted); background:var(--input-bg); transition:all .12s; }
+.dir-btn.buy.active { background:#dcfce7; color:#15803d; border-right:1px solid var(--input-border); }
+.dir-btn.sell.active { background:#fee2e2; color:#991b1b; }
+
+/* ── Toggle switch ── */
+.toggle-row { display:flex; align-items:center; gap:10px; }
+.toggle { position:relative; width:36px; height:20px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:#d1d5db; border-radius:10px; cursor:pointer; transition:.2s; }
+.toggle-slider::before { content:''; position:absolute; width:14px; height:14px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.2s; }
+.toggle input:checked + .toggle-slider { background:var(--primary); }
+.toggle input:checked + .toggle-slider::before { transform:translateX(16px); }
+.toggle-label { font-size:.77rem; font-weight:500; color:var(--text); }
+.toggle-sub { font-size:.68rem; color:var(--muted); }
+
+/* ── Split preview card ── */
+.split-preview { background:#eff6ff; border:1px solid #bfdbfe; border-radius:5px; padding:10px 12px; margin:0 20px 14px; }
+.split-preview-title { font-size:.68rem; font-weight:600; color:#1e40af; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.split-preview-row { display:flex; align-items:center; gap:10px; padding:3px 0; border-bottom:1px solid #dbeafe; font-size:.74rem; }
+.split-preview-row:last-child { border-bottom:none; }
+
+/* ── Mapping rule card ── */
+.rule-group-head { padding:9px 13px; background:#f8fafc; border-bottom:1px solid var(--border); font-size:.75rem; font-weight:600; display:flex; align-items:center; gap:8px; border-top:1px solid var(--border); }
+.rule-group-head:first-child { border-top:none; }
+.ratio-pill { display:inline-flex; align-items:center; padding:1px 7px; border-radius:8px; font-size:.66rem; font-weight:600; background:#eff6ff; color:var(--primary); }
+.ratio-pill.warn { background:#fef3c7; color:#92400e; }
+
+/* ── Lineage pill ── */
+.lineage { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; font-size:.63rem; color:#1d4ed8; font-weight:500; cursor:pointer; }
+.lineage:hover { background:#dbeafe; }
+.lineage svg { width:9px; height:9px; }
+
+/* ── Drift bar ── */
+.drift-bar { display:flex; align-items:center; gap:5px; }
+.drift-track { width:50px; height:4px; background:#e5e7eb; border-radius:2px; overflow:hidden; flex-shrink:0; }
+.drift-fill { height:100%; border-radius:2px; }
+.d-ok { background:var(--success); } .d-warn { background:var(--warning); } .d-bad { background:var(--danger); }
+
+/* ── Cap chips ── */
+.cap-chip { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:4px; font-size:.63rem; font-weight:500; background:#dcfce7; color:#15803d; }
+
+/* ── Alloc calendar bar ── */
+.cal-cell { width:26px; height:21px; border-radius:4px; font-size:.66rem; display:flex; align-items:center; justify-content:center; cursor:default; color:#d1d5db; }
+.cal-cell.c-ok  { background:#dcfce7; color:#15803d; font-weight:600; cursor:pointer; }
+.cal-cell.c-bad { background:#fee2e2; color:#991b1b; font-weight:600; cursor:pointer; }
+.cal-cell.c-today { outline:2px solid var(--primary); outline-offset:-2px; }
+
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+/* ── New-book modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:1000; display:flex; align-items:center; justify-content:center; }
+.modal-card { background:var(--card); border-radius:8px; width:540px; max-height:82vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+.modal-head { padding:13px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; }
+.modal-body { padding:16px 18px; overflow-y:auto; flex:1; }
+.modal-foot { padding:11px 18px; border-top:1px solid var(--border); display:flex; gap:8px; }
+.nb-line { display:grid; grid-template-columns:1fr 1fr 72px 26px; gap:6px; margin-bottom:6px; align-items:center; }
+.nb-remove { background:none; border:none; cursor:pointer; color:var(--muted); font-size:.9rem; padding:0; line-height:1; }
+.nb-remove:hover { color:var(--danger); }
+.nb-total-row { display:flex; align-items:center; gap:8px; margin-top:8px; padding:7px 10px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:5px; font-size:.75rem; }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">M</div>
+    <span class="logo-text">Molecule</span>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Fund Allocations</div>
+    <div class="nav-item" data-section="trades" onclick="showSection('trades')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
+      Trades
+    </div>
+    <div class="nav-item" data-section="valuations" onclick="showSection('valuations')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+      Valuations
+    </div>
+    <div class="nav-item active" data-section="allocations" onclick="showSection('allocations')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.85"/></svg>
+      Allocations
+      <span class="nav-badge" id="nav-badge-alloc">6</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-title">Fund Allocations</div>
+    <div class="topbar-sep"></div>
+    <span style="font-size:.72rem;color:var(--muted)">Pegasus Partners</span>
+    <div class="topbar-right">
+      <button class="btn btn-primary btn-sm" onclick="showSection('trades')" style="gap:4px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Parent Trade
+      </button>
+    </div>
+  </div>
+
+  <!-- Allocation calendar bar (shown only on allocations section) -->
+  <div id="alloc-cal-bar" style="background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0">
+    <!-- Header row — always visible, click to toggle -->
+    <div onclick="toggleCalendar()" style="padding:6px 18px;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;height:34px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:var(--muted);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span style="font-size:.76rem;font-weight:600">March 2026</span>
+      <span style="font-size:.7rem;color:var(--muted)">·</span>
+      <span style="font-size:.7rem;color:var(--muted)">Today: Mar 19</span>
+      <span id="cal-header-status"></span>
+      <svg id="cal-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;color:var(--faint);margin-left:auto;transition:transform .15s"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <!-- Expandable body -->
+    <div id="cal-body" style="display:none;padding:2px 18px 10px;gap:20px">
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,26px);gap:2px"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;padding-top:19px;font-size:.62rem;color:var(--muted)">
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#dcfce7;border-radius:2px;display:inline-block"></span>All finalized</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#fee2e2;border-radius:2px;display:inline-block"></span>Has pending</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:2px;display:inline-block"></span>No trades</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs bar — allocation sub-tabs only -->
+  <div class="tabs-bar" id="alloc-tabs" style="align-items:center;gap:0">
+    <div class="tab active" id="tab-orders" onclick="showTab('orders')">
+      Parent Trades &amp; Allocations
+      <span class="tab-count" id="tc-orders">15</span>
+    </div>
+    <div class="tab" id="tab-mapping" onclick="showTab('mapping')">Mapping Rules</div>
+    <div class="tab" id="tab-aum" onclick="showTab('aum')">AUM &amp; Ratios</div>
+    <div class="tab" id="tab-trueup" onclick="showTab('trueup')">
+      True-up
+      <span class="tab-count warn">1</span>
+    </div>
+
+    <!-- Right side: strip filters (always visible on trades/allocations tab) -->
+    <div id="tab-right-controls" style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 10px;border-left:1px solid var(--border)">
+      <div id="strip-filters" style="display:flex;align-items:center;gap:5px">
+        <span class="f-label">Strip:</span>
+        <select class="f-select" style="width:78px;height:25px;font-size:.72rem" onchange="renderStrip()">
+          <option value="">All</option><option value="Buy">Buy</option><option value="Sell">Sell</option>
+        </select>
+        <select class="f-select" style="width:130px;height:25px;font-size:.72rem" onchange="renderStrip()">
+          <option value="">All Products</option><option value="Natural Gas">Nat Gas (NG)</option><option value="WTI">WTI Crude</option><option value="Henry Hub">Henry Hub (HH)</option>
+        </select>
+        <select class="f-select" style="width:110px;height:25px;font-size:.72rem" onchange="renderStrip()">
+          <option value="">All Statuses</option><option value="pending">Pending</option><option value="finalized">Finalized</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ════════════════════════════════════════════ TRADES & STRIP -->
+    <div class="tab-panel active" id="panel-orders">
+      <div class="split">
+
+        <!-- Left: compact parent trades list -->
+        <div class="split-left" style="width:248px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden">
+          <div class="panel-label" style="justify-content:space-between;padding-right:8px;flex-shrink:0">
+            <span>Parent Trades <span id="trades-pending-count" style="font-size:.7rem;color:var(--muted);font-weight:400"></span></span>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-success" style="font-size:.62rem;padding:2px 7px;height:21px" onclick="finalizeAllPending()">Fin. All</button>
+              <button class="btn btn-ghost" style="font-size:.62rem;padding:2px 7px;height:21px;color:var(--muted)" onclick="unfinalizeAll()">Unfin. All</button>
+            </div>
+          </div>
+          <!-- Trade filters -->
+          <div style="padding:5px 8px;border-bottom:1px solid var(--border);background:var(--card);flex-shrink:0;display:flex;flex-direction:column;gap:4px">
+            <input id="tf-search" type="text" placeholder="Search ID or description…" oninput="renderTradesList()"
+              style="width:100%;box-sizing:border-box;height:23px;font-size:.69rem;padding:0 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);outline:none">
+            <div style="display:flex;gap:4px">
+              <select id="tf-dir" onchange="renderTradesList()" style="flex:1;height:22px;font-size:.67rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);padding:0 3px">
+                <option value="">All Dir.</option>
+                <option value="Buy">Buy</option>
+                <option value="Sell">Sell</option>
+              </select>
+              <select id="tf-status" onchange="renderTradesList()" style="flex:1;height:22px;font-size:.67rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);padding:0 3px">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="finalized">Finalized</option>
+              </select>
+            </div>
+            <select id="tf-product" onchange="renderTradesList()" style="width:100%;height:22px;font-size:.67rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);padding:0 3px">
+              <option value="">All Products</option>
+              <option value="NG">Natural Gas (NG)</option>
+              <option value="WTI">WTI Crude</option>
+              <option value="HH">Henry Hub (HH)</option>
+            </select>
+          </div>
+          <div class="scroll" id="trades-list-scroll"></div>
+        </div>
+
+        <!-- Right: strip view (always visible) -->
+        <div class="split-right" style="flex-direction:column;overflow:hidden">
+          <div class="scroll" id="strip-scroll"></div>
+        </div>
+
+      </div>
+    </div><!-- /panel-orders -->
+
+    <!-- ════════════════════════════════════════════ NEW ORDER -->
+    <div class="tab-panel" id="panel-new-order">
+      <div style="flex:1;overflow-y:auto">
+        <div style="max-width:720px;margin:0 auto;padding:20px 20px 40px">
+
+          <!-- Header -->
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div>
+              <div style="font-size:.88rem;font-weight:600">Trade Entry</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="showSection('allocations')">← Back to Allocations</button>
+          </div>
+
+          <!-- Form -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:7px;overflow:hidden">
+
+            <div class="form-section">
+              <div class="form-section-title">Instrument</div>
+              <div class="form-grid form-g4">
+                <div class="form-field">
+                  <label class="form-label">Product</label>
+                  <select class="form-select" id="order-product" onchange="updatePreview()"><option>Natural Gas (NG)</option><option>WTI Crude Oil (WTI)</option><option>Henry Hub NG (HH)</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Deal Type</label>
+                  <select class="form-select"><option>Future</option><option>Option</option><option>Swap</option><option>Forward</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Contract Start</label>
+                  <input class="form-input" type="month" id="contract-start" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Contract End</label>
+                  <input class="form-input" type="month" id="contract-end" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Direction &amp; Quantity</div>
+              <div class="form-grid form-g4">
+                <div class="form-field">
+                  <label class="form-label">Direction</label>
+                  <div class="dir-toggle">
+                    <div class="dir-btn buy active" onclick="setDir('buy',this)">Buy</div>
+                    <div class="dir-btn sell" onclick="setDir('sell',this)">Sell</div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Quantity (lots)</label>
+                  <input class="form-input" type="number" value="10" id="order-qty" oninput="updatePreview()" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">UOM</label>
+                  <select class="form-select"><option>MMBtu</option><option>BBL</option><option>MWh</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Quantity Type</label>
+                  <select class="form-select"><option>Contract</option><option>Unit</option></select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Pricing</div>
+              <div class="form-grid form-g3">
+                <div class="form-field">
+                  <label class="form-label">Price</label>
+                  <input class="form-input" type="number" value="3.2470" step="0.0001" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Price Formula</label>
+                  <input class="form-input" type="text" placeholder="e.g. NG_NYMEX + 0.05" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Mark Formula</label>
+                  <input class="form-input" type="text" placeholder="Optional" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Routing &amp; Booking</div>
+              <div class="form-grid form-g3">
+                <div class="form-field">
+                  <label class="form-label">Book</label>
+                  <select class="form-select" id="order-book" onchange="updatePreview()">
+                    <option value="Omnibus-Energy">Omnibus-Energy (#GH5600)</option>
+                    <option value="Omnibus-Gas">Omnibus-Gas (#GH5601)</option>
+                    <option value="Omnibus-Crude">Omnibus-Crude (#GH5603)</option>
+                  </select>
+                </div>
+<div class="form-field">
+                  <label class="form-label">Trade Date</label>
+                  <input class="form-input" type="date" id="trade-date" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">External Exec ID</label>
+                  <input class="form-input" type="text" placeholder="Optional" />
+                </div>
+              </div>
+
+              <!-- Is Order field — highlighted as the allocation trigger -->
+              <div style="margin-top:12px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px">
+                <div class="toggle-row" style="margin-bottom:0">
+                  <label class="toggle"><input type="checkbox" id="is-order-toggle" checked onchange="toggleOrderPreview()"><div class="toggle-slider"></div></label>
+                  <div>
+                    <div class="toggle-label" style="font-size:.8rem">Is Parent Trade</div>
+                    <div class="toggle-sub">Route this trade through fund allocation — splits are created immediately on entry.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Split preview (shown when Is Order is on) -->
+            <div id="order-split-preview" class="split-preview">
+              <div class="split-preview-title" id="split-preview-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M22 12H2"/><path d="M5 5L2 12l3 7"/><path d="M19 5l3 7-3 7"/></svg>
+                Proposed splits
+              </div>
+              <div id="split-preview-rows"></div>
+              <div style="font-size:.67rem;color:#1e40af;margin-top:6px">Proposed — adjust quantities on the Allocations screen before finalizing.</div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">Additional Fields</div>
+              <div class="form-grid form-g4">
+                <div class="form-field">
+                  <label class="form-label">Trader</label>
+                  <select class="form-select"><option>S. Patel</option><option>J. Smith</option></select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Broker</label>
+                  <input class="form-input" type="text" placeholder="Optional" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Counterparty</label>
+                  <input class="form-input" type="text" placeholder="Search..." />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Tags</label>
+                  <input class="form-input" type="text" placeholder="e.g. hedge, speculative" />
+                </div>
+              </div>
+              <div class="form-field" style="margin-top:10px">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" style="height:50px;resize:none;padding-top:6px" placeholder="Optional notes…"></textarea>
+              </div>
+            </div>
+
+            <div style="padding:12px 20px;display:flex;gap:8px;border-top:1px solid var(--border)">
+              <button class="btn btn-primary" onclick="alert('Trade submitted — appears in Parent Trades & Allocations (is_parent_trade = true)')">Submit Trade</button>
+              <button class="btn btn-outline" onclick="showSection('allocations')">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ MAPPING RULES -->
+    <div class="tab-panel" id="panel-mapping">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+        <div class="filters">
+          <span class="f-label">Book</span>
+          <select class="f-select" id="mapping-book-filter" style="width:160px"><option>All Books</option><option>Omnibus-Energy (#GH5600)</option><option>Omnibus-Gas (#GH5601)</option><option>Omnibus-Crude (#GH5603)</option></select>
+          <div class="f-sep"></div>
+          <span class="f-label">History</span>
+          <select class="f-select" style="width:110px"><option>Active only</option><option>Include retired</option></select>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="openNewBookModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Book Rule
+            </button>
+          </div>
+        </div>
+
+        <div class="scroll" id="mapping-rules-scroll">
+          <div id="book-cards-container"></div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ VALUATIONS -->
+    <div class="tab-panel" id="panel-valuations">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div class="filters">
+          <span class="f-label">FCM</span>
+          <select class="f-select" style="width:145px"><option>All FCMs</option><option>Morgan Stanley</option><option>JP Morgan</option><option>Goldman Sachs</option></select>
+          <div class="f-sep"></div>
+          <span class="f-label">Product</span>
+          <select class="f-select" style="width:110px"><option>All</option><option>NG</option><option>WTI</option><option>HH</option></select>
+          <div class="f-sep"></div>
+          <span class="f-label">As Of</span>
+          <input class="f-input" type="date" value="2026-03-05" style="width:125px" />
+          <div class="f-sep"></div>
+          <span class="f-label">Status</span>
+          <select class="f-select" style="width:105px"><option>Unrealized</option><option>Realized</option><option>All</option></select>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <!-- Capability callout -->
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#f0fdf4;border-bottom:1px solid #bbf7d0;flex-shrink:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:var(--success);flex-shrink:0"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span style="font-size:.7rem;color:#15803d">Pipeline active —</span>
+          <div style="display:flex;gap:4px">
+            <span class="cap-chip">Formula pricing</span>
+            <span class="cap-chip">Greeks</span>
+            <span class="cap-chip">FX exposure</span>
+            <span class="cap-chip">Fee attribution</span>
+            <span class="cap-chip">Decay tracking</span>
+          </div>
+        </div>
+
+        <div class="scroll">
+          <table>
+            <thead><tr>
+              <th style="width:60px">As Of</th>
+              <th style="width:110px">Product</th>
+              <th style="width:85px">Contract</th>
+              <th style="width:115px">SMA</th>
+              <th style="width:75px">Account #</th>
+              <th style="width:40px">Dir</th>
+              <th style="width:42px" class="r">Qty</th>
+              <th style="width:75px" class="r">Entry Px</th>
+              <th style="width:75px" class="r">Curve Px</th>
+              <th style="width:70px" class="r">Position</th>
+              <th style="width:82px" class="r">Valuation</th>
+              <th style="width:75px" class="r">Day MTM Δ</th>
+              <th style="width:72px" class="r">Real. PnL</th>
+              <th style="width:75px">Curve Src</th>
+              <th style="width:70px">Status</th>
+              <th style="width:90px" class="r">Updated At</th>
+            </tr></thead>
+            <tbody>
+              <!-- Morgan Stanley — NG Jan (strip fill) -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">Natural Gas (NG)</td>
+                <td class="mono">Jan 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c0)"></div>Morgan Stanley</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">MS-5758778</td>
+                <td><span style="color:var(--success);font-weight:500">Buy</span></td>
+                <td class="r mono">3</td>
+                <td class="r mono">3.2470</td>
+                <td class="r mono">3.3890</td>
+                <td class="r mono">30,000</td>
+                <td class="r mono pos">$4,260</td>
+                <td class="r mono pos">$480</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Vendor</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 14:32</td>
+              </tr>
+              <!-- Morgan Stanley — NG Feb -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">Natural Gas (NG)</td>
+                <td class="mono">Feb 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c0)"></div>Morgan Stanley</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">MS-5758778</td>
+                <td><span style="color:var(--success);font-weight:500">Buy</span></td>
+                <td class="r mono">3</td>
+                <td class="r mono">3.2470</td>
+                <td class="r mono">3.3720</td>
+                <td class="r mono">30,000</td>
+                <td class="r mono pos">$3,750</td>
+                <td class="r mono pos">$410</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Vendor</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 14:32</td>
+              </tr>
+              <!-- JP Morgan — NG Jan -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">Natural Gas (NG)</td>
+                <td class="mono">Jan 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c1)"></div>JP Morgan</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">JPM-568767</td>
+                <td><span style="color:var(--success);font-weight:500">Buy</span></td>
+                <td class="r mono">3</td>
+                <td class="r mono">3.2470</td>
+                <td class="r mono">3.3890</td>
+                <td class="r mono">30,000</td>
+                <td class="r mono pos">$4,260</td>
+                <td class="r mono pos">$480</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Vendor</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 14:32</td>
+              </tr>
+              <!-- JP Morgan — NG Feb -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">Natural Gas (NG)</td>
+                <td class="mono">Feb 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c1)"></div>JP Morgan</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">JPM-568767</td>
+                <td><span style="color:var(--success);font-weight:500">Buy</span></td>
+                <td class="r mono">3</td>
+                <td class="r mono">3.2470</td>
+                <td class="r mono">3.3720</td>
+                <td class="r mono">30,000</td>
+                <td class="r mono pos">$3,750</td>
+                <td class="r mono pos">$410</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Vendor</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 14:32</td>
+              </tr>
+              <!-- Goldman Sachs — NG Jan -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">Natural Gas (NG)</td>
+                <td class="mono">Jan 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c2)"></div>Goldman Sachs</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">GS-456456</td>
+                <td><span style="color:var(--success);font-weight:500">Buy</span></td>
+                <td class="r mono">4</td>
+                <td class="r mono">3.2470</td>
+                <td class="r mono">3.3890</td>
+                <td class="r mono">40,000</td>
+                <td class="r mono pos">$5,680</td>
+                <td class="r mono pos">$640</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Vendor</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 14:32</td>
+              </tr>
+              <!-- Goldman Sachs — WTI Jun (Prelim, pending alloc) -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">WTI Crude Oil</td>
+                <td class="mono">Jun 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c2)"></div>Goldman Sachs</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">GS-456456</td>
+                <td><span style="color:var(--danger);font-weight:500">Sell</span></td>
+                <td class="r mono">4</td>
+                <td class="r mono">78.4200</td>
+                <td class="r mono">77.6100</td>
+                <td class="r mono">4,000</td>
+                <td class="r mono pos">$3,240</td>
+                <td class="r mono pos">$600</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-amber" style="font-size:.6rem"><span class="b-dot"></span>Prelim</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 10:03</td>
+              </tr>
+              <!-- Morgan Stanley — WTI Jun (Prelim) -->
+              <tr>
+                <td>Mar 5</td>
+                <td style="font-weight:500">WTI Crude Oil</td>
+                <td class="mono">Jun 2026</td>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c0)"></div>Morgan Stanley</div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">MS-5758778</td>
+                <td><span style="color:var(--danger);font-weight:500">Sell</span></td>
+                <td class="r mono">3</td>
+                <td class="r mono">78.4200</td>
+                <td class="r mono">77.6100</td>
+                <td class="r mono">3,000</td>
+                <td class="r mono pos">$2,430</td>
+                <td class="r mono pos">$450</td>
+                <td class="r mono" style="color:var(--faint)">—</td>
+                <td><span class="badge b-amber" style="font-size:.6rem"><span class="b-dot"></span>Prelim</span></td>
+                <td><span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Unrealized</span></td>
+                <td class="r" style="color:var(--faint);font-size:.7rem">Today 10:03</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Totals footer -->
+          <div style="padding:7px 16px;background:#f8fafc;border-top:2px solid var(--border);display:flex;gap:20px;font-size:.73rem">
+            <span style="color:var(--muted)">7 positions · 18 allocation trades</span>
+            <span style="color:var(--muted)">Total Unreal. PnL: <strong class="pos">$27,370</strong></span>
+            <span style="color:var(--muted)">Day MTM Δ: <strong class="pos">$3,470</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ AUM & RATIOS -->
+    <div class="tab-panel" id="panel-aum">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+        <!-- Header -->
+        <div style="padding:11px 18px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+          <div>
+            <div style="font-size:.82rem;font-weight:600;margin-bottom:3px">AUM &amp; Derived Allocation Ratios</div>
+            <div style="font-size:.71rem;color:var(--muted)">
+              <strong>(AUM × Leverage) ÷ Σ</strong> per book — update AUM monthly, then click "Apply to Mapping Rules" to push derived ratios.
+            </div>
+          </div>
+          <div style="flex-shrink:0;text-align:right;font-size:.68rem;color:var(--faint)">
+            Last AUM update<br><strong style="color:var(--muted)">Mar 1, 2026 · J. Smith</strong>
+          </div>
+        </div>
+
+        <div class="scroll" id="aum-scroll">
+
+          <!-- ══ SECTION 1: Client Accounts — AUM registry ══ -->
+          <div style="padding:9px 16px 7px;border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:8px">
+            <span style="font-size:.78rem;font-weight:600">Client Accounts</span>
+            <button class="btn btn-outline btn-sm" style="margin-left:auto;font-size:.67rem">+ Add Account</button>
+          </div>
+          <table>
+            <thead><tr>
+              <th style="width:180px">Client Name</th>
+              <th style="width:110px">Account #</th>
+              <th style="width:140px">FCM / Custodian</th>
+              <th style="width:110px" class="r">AUM ($M)</th>
+              <th style="width:90px" class="r">As of</th>
+              <th style="width:110px" class="r">Last Updated By</th>
+            </tr></thead>
+            <tbody id="aum-accounts-body"></tbody>
+          </table>
+
+          <!-- ══ SECTION 2: Derived Ratios per Book ══ -->
+          <div style="padding:9px 16px 7px;border-bottom:1px solid var(--row-border);border-top:2px solid var(--border);margin-top:10px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:.78rem;font-weight:600">Derived Allocation Ratios</span>
+          </div>
+
+          <!-- ── Book: Omnibus-Energy (ticker leverage mode) ── -->
+          <div style="padding:6px 16px;background:#f8fafc;border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:10px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--primary)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span style="font-size:.74rem;font-weight:600">Omnibus-Energy</span>
+            <span style="font-family:monospace;font-size:.7rem;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px">#GH5600</span>
+            <span style="font-size:.69rem;color:var(--muted)">· Natural Gas / WTI</span>
+          </div>
+          <!-- Ticker leverage matrix -->
+          <table id="aum-table-energy" style="font-size:.78rem">
+            <thead>
+              <tr style="background:#f0f7ff">
+                <th rowspan="2" style="width:155px;vertical-align:bottom;padding-bottom:6px">Ticker</th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c0)">
+                  Apex Capital Management<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">MS-5758778</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $450M AUM</span>
+                </th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c1)">
+                  Meridian Asset Partners<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">JPM-568767</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $360M AUM</span>
+                </th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c2)">
+                  Clearwater Fund Ltd.<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">GS-456456</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $600M AUM</span>
+                </th>
+                <th rowspan="2" style="width:145px;vertical-align:bottom;padding-bottom:6px;border-left:2px solid var(--border)">
+                  Effective Split
+                </th>
+              </tr>
+              <tr style="background:#f0f7ff">
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+              </tr>
+            </thead>
+            <tbody id="aum-body-energy"></tbody>
+          </table>
+          <div style="padding:7px 16px;border-top:1px solid var(--row-border);border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:6px;background:#fafbfc">
+            <button class="btn btn-outline btn-sm" style="font-size:.67rem" onclick="showAddTickerRow('energy')">+ Add Ticker</button>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" style="font-size:.67rem" onclick="resetAumDerived('energy')">Reset</button>
+              <button class="btn btn-primary btn-sm" style="font-size:.67rem" onclick="applyAumToMapping('energy','Omnibus-Energy')">Apply to Mapping Rules</button>
+            </div>
+          </div>
+
+          <!-- ── Book: Omnibus-Gas ── -->
+          <div style="padding:6px 16px;background:#f8fafc;border-bottom:1px solid var(--row-border);border-top:2px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--primary)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span style="font-size:.74rem;font-weight:600">Omnibus-Gas</span>
+            <span style="font-family:monospace;font-size:.7rem;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px">#GH5601</span>
+            <span style="font-size:.69rem;color:var(--muted)">· Henry Hub</span>
+          </div>
+          <!-- Ticker leverage matrix (same format as energy) -->
+          <table id="aum-table-gas" style="font-size:.78rem">
+            <thead>
+              <tr style="background:#f0f7ff">
+                <th rowspan="2" style="width:155px;vertical-align:bottom;padding-bottom:6px">Ticker</th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c0)">
+                  Apex Capital Management<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">MS-5758778</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $450M AUM</span>
+                </th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c2)">
+                  Clearwater Fund Ltd.<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">GS-456456</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $600M AUM</span>
+                </th>
+                <th rowspan="2" style="width:145px;vertical-align:bottom;padding-bottom:6px;border-left:2px solid var(--border)">
+                  Effective Split
+                </th>
+              </tr>
+              <tr style="background:#f0f7ff">
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+              </tr>
+            </thead>
+            <tbody id="aum-body-gas"></tbody>
+          </table>
+          <div style="padding:7px 16px;border-top:1px solid var(--row-border);border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:6px;background:#fafbfc">
+            <button class="btn btn-outline btn-sm" style="font-size:.67rem" onclick="showAddTickerRow('gas')">+ Add Ticker</button>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" style="font-size:.67rem" onclick="resetAumDerived('gas')">Reset</button>
+              <button class="btn btn-primary btn-sm" style="font-size:.67rem" onclick="applyAumToMapping('gas','Omnibus-Gas')">Apply to Mapping Rules</button>
+            </div>
+          </div>
+
+          <!-- ── Book: Omnibus-Crude ── -->
+          <div style="padding:6px 16px;background:#f8fafc;border-bottom:1px solid var(--row-border);border-top:2px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--primary)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span style="font-size:.74rem;font-weight:600">Omnibus-Crude</span>
+            <span style="font-family:monospace;font-size:.7rem;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px">#GH5603</span>
+            <span style="font-size:.69rem;color:var(--muted)">· WTI Crude Oil</span>
+          </div>
+          <table id="aum-table-crude" style="font-size:.78rem">
+            <thead>
+              <tr style="background:#f0f7ff">
+                <th rowspan="2" style="width:155px;vertical-align:bottom;padding-bottom:6px">Ticker</th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c0)">
+                  Bravo Alpha Capital LLC<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">CIT-88234</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $520M AUM</span>
+                </th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c1)">
+                  Thornfield Asset Mgmt<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">BAR-44512</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $380M AUM</span>
+                </th>
+                <th colspan="2" style="text-align:center;border-left:1px solid var(--border);padding:5px 8px;color:var(--c2)">
+                  Apex Capital Management<br>
+                  <span style="font-family:monospace;font-size:.65rem;font-weight:400;color:#94a3b8">MS-5758778</span>
+                  <span style="font-size:.65rem;font-weight:500;color:var(--muted)"> · $450M AUM</span>
+                </th>
+                <th rowspan="2" style="width:145px;vertical-align:bottom;padding-bottom:6px;border-left:2px solid var(--border)">Effective Split</th>
+              </tr>
+              <tr style="background:#f0f7ff">
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+                <th style="text-align:center;border-left:1px solid var(--border);width:74px;font-weight:500;color:var(--muted)">Leverage</th>
+                <th style="text-align:right;width:82px;font-weight:500;color:var(--muted)">Wtd. Exp.</th>
+              </tr>
+            </thead>
+            <tbody id="aum-body-crude"></tbody>
+          </table>
+          <div style="padding:7px 16px;border-top:1px solid var(--row-border);border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:6px;background:#fafbfc">
+            <button class="btn btn-outline btn-sm" style="font-size:.67rem" onclick="showAddTickerRow('crude')">+ Add Ticker</button>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" style="font-size:.67rem" onclick="resetAumDerived('crude')">Reset</button>
+              <button class="btn btn-primary btn-sm" style="font-size:.67rem" onclick="applyAumToMapping('crude','Omnibus-Crude')">Apply to Mapping Rules</button>
+            </div>
+          </div>
+
+        </div><!-- /aum-scroll -->
+      </div>
+    </div><!-- /panel-aum -->
+
+    <!-- ════════════════════════════════════════════ TRUE-UP -->
+    <div class="tab-panel" id="panel-trueup">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+        <div style="padding:10px 18px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0">
+          <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">Portfolio Balance</div>
+          <div style="font-size:.71rem;color:var(--muted)">Finalized lots per account × ticker vs. target. Enter a lot size to see the rebalancing suggestion for the next trade.</div>
+        </div>
+
+        <div class="scroll" id="trueup-scroll">
+
+          <!-- populated by renderTrueup() -->
+          <div style="display:none"><!-- ── Book: Omnibus-Energy ── -->
+          <div style="padding:7px 16px;background:#f8fafc;border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:10px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--primary)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span style="font-size:.75rem;font-weight:600">Omnibus-Energy</span>
+            <span style="font-family:monospace;font-size:.7rem;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px">#GH5600</span>
+            <span style="font-size:.69rem;color:var(--muted)">· Buy NG · 4 finalized parent trades · 97 lots total</span>
+            <span style="font-size:.68rem;color:var(--faint);margin-left:auto">Ratios: MS 30% · JPM 30% · GS 40%</span>
+          </div>
+          <table>
+            <thead><tr>
+              <th style="width:140px">SMA</th>
+              <th style="width:90px">Account #</th>
+              <th style="width:80px" class="r">Target %</th>
+              <th style="width:80px" class="r">Expected Lots</th>
+              <th style="width:80px" class="r">Actual Lots</th>
+              <th style="width:75px" class="r">Actual %</th>
+              <th style="width:65px" class="r">Drift</th>
+              <th style="width:120px">Severity</th>
+              <th style="width:130px">Action</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c0)"></div><span style="font-weight:500">Morgan Stanley</span></div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">MS-5758778</td>
+                <td class="r mono">30.0%</td>
+                <td class="r mono" style="color:var(--muted)">29.1</td>
+                <td class="r mono">29</td>
+                <td class="r mono">29.9%</td>
+                <td class="r mono" style="color:var(--muted)">−0.1%</td>
+                <td><div class="drift-bar"><div class="drift-track"><div class="drift-fill d-ok" style="width:10%"></div></div><span style="font-size:.65rem;color:var(--success)">On target</span></div></td>
+                <td><span style="font-size:.69rem;color:var(--faint)">No action</span></td>
+              </tr>
+              <tr style="background:#fffbeb">
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c1)"></div><span style="font-weight:500">JP Morgan</span></div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">JPM-568767</td>
+                <td class="r mono">30.0%</td>
+                <td class="r mono" style="color:var(--muted)">29.1</td>
+                <td class="r mono">31</td>
+                <td class="r mono">32.0%</td>
+                <td class="r mono neg">+2.0%</td>
+                <td><div class="drift-bar"><div class="drift-track"><div class="drift-fill d-bad" style="width:100%"></div></div><span style="font-size:.65rem;color:var(--danger);font-weight:500">Over threshold</span></div></td>
+                <td><button class="btn btn-primary btn-xs" onclick="showTrueupAdjustment('OmnibusEnergy')">Apply Adjustment</button></td>
+              </tr>
+              <tr>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c2)"></div><span style="font-weight:500">Goldman Sachs</span></div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">GS-456456</td>
+                <td class="r mono">40.0%</td>
+                <td class="r mono" style="color:var(--muted)">38.8</td>
+                <td class="r mono">37</td>
+                <td class="r mono">38.1%</td>
+                <td class="r mono" style="color:var(--muted)">−1.9%</td>
+                <td><div class="drift-bar"><div class="drift-track"><div class="drift-fill d-warn" style="width:95%"></div></div><span style="font-size:.65rem;color:var(--warning)">Near threshold</span></div></td>
+                <td><span style="font-size:.69rem;color:var(--faint)">Monitor</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Inline adjustment panel (hidden until Apply Adjustment clicked) -->
+          <div id="trueup-adj-OmnibusEnergy" style="display:none;margin:0 16px 8px;border:1px solid #bfdbfe;border-radius:6px;overflow:hidden">
+            <div style="padding:8px 12px;background:#eff6ff;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:8px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:#1e40af;flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span style="font-size:.77rem;font-weight:600;color:#1e40af">Suggested True-up Adjustment — Omnibus-Energy (next trade)</span>
+              <button onclick="hideTrueupAdjustment('OmnibusEnergy')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#6b7280;font-size:.85rem;padding:0 2px;line-height:1">✕</button>
+            </div>
+            <div style="padding:10px 14px">
+              <div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">
+                Applies to the <strong>next parent trade</strong> in Omnibus-Energy only — no corrective trade created.
+              </div>
+              <table style="width:100%;font-size:.72rem">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="text-align:left;padding:4px 8px;font-weight:500">SMA</th>
+                    <th style="text-align:right;padding:4px 8px;font-weight:500">Normal Split</th>
+                    <th style="text-align:right;padding:4px 8px;font-weight:500">Adjusted Split</th>
+                    <th style="text-align:right;padding:4px 8px;font-weight:500">Δ on 10-lot trade</th>
+                    <th style="text-align:right;padding:4px 8px;font-weight:500">Post-adj Drift</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid var(--row-border)">
+                    <td style="padding:5px 8px"><div class="fund-chip"><div class="fund-dot" style="background:var(--c0)"></div><span>Morgan Stanley</span></div></td>
+                    <td style="text-align:right;padding:5px 8px" class="mono">30%</td>
+                    <td style="text-align:right;padding:5px 8px" class="mono">30%</td>
+                    <td style="text-align:right;padding:5px 8px;color:var(--muted)" class="mono">—</td>
+                    <td style="text-align:right;padding:5px 8px;color:var(--muted)" class="mono">−0.1%</td>
+                  </tr>
+                  <tr style="border-top:1px solid var(--row-border);background:#fef9c3">
+                    <td style="padding:5px 8px"><div class="fund-chip"><div class="fund-dot" style="background:var(--c1)"></div><span>JP Morgan</span></div></td>
+                    <td style="text-align:right;padding:5px 8px" class="mono">30%</td>
+                    <td style="text-align:right;padding:5px 8px;font-weight:600" class="mono">20%</td>
+                    <td style="text-align:right;padding:5px 8px;color:var(--danger);font-weight:600" class="mono">−1 lot</td>
+                    <td style="text-align:right;padding:5px 8px;color:var(--warning)" class="mono">+1.0%</td>
+                  </tr>
+                  <tr style="border-top:1px solid var(--row-border);background:#f0fdf4">
+                    <td style="padding:5px 8px"><div class="fund-chip"><div class="fund-dot" style="background:var(--c2)"></div><span>Goldman Sachs</span></div></td>
+                    <td style="text-align:right;padding:5px 8px" class="mono">40%</td>
+                    <td style="text-align:right;padding:5px 8px;font-weight:600" class="mono">50%</td>
+                    <td style="text-align:right;padding:5px 8px;color:var(--success);font-weight:600" class="mono">+1 lot</td>
+                    <td style="text-align:right;padding:5px 8px;color:var(--muted)" class="mono">−0.9%</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="font-size:.67rem;color:var(--faint);margin-top:6px">Based on a 10-lot trade — actual Δ scales with trade size.</div>
+              <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+                <button class="btn btn-ghost btn-sm" onclick="hideTrueupAdjustment('OmnibusEnergy')">Cancel</button>
+                <button class="btn btn-primary btn-sm" onclick="queueTrueupAdjustment('OmnibusEnergy')">Queue for Next Trade</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin:0 16px 0;padding:7px 12px;background:#f8fafc;border:1px solid var(--row-border);border-top:none;font-size:.68rem;color:var(--muted)">
+            <strong style="color:var(--text)">Why drift occurs:</strong> Lot counts round to whole numbers — e.g. a 7-lot trade can't split 2.1/2.1/2.8, so GS gets 3 instead of 2.8. Over 4 trades this adds up. JPM: 31 lots vs. 29.1 expected.
+          </div>
+
+          <!-- ── Book: Omnibus-Gas ── -->
+          <div style="padding:7px 16px;background:#f8fafc;border-bottom:1px solid var(--row-border);border-top:2px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--primary)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span style="font-size:.75rem;font-weight:600">Omnibus-Gas</span>
+            <span style="font-family:monospace;font-size:.7rem;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px">#GH5601</span>
+            <span style="font-size:.69rem;color:var(--muted)">· Buy HH · 1 finalized parent trade · 4 lots total</span>
+            <span style="font-size:.68rem;color:var(--faint);margin-left:auto">Ratios: MS 50% · GS 50%</span>
+          </div>
+          <table>
+            <thead><tr>
+              <th style="width:140px">SMA</th>
+              <th style="width:90px">Account #</th>
+              <th style="width:80px" class="r">Target %</th>
+              <th style="width:80px" class="r">Expected Lots</th>
+              <th style="width:80px" class="r">Actual Lots</th>
+              <th style="width:75px" class="r">Actual %</th>
+              <th style="width:65px" class="r">Drift</th>
+              <th style="width:120px">Severity</th>
+              <th style="width:130px">Action</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c0)"></div><span style="font-weight:500">Morgan Stanley</span></div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">MS-5758778</td>
+                <td class="r mono">50.0%</td>
+                <td class="r mono" style="color:var(--muted)">2.0</td>
+                <td class="r mono">2</td>
+                <td class="r mono">50.0%</td>
+                <td class="r mono pos">0.0%</td>
+                <td><div class="drift-bar"><div class="drift-track"><div class="drift-fill d-ok" style="width:2%"></div></div><span style="font-size:.65rem;color:var(--success)">On target</span></div></td>
+                <td><span style="font-size:.69rem;color:var(--faint)">No action</span></td>
+              </tr>
+              <tr>
+                <td><div class="fund-chip"><div class="fund-dot" style="background:var(--c2)"></div><span style="font-weight:500">Goldman Sachs</span></div></td>
+                <td class="mono" style="font-size:.72rem;color:var(--muted)">GS-456456</td>
+                <td class="r mono">50.0%</td>
+                <td class="r mono" style="color:var(--muted)">2.0</td>
+                <td class="r mono">2</td>
+                <td class="r mono">50.0%</td>
+                <td class="r mono pos">0.0%</td>
+                <td><div class="drift-bar"><div class="drift-track"><div class="drift-fill d-ok" style="width:2%"></div></div><span style="font-size:.65rem;color:var(--success)">On target</span></div></td>
+                <td><span style="font-size:.69rem;color:var(--faint)">No action</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          </div><!-- hidden legacy static content -->
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main -->
+
+<script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const COLORS = ['var(--c0)','var(--c1)','var(--c2)','var(--c3)'];
+
+/// Mapping rules: book → SMA account lines (including historical retired entries)
+const BOOK_RULES = {
+  'Omnibus-Energy': [
+    { fcm:'Morgan Stanley', acctNum:'MS-5758778',  target:.30, ci:0, status:'active',  effectiveFrom:'Jan 1, 2026' },
+    { fcm:'JP Morgan',      acctNum:'JPM-568767',  target:.30, ci:1, status:'active',  effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Goldman Sachs',  acctNum:'GS-456456',   target:.40, ci:2, status:'active',  effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Morgan Stanley', acctNum:'MS-5758778',  target:.25, ci:0, status:'retired', effectiveFrom:'Jul 1, 2025', effectiveTo:'Dec 31, 2025' },
+  ],
+  'Omnibus-Gas': [
+    { fcm:'Morgan Stanley', acctNum:'MS-5758778',  target:.50, ci:0, status:'active', effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Goldman Sachs',  acctNum:'GS-456456',   target:.50, ci:2, status:'active', effectiveFrom:'Jan 1, 2026' },
+  ],
+  'Omnibus-Crude': [
+    { fcm:'Citadel Securities', acctNum:'CIT-88234',  target:.45, ci:0, status:'active', effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Barclays',           acctNum:'BAR-44512',  target:.35, ci:1, status:'active', effectiveFrom:'Jan 1, 2026' },
+    { fcm:'Morgan Stanley',     acctNum:'MS-5758778', target:.20, ci:2, status:'active', effectiveFrom:'Jan 1, 2026' },
+  ],
+};
+
+
+const orders = [
+  // ── Pending ──────────────────────────────────────────────────────────────────
+  // NG May 2026, 20 lots, Omnibus-Energy
+  { id:'ORD-7678500', ar:'AR-1102',
+    product:'Natural Gas (NG) · May 2026', short:'NG May 26',
+    contractRange:'May 2026', months:1, lotsPerMonth:20,
+    dir:'Buy', qty:20, price:'3.2650 $/MMBtu', date:'Mar 6, 2026',
+    book:'Omnibus-Energy', isOrder:true, status:'pending', proposedAt:'Today 08:30',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:6,  final:6,  target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:6,  final:6,  target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:8,  final:8,  target:.40, ci:2 },
+    ], fills:[] },
+  // WTI Apr 2026, 15 lots, Omnibus-Crude
+  { id:'ORD-7678501', ar:'AR-1103',
+    product:'WTI Crude Oil · Apr 2026', short:'WTI Apr 26',
+    contractRange:'Apr 2026', months:1, lotsPerMonth:15,
+    dir:'Sell', qty:15, price:'79.1500 $/bbl', date:'Mar 6, 2026',
+    book:'Omnibus-Crude', isOrder:true, status:'pending', proposedAt:'Today 09:05',
+    lines:[
+      { fcm:'Citadel Securities', acctNum:'CIT-88234', proposed:7,  final:7,  target:.45, ci:0 },
+      { fcm:'Barclays',           acctNum:'BAR-44512', proposed:5,  final:5,  target:.35, ci:1 },
+      { fcm:'Morgan Stanley',     acctNum:'MS-5758778',proposed:3,  final:3,  target:.20, ci:2 },
+    ], fills:[] },
+  // Strip: NG Apr–Sep 2026, 10 lots/month, Omnibus-Energy
+  { id:'ORD-2847', ar:'AR-1094',
+    product:'Natural Gas (NG) · Apr – Sep 2026', short:'NG Apr–Sep 26',
+    contractRange:'Apr – Sep 2026', months:6, lotsPerMonth:10,
+    dir:'Buy', qty:60, price:'3.2470 $/MMBtu', date:'Mar 5, 2026',
+    book:'Omnibus-Energy', isOrder:true, status:'pending', proposedAt:'Yesterday 09:14',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:18, final:18, target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:18, final:18, target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:24, final:24, target:.40, ci:2 },
+    ], fills:[] },
+  // Strip: WTI Jun–Dec 2026, 5 lots/month, Omnibus-Energy
+  { id:'ORD-2848', ar:'AR-1095',
+    product:'WTI Crude Oil · Jun – Dec 2026', short:'WTI Jun–Dec 26',
+    contractRange:'Jun – Dec 2026', months:7, lotsPerMonth:5,
+    dir:'Sell', qty:35, price:'78.4200 $/bbl', date:'Mar 5, 2026',
+    book:'Omnibus-Energy', isOrder:true, status:'pending', proposedAt:'Yesterday 10:02',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:10, final:10, target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:11, final:11, target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:14, final:14, target:.40, ci:2 },
+    ], fills:[] },
+  // HH Mar 2026, 4 lots, Omnibus-Gas
+  { id:'ORD-2849', ar:'AR-1096',
+    product:'Henry Hub NG · Mar 2026', short:'HH Mar 26',
+    contractRange:'Mar 2026', months:1, lotsPerMonth:4,
+    dir:'Buy', qty:4, price:'3.1190 $/MMBtu', date:'Mar 4, 2026',
+    book:'Omnibus-Gas', isOrder:true, status:'pending', proposedAt:'Mar 4, 15:44',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:2, final:2, target:.50, ci:0 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:2, final:2, target:.50, ci:2 },
+    ], fills:[] },
+  // WTI Jun 2026, 25 lots, Omnibus-Crude
+  { id:'ORD-7678504', ar:'AR-1106',
+    product:'WTI Crude Oil · Jun 2026', short:'WTI Jun 26',
+    contractRange:'Jun 2026', months:1, lotsPerMonth:25,
+    dir:'Buy', qty:25, price:'77.8800 $/bbl', date:'Mar 5, 2026',
+    book:'Omnibus-Crude', isOrder:true, status:'pending', proposedAt:'Yesterday 14:20',
+    lines:[
+      { fcm:'Citadel Securities', acctNum:'CIT-88234', proposed:11, final:11, target:.45, ci:0 },
+      { fcm:'Barclays',           acctNum:'BAR-44512', proposed:9,  final:9,  target:.35, ci:1 },
+      { fcm:'Morgan Stanley',     acctNum:'MS-5758778',proposed:5,  final:5,  target:.20, ci:2 },
+    ], fills:[] },
+  // ── Finalized ─────────────────────────────────────────────────────────────────
+  // HH Apr–Jun 2026, 12 lots (4/mo × 3), Omnibus-Gas
+  { id:'ORD-7678502', ar:'AR-1104',
+    product:'Henry Hub NG · Apr – Jun 2026', short:'HH Apr–Jun 26',
+    contractRange:'Apr – Jun 2026', months:3, lotsPerMonth:4,
+    dir:'Buy', qty:12, price:'3.1190 $/MMBtu', date:'Mar 4, 2026',
+    book:'Omnibus-Gas', isOrder:true, status:'finalized', proposedAt:'Mar 4, 09:30', finalizedAt:'Mar 4, 10:15', finalizedBy:'S. Patel',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:6, final:6, target:.50, ci:0 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:6, final:6, target:.50, ci:2 },
+    ],
+    fills:[
+      { tradeId:'TRD-2910', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:2, contract:'Apr 2026', entryPx:3.1190, curvePx:3.2100, unrealPnl:1820, dayMtm:210, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2911', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:2, contract:'May 2026', entryPx:3.1190, curvePx:3.1950, unrealPnl:1520, dayMtm:190, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2912', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:2, contract:'Jun 2026', entryPx:3.1190, curvePx:3.1750, unrealPnl:1120, dayMtm:160, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2913', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:2, contract:'Apr 2026', entryPx:3.1190, curvePx:3.2100, unrealPnl:1820, dayMtm:210, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2914', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:2, contract:'May 2026', entryPx:3.1190, curvePx:3.1950, unrealPnl:1520, dayMtm:190, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2915', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:2, contract:'Jun 2026', entryPx:3.1190, curvePx:3.1750, unrealPnl:1120, dayMtm:160, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+    ] },
+  // NG Mar 2026, 30 lots, Omnibus-Energy, Sell
+  { id:'ORD-7678503', ar:'AR-1105',
+    product:'Natural Gas (NG) · Mar 2026', short:'NG Mar 26',
+    contractRange:'Mar 2026', months:1, lotsPerMonth:30,
+    dir:'Sell', qty:30, price:'3.2800 $/MMBtu', date:'Mar 3, 2026',
+    book:'Omnibus-Energy', isOrder:true, status:'finalized', proposedAt:'Mar 3, 11:20', finalizedAt:'Mar 3, 12:05', finalizedBy:'J. Smith',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:9,  final:9,  target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:9,  final:9,  target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:12, final:12, target:.40, ci:2 },
+    ],
+    fills:[
+      { tradeId:'TRD-2916', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Sell', qty:9,  contract:'Mar 2026', entryPx:3.2800, curvePx:3.3120, unrealPnl:-2880, dayMtm:-380, src:'user',   asOf:'Mar 5', updatedAt:'Mar 3, 12:05' },
+      { tradeId:'TRD-2917', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Sell', qty:9,  contract:'Mar 2026', entryPx:3.2800, curvePx:3.3120, unrealPnl:-2880, dayMtm:-380, src:'user',   asOf:'Mar 5', updatedAt:'Mar 3, 12:05' },
+      { tradeId:'TRD-2918', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Sell', qty:12, contract:'Mar 2026', entryPx:3.2800, curvePx:3.3120, unrealPnl:-3840, dayMtm:-510, src:'user',   asOf:'Mar 5', updatedAt:'Mar 3, 12:05' },
+    ] },
+  // NG Jan–Jun 2026, 60 lots (10/mo), Omnibus-Energy, Buy — finalized strip
+  { id:'ORD-2844', ar:'AR-1091',
+    product:'Natural Gas (NG) · Jan – Jun 2026', short:'NG Jan–Jun 26',
+    contractRange:'Jan – Jun 2026', months:6, lotsPerMonth:10,
+    dir:'Buy', qty:60, price:'3.2310 $/MMBtu', date:'Mar 5, 2026',
+    book:'Omnibus-Energy', isOrder:true, status:'finalized', proposedAt:'Today 08:51', finalizedAt:'Today 09:47', finalizedBy:'J. Smith',
+    lines:[
+      { fcm:'Morgan Stanley', acctNum:'MS-5758778', proposed:18, final:18, target:.30, ci:0 },
+      { fcm:'JP Morgan',      acctNum:'JPM-568767', proposed:18, final:18, target:.30, ci:1 },
+      { fcm:'Goldman Sachs',  acctNum:'GS-456456',  proposed:24, final:24, target:.40, ci:2 },
+    ],
+    fills:[
+      { tradeId:'TRD-2901', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Jan 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:4740, dayMtm:540, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2902', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Feb 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:4230, dayMtm:480, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2903', fcm:'Morgan Stanley', acctNum:'MS-5758778', ci:0, dir:'Buy', qty:3, contract:'Mar 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:3720, dayMtm:410, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2904', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Jan 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:4740, dayMtm:540, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2905', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Feb 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:4230, dayMtm:480, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2906', fcm:'JP Morgan',      acctNum:'JPM-568767', ci:1, dir:'Buy', qty:3, contract:'Mar 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:3720, dayMtm:410, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2907', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Jan 2026', entryPx:3.2310, curvePx:3.3890, unrealPnl:6320, dayMtm:720, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2908', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Feb 2026', entryPx:3.2310, curvePx:3.3720, unrealPnl:5640, dayMtm:640, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+      { tradeId:'TRD-2909', fcm:'Goldman Sachs',  acctNum:'GS-456456',  ci:2, dir:'Buy', qty:4, contract:'Mar 2026', entryPx:3.2310, curvePx:3.3550, unrealPnl:4960, dayMtm:550, src:'vendor', asOf:'Mar 5', updatedAt:'Today 14:32' },
+    ] },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const fmt$ = n => { if(n==null) return '—'; const a=Math.abs(n); const s=a>=1000?'$'+(a/1000).toFixed(1)+'k':'$'+a.toFixed(0); return n<0?'('+s+')':s; };
+const fmtP = (n,d=4) => n==null?'—':n.toFixed(d);
+const pCls = n => n==null?'':n>=0?'pos':'neg';
+
+function statusBadge(s) {
+  return { pending:'<span class="badge b-amber"><span class="b-dot"></span>Pending</span>', finalized:'<span class="badge b-green"><span class="b-dot"></span>Finalized</span>', cancelled:'<span class="badge b-gray"><span class="b-dot"></span>Cancelled</span>' }[s]||s;
+}
+
+// ─── Allocation calendar ───────────────────────────────────────────────────────
+const MOCKUP_TODAY = new Date(2026, 2, 19); // Mar 19, 2026
+const _MONTH_NUM = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function parseMockupDate(str) {
+  const m = (str||'').match(/(\w{3})\s+(\d+),\s+(\d{4})/);
+  return m ? new Date(+m[3], _MONTH_NUM[m[1]], +m[2]) : null;
+}
+
+let _calExpanded = false;
+function toggleCalendar() {
+  _calExpanded = !_calExpanded;
+  const body = document.getElementById('cal-body');
+  const chev = document.getElementById('cal-chevron');
+  if (body) body.style.display = _calExpanded ? 'flex' : 'none';
+  if (body && _calExpanded) renderAllocCalendar();
+  if (chev) chev.style.transform = _calExpanded ? 'rotate(180deg)' : '';
+}
+
+function renderAllocCalendar() {
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+
+  // Build per-date status: 'ok' = all finalized, 'bad' = any pending
+  const dateStatus = {};
+  orders.forEach(o => {
+    const d = parseMockupDate(o.date);
+    if (!d) return;
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (!dateStatus[key]) dateStatus[key] = 'ok';
+    if (o.status === 'pending') dateStatus[key] = 'bad';
+  });
+
+  // Header status chip — show today's state
+  const todayKey = '2026-03-19';
+  const todayStatus = dateStatus[todayKey];
+  const hdrStatus = document.getElementById('cal-header-status');
+  if (hdrStatus) {
+    hdrStatus.innerHTML = todayStatus === 'ok'
+      ? '<span style="font-size:.62rem;background:#dcfce7;color:#15803d;padding:1px 7px;border-radius:8px;font-weight:500">all finalized</span>'
+      : todayStatus === 'bad'
+        ? '<span style="font-size:.62rem;background:#fee2e2;color:#991b1b;padding:1px 7px;border-radius:8px;font-weight:500">has pending</span>'
+        : '<span style="font-size:.62rem;color:var(--faint)">no trades</span>';
+  }
+
+  // Render current month (March 2026)
+  const year = 2026, month = 2;
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  let html = DOWS.map(d =>
+    `<div style="font-size:.58rem;font-weight:600;color:var(--faint);text-align:center;height:17px;display:flex;align-items:center;justify-content:center">${d}</div>`
+  ).join('');
+
+  for (let i = 0; i < firstDow; i++) html += '<div></div>';
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `2026-03-${String(day).padStart(2,'0')}`;
+    const status = dateStatus[key];
+    const isToday = day === 19;
+    const cls = ['cal-cell', status === 'ok' ? 'c-ok' : status === 'bad' ? 'c-bad' : '', isToday ? 'c-today' : ''].filter(Boolean).join(' ');
+    const title = status === 'ok' ? 'All finalized' : status === 'bad' ? 'Has pending trades' : '';
+    html += `<div class="${cls}" title="${title}">${day}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+// ─── Portfolio Balance (True-up) ───────────────────────────────────────────────
+const _trueupLots = {}; // 'bookKey|ticker' → user-entered lot value
+
+function renderTrueup() {
+  const el = document.getElementById('trueup-scroll');
+  if (!el) return;
+
+  // Build finalized lots: bookName → ticker → acctNum → total lots
+  const finData = {};
+  orders.filter(o => o.status === 'finalized').forEach(o => {
+    const ticker = o.short.split(' ')[0];
+    if (!finData[o.book]) finData[o.book] = {};
+    if (!finData[o.book][ticker]) finData[o.book][ticker] = {};
+    (o.fills || []).forEach(f => {
+      finData[o.book][ticker][f.acctNum] = (finData[o.book][ticker][f.acctNum] || 0) + f.qty * o.months;
+    });
+  });
+
+  let html = '';
+
+  Object.entries(AUM_BOOKS).forEach(([bookKey, bookMeta]) => {
+    const bookName = bookMeta.bookName;
+    const activeRules = (BOOK_RULES[bookName] || []).filter(r => r.status === 'active');
+    const configuredTickers = (TICKER_LEV_DATA[bookKey]?.tickers || []).map(t => t.symbol);
+    const finalizedTickers = Object.keys(finData[bookName] || {});
+    const allTickers = [...new Set([...configuredTickers, ...finalizedTickers])];
+    if (!allTickers.length) return;
+
+    html += `<div style="padding:6px 16px;background:#f8fafc;border-top:2px solid var(--border);border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:8px">
+      <span style="font-size:.75rem;font-weight:600">${bookName}</span>
+      <span style="font-family:monospace;font-size:.69rem;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px">${BOOKS_META[bookName]||''}</span>
+    </div>`;
+
+    allTickers.forEach(ticker => {
+      const finLots = (finData[bookName] || {})[ticker] || {};
+      const totalFin = Object.values(finLots).reduce((s, v) => s + v, 0);
+      const splits = computeTickerSplit(bookKey, ticker) || {};
+      const lotKey = bookKey + '|' + ticker;
+      const newLots = Math.max(1, parseInt(_trueupLots[lotKey]) || 10);
+
+      // Compute deficit-correcting allocation for newLots
+      const suggested = {};
+      activeRules.forEach(r => {
+        const needed = (totalFin + newLots) * (splits[r.acctNum] || 0) - (finLots[r.acctNum] || 0);
+        suggested[r.acctNum] = Math.max(0, Math.round(needed));
+      });
+      // Fix rounding so sum = newLots
+      let diff = newLots - activeRules.reduce((s, r) => s + suggested[r.acctNum], 0);
+      if (diff !== 0) {
+        const ranked = activeRules.map(r => {
+          const needed = (totalFin + newLots) * (splits[r.acctNum] || 0) - (finLots[r.acctNum] || 0);
+          return { acct: r.acctNum, frac: Math.max(0, needed) % 1 };
+        }).sort((a, b) => b.frac - a.frac);
+        for (let i = 0; Math.abs(diff) > 0 && i < ranked.length * 2; i++) {
+          const acct = ranked[i % ranked.length].acct;
+          if (diff > 0) { suggested[acct]++; diff--; }
+          else if (suggested[acct] > 0) { suggested[acct]--; diff++; }
+        }
+      }
+
+      const rows = activeRules.map(r => {
+        const acct = r.acctNum;
+        const d = AUM_DATA[acct] || {};
+        const fin = finLots[acct] || 0;
+        const tgtPct = (splits[acct] || 0) * 100;
+        const actPct = totalFin > 0 ? fin / totalFin * 100 : null;
+        const drift = actPct != null ? actPct - tgtPct : null;
+        const driftColor = drift == null ? 'var(--faint)' : Math.abs(drift) < 1 ? 'var(--success)' : Math.abs(drift) < 3 ? 'var(--warning)' : 'var(--danger)';
+        const sug = suggested[acct] || 0;
+        const sugPct = newLots > 0 ? sug / newLots * 100 : 0;
+        const postTotal = totalFin + newLots;
+        const postPct = postTotal > 0 ? (fin + sug) / postTotal * 100 : 0;
+        const postDrift = postPct - tgtPct;
+        const postColor = Math.abs(postDrift) < 1 ? 'var(--success)' : Math.abs(postDrift) < 3 ? 'var(--warning)' : 'var(--danger)';
+        const sign = v => v >= 0 ? '+' : '';
+        // Highlight if suggested differs significantly from target
+        const sugDelta = sugPct - tgtPct;
+        const sugHighlight = Math.abs(sugDelta) > 0.5 ? 'color:var(--primary);font-weight:600' : '';
+        return `<tr>
+          <td><div class="fund-chip"><div class="fund-dot" style="background:${COLORS[r.ci]}"></div><span style="font-weight:500">${d.client||r.fcm}</span></div></td>
+          <td class="mono" style="font-size:.69rem;color:var(--muted)">${acct}</td>
+          <td class="r mono">${tgtPct.toFixed(1)}%</td>
+          <td class="r mono">${fin}</td>
+          <td class="r mono" style="color:${actPct==null?'var(--faint)':driftColor}">${actPct!=null?actPct.toFixed(1)+'%':'—'}</td>
+          <td class="r mono" style="color:${driftColor}">${drift!=null?sign(drift)+drift.toFixed(1)+'%':'—'}</td>
+          <td class="r mono" style="${sugHighlight}">${sug} <span style="font-size:.65rem;color:var(--faint)">(${sugPct.toFixed(0)}%)</span></td>
+          <td class="r mono" style="color:${postColor}">${sign(postDrift)+postDrift.toFixed(1)}%</td>
+        </tr>`;
+      }).join('');
+
+      // Totals row
+      const sugTotal = activeRules.reduce((s, r) => s + (suggested[r.acctNum]||0), 0);
+      html += `
+      <div style="padding:5px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--row-border);background:var(--card)">
+        <span style="font-size:.71rem;font-weight:600">${ticker}</span>
+        <span style="font-size:.67rem;color:var(--muted)">${totalFin > 0 ? totalFin + ' lots finalized' : 'no finalized trades'}</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:.69rem;color:var(--muted)">
+          Next trade:
+          <input type="number" min="1" value="${newLots}"
+            style="width:50px;height:21px;font-size:.71rem;text-align:right;border:1px solid var(--border);border-radius:4px;background:var(--bg);padding:0 5px;color:var(--text)"
+            oninput="_trueupLots['${lotKey}']=this.value;renderTrueup()"> lots
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:175px">Account</th>
+          <th style="width:82px">Acct #</th>
+          <th class="r" style="width:72px">Target %</th>
+          <th class="r" style="width:80px">Fin. Lots</th>
+          <th class="r" style="width:72px">Actual %</th>
+          <th class="r" style="width:62px">Drift</th>
+          <th class="r" style="width:105px">Suggested (${newLots}L)</th>
+          <th class="r" style="width:88px">Post-trade %</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr style="background:#f8fafc;font-size:.68rem;color:var(--muted)">
+          <td colspan="6" style="padding:3px 9px;text-align:right">Total suggested:</td>
+          <td class="r mono" style="font-weight:600;color:var(--text)">${sugTotal}L</td>
+          <td></td>
+        </tr></tfoot>
+      </table>`;
+    });
+  });
+
+  el.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--muted);font-size:.8rem">No finalized trades yet.</div>';
+}
+
+// ─── True-up adjustment UI (legacy stubs kept to avoid reference errors) ───────
+function showTrueupAdjustment(key) {
+  const el = document.getElementById('trueup-adj-' + key);
+  if (el) el.style.display = 'block';
+}
+function hideTrueupAdjustment(key) {
+  const el = document.getElementById('trueup-adj-' + key);
+  if (el) el.style.display = 'none';
+}
+function queueTrueupAdjustment(key) {
+  hideTrueupAdjustment(key);
+  const banner = document.getElementById('trueup-queued-banner');
+  if (banner) banner.style.display = 'flex';
+}
+function cancelTrueupAdjustment() {
+  const banner = document.getElementById('trueup-queued-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+// ─── Parent trades list (left panel) ──────────────────────────────────────────
+function highlightOrder(id) { /* row click — could scroll strip to that order */ }
+
+function renderTradesList() {
+  const pending = orders.filter(o => o.status === 'pending').length;
+  const el = document.getElementById('trades-pending-count');
+  if (el) el.textContent = '(' + pending + ' pending)';
+  document.getElementById('tc-orders').textContent = orders.length;
+  const nbEl = document.getElementById('nav-badge-alloc');
+  if (nbEl) nbEl.textContent = pending;
+
+  renderAllocCalendar();
+
+  const search = (document.getElementById('tf-search')?.value || '').toLowerCase();
+  const dirF   = document.getElementById('tf-dir')?.value     || '';
+  const statF  = document.getElementById('tf-status')?.value  || '';
+  const prodF  = document.getElementById('tf-product')?.value || '';
+
+  const visible = orders.filter(o => {
+    if (dirF  && o.dir !== dirF)         return false;
+    if (statF && o.status !== statF)     return false;
+    if (prodF && !o.short.startsWith(prodF)) return false;
+    if (search && !o.id.toLowerCase().includes(search) && !o.short.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  if (!visible.length) {
+    document.getElementById('trades-list-scroll').innerHTML =
+      '<div style="padding:18px 12px;text-align:center;font-size:.71rem;color:var(--faint)">No trades match filters.</div>';
+    return;
+  }
+
+  document.getElementById('trades-list-scroll').innerHTML = visible.map(o => {
+    const isPending = o.status === 'pending';
+    const dotColor = isPending ? 'var(--warning)' : 'var(--success)';
+    const dirColor = o.dir === 'Buy' ? 'var(--success)' : 'var(--danger)';
+    const stripTag = o.months > 1
+      ? ' <span style="font-size:.58rem;background:#eff6ff;color:var(--primary);padding:0 3px;border-radius:3px">' + o.months + 'mo</span>'
+      : '';
+    const actionBtn = isPending
+      ? '<button class="btn btn-success" style="font-size:.58rem;padding:0 5px;height:17px;flex-shrink:0" onclick="finalizeOrder(\'' + o.id + '\');event.stopPropagation()">Fin</button>'
+      : '<button class="btn btn-ghost" style="font-size:.58rem;padding:0 5px;height:17px;flex-shrink:0;color:var(--faint)" onclick="unfinalizeOrder(\'' + o.id + '\');event.stopPropagation()">↺</button>';
+    return '<div style="padding:3px 8px;border-bottom:1px solid var(--row-border);display:flex;align-items:center;gap:5px;height:27px;cursor:pointer" onclick="highlightOrder(\'' + o.id + '\')">' +
+      '<span style="width:6px;height:6px;border-radius:50%;background:' + dotColor + ';flex-shrink:0"></span>' +
+      '<span style="flex:1;font-size:.72rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + o.short + stripTag + '</span>' +
+      '<span style="font-size:.65rem;font-weight:600;color:' + dirColor + ';flex-shrink:0">' + o.dir[0] + '</span>' +
+      '<span style="font-size:.63rem;color:var(--muted);flex-shrink:0">' + o.qty + 'L</span>' +
+      actionBtn +
+      '</div>';
+  }).join('');
+}
+
+// ─── Finalize / Unfinalize ────────────────────────────────────────────────────
+function _applyFinalize(o) {
+  o.status = 'finalized';
+  o.finalizedAt = 'Today ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',hour12:false});
+  o.finalizedBy = 'J. Smith';
+  const bookKey = BOOK_LEV_KEY[o.book];
+  const ticker  = o.short.split(' ')[0];
+  const splits  = bookKey ? computeTickerSplit(bookKey, ticker) : null;
+  o.fills = o.lines.map((l, li) => {
+    const frac = splits ? (splits[l.acctNum] || 0) : (l.target || 0);
+    const qty  = Math.round(o.lotsPerMonth * frac);
+    return {
+      tradeId: 'TRD-' + (3000 + orders.indexOf(o)*10 + li),
+      fcm: l.fcm, acctNum: l.acctNum, ci: l.ci, dir: o.dir,
+      qty,
+      contract: o.contractRange,
+      entryPx: parseFloat(o.price), curvePx: parseFloat(o.price)*1.04,
+      unrealPnl: Math.round(qty*10000*0.04), dayMtm: Math.round(qty*1000*0.04),
+      src: 'vendor', asOf: 'Today', updatedAt: 'Just now'
+    };
+  });
+}
+
+const _refreshTrueup = () => { if (document.getElementById('panel-trueup')?.classList.contains('active')) renderTrueup(); };
+
+function finalizeOrder(orderId) {
+  const o = orders.find(o => o.id === orderId);
+  if (!o || o.status !== 'pending') return;
+  _applyFinalize(o);
+  renderTradesList();
+  renderStrip();
+  _refreshTrueup();
+}
+
+function unfinalizeOrder(orderId) {
+  const o = orders.find(o => o.id === orderId);
+  if (!o || o.status !== 'finalized') return;
+  if (!confirm('Unfinalize ' + o.id + '?\n\nThis reverts the allocation to Pending. Fill trades are not automatically reversed.')) return;
+  o.status = 'pending';
+  delete o.finalizedAt; delete o.finalizedBy; o.fills = [];
+  renderTradesList();
+  renderStrip();
+  _refreshTrueup();
+}
+
+function finalizeAllPending() {
+  const pending = orders.filter(o => o.status === 'pending');
+  if (!pending.length) { alert('No pending trades to finalize.'); return; }
+  if (!confirm('Finalize all ' + pending.length + ' pending trade' + (pending.length>1?'s':'') + '?')) return;
+  pending.forEach(o => _applyFinalize(o));
+  renderTradesList();
+  renderStrip();
+  _refreshTrueup();
+}
+
+function unfinalizeAll() {
+  const fin = orders.filter(o => o.status === 'finalized');
+  if (!fin.length) { alert('No finalized trades to revert.'); return; }
+  if (!confirm('Unfinalize all ' + fin.length + ' finalized trade' + (fin.length>1?'s':'') + '?')) return;
+  fin.forEach(o => { o.status='pending'; delete o.finalizedAt; delete o.finalizedBy; o.fills=[]; });
+  renderTradesList();
+  renderStrip();
+}
+
+
+// ─── Section (sidebar) ────────────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.nav-item[data-section]').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-section="${name}"]`).classList.add('active');
+  const isAllocations = name === 'allocations';
+  document.getElementById('alloc-tabs').style.display = isAllocations ? 'flex' : 'none';
+  document.getElementById('alloc-cal-bar').style.display = isAllocations ? 'block' : 'none';
+  const titles = { trades: 'Trades', valuations: 'Valuations', allocations: 'Fund Allocations' };
+  document.querySelector('.topbar-title').textContent = titles[name];
+  ['orders','new-order','mapping','valuations','trueup'].forEach(t =>
+    document.getElementById('panel-'+t).classList.remove('active'));
+  if (name === 'trades') {
+    document.getElementById('panel-new-order').classList.add('active');
+  } else if (name === 'valuations') {
+    document.getElementById('panel-valuations').classList.add('active');
+  } else {
+    showTab('orders');
+  }
+}
+
+// ─── Tabs (allocation sub-tabs) ───────────────────────────────────────────────
+function showTab(name) {
+  ['orders','mapping','aum','trueup'].forEach(t=>{
+    document.getElementById('panel-'+t)?.classList.remove('active');
+    document.getElementById('tab-'+t)?.classList.remove('active');
+  });
+  document.getElementById('panel-'+name)?.classList.add('active');
+  document.getElementById('tab-'+name)?.classList.add('active');
+  // Show strip filters only on the orders/trades tab
+  const sf = document.getElementById('strip-filters');
+  if (sf) sf.style.display = name === 'orders' ? 'flex' : 'none';
+  if (name === 'orders') renderStrip();
+  if (name === 'aum') renderAumTables();
+  if (name === 'trueup') renderTrueup();
+}
+
+// ─── New order helpers ────────────────────────────────────────────────────────
+function setDir(dir, btn) {
+  document.querySelectorAll('.dir-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleOrderPreview() {
+  const on = document.getElementById('is-order-toggle').checked;
+  document.getElementById('order-split-preview').style.display = on ? 'block' : 'none';
+}
+
+function updatePreview() {
+  const qty = parseInt(document.getElementById('order-qty').value) || 0;
+  const bookEl = document.getElementById('order-book');
+  const book = bookEl.value;
+  const rules = (BOOK_RULES[book] || []).filter(r => r.status !== 'retired');
+  const bookLabel = bookEl.options[bookEl.selectedIndex].text;
+
+  // Derive ticker symbol from selected product, e.g. "Natural Gas (NG)" → "NG"
+  const productTxt = document.getElementById('order-product')?.value || '';
+  const ticker = productTxt.match(/\((\w+)\)/)?.[1] || '';
+  const bookKey = BOOK_LEV_KEY[book];
+  const splits = bookKey ? computeTickerSplit(bookKey, ticker) : null;
+
+  document.getElementById('split-preview-title').innerHTML =
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M22 12H2"/><path d="M5 5L2 12l3 7"/><path d="M19 5l3 7-3 7"/></svg>
+    Proposed splits — ${bookLabel}${ticker ? ' · ' + ticker : ''}`;
+
+  if (rules.length === 0) {
+    document.getElementById('split-preview-rows').innerHTML =
+      `<div style="font-size:.71rem;color:var(--danger);padding:4px 0">⚠ Mapping rules for this book are incomplete — cannot auto-split.</div>`;
+    return;
+  }
+
+  document.getElementById('split-preview-rows').innerHTML = rules.map(r => {
+    const frac = splits ? (splits[r.acctNum] || 0) : r.target;
+    const lots = Math.round(qty * frac);
+    const pct = (frac * 100).toFixed(1) + '%';
+    return `<div class="split-preview-row">
+      <div class="fund-chip"><div class="fund-dot" style="background:${COLORS[r.ci]}"></div><strong>${r.fcm}</strong></div>
+      <span style="font-family:monospace;font-size:.72rem;color:var(--muted);margin-left:6px">${r.acctNum}</span>
+      <span style="color:var(--muted);margin-left:auto">${pct}</span>
+      <span class="mono" style="width:50px;text-align:right;color:var(--faint)">${lots} lots</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── Strip view ───────────────────────────────────────────────────────────────
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getMonthLabels(order) {
+  const r = order.contractRange;
+  if (/^\w+\s+\d{4}$/.test(r)) return [r];
+  const m = r.match(/^(\w+)\s+[–-]\s+(\w+)\s+(\d{4})$/);
+  if (m) {
+    const s = MONTH_NAMES.indexOf(m[1]), e = MONTH_NAMES.indexOf(m[2]), yr = m[3];
+    const res = [];
+    for (let i = s; i <= e; i++) res.push(MONTH_NAMES[i] + ' ' + yr);
+    return res;
+  }
+  return [r];
+}
+
+function sortMonthLabels(labels) {
+  return [...new Set(labels)].sort((a, b) => {
+    const [aM, aY] = a.split(' '), [bM, bY] = b.split(' ');
+    return aY !== bY ? parseInt(aY) - parseInt(bY) : MONTH_NAMES.indexOf(aM) - MONTH_NAMES.indexOf(bM);
+  });
+}
+
+// Group: book → monthLabel → productKey → [orders]
+function buildStripByBook(filteredOrders) {
+  const byBook = {};
+  filteredOrders.forEach(o => {
+    const prod = o.short.split(' ')[0];
+    if (!byBook[o.book]) byBook[o.book] = {};
+    getMonthLabels(o).forEach(label => {
+      if (!byBook[o.book][label]) byBook[o.book][label] = {};
+      if (!byBook[o.book][label][prod]) byBook[o.book][label][prod] = [];
+      byBook[o.book][label][prod].push(o);
+    });
+  });
+  return byBook;
+}
+
+let expandedStrip = new Set();
+const stripEdits = {}; // "orderId|acctNum|monthLabel" → overridden lot count
+
+function getStripLots(o, acctNum, monthLabel) {
+  const k = `${o.id}|${acctNum}|${monthLabel}`;
+  if (k in stripEdits) return stripEdits[k];
+  const bookKey = BOOK_LEV_KEY[o.book];
+  if (bookKey) {
+    const ticker = o.short.split(' ')[0];
+    const splits = computeTickerSplit(bookKey, ticker);
+    if (splits && acctNum in splits) return Math.round(o.lotsPerMonth * splits[acctNum]);
+  }
+  const line = o.lines.find(l => l.acctNum === acctNum);
+  return line ? Math.round(o.lotsPerMonth * line.target) : 0;
+}
+
+function setStripLots(orderId, acctNum, monthLabel, val) {
+  stripEdits[`${orderId}|${acctNum}|${monthLabel}`] = Math.max(0, parseInt(val) || 0);
+  renderStrip();
+}
+
+function renderStrip() {
+  const dirF  = document.querySelector('#strip-filters select:nth-child(3)')?.value || '';
+  const prodF = document.querySelector('#strip-filters select:nth-child(4)')?.value || '';
+  const statF = document.querySelector('#strip-filters select:nth-child(5)')?.value || '';
+
+  const filtered = orders.filter(o =>
+    (!dirF  || o.dir === dirF) &&
+    (!prodF || o.product.includes(prodF)) &&
+    (!statF || o.status === statF)
+  );
+
+  const byBook = buildStripByBook(filtered);
+  const container = document.getElementById('strip-scroll');
+
+  function inputStyle(color) {
+    return `width:44px;text-align:right;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Courier New',monospace;font-size:.72rem;padding:1px 4px;color:${color};outline:none`;
+  }
+
+  function leftoverCell(diff, style) {
+    if (diff === 0) return `<td class="r" style="${style}"><span style="color:var(--success);font-size:.75rem">✓</span></td>`;
+    if (diff > 0)   return `<td class="r" style="${style}"><span style="color:var(--warning);font-weight:600;font-size:.72rem" title="${diff} lots unallocated">−${diff}</span></td>`;
+    return             `<td class="r" style="${style}"><span style="color:var(--danger);font-weight:600;font-size:.72rem" title="${-diff} lots over-allocated">+${-diff}</span></td>`;
+  }
+
+  const html = Object.keys(BOOK_RULES).filter(book => byBook[book]).map(book => {
+    const activeRules = (BOOK_RULES[book] || []).filter(r => r.status !== 'retired');
+    const monthMap = byBook[book];
+    const sortedMonths = sortMonthLabels(Object.keys(monthMap));
+
+    const fcmHeaders = activeRules.map(r =>
+      `<th class="r" style="color:${COLORS[r.ci]};font-size:.65rem">${r.acctNum}</th>`
+    ).join('');
+
+    let rows = '';
+    sortedMonths.forEach((label, mIdx) => {
+      const prodMap = monthMap[label];
+      const prods = Object.keys(prodMap).sort();
+
+      prods.forEach((prod, pi) => {
+        const ordersInCell = prodMap[prod];
+        const key = `${book}|${label}|${prod}`;
+        const safeKey = key.replace(/'/g, "\\'");
+        const expanded = expandedStrip.has(key);
+
+        // Month separator — thicker top border at each new month (except first)
+        const sepStyle = (pi === 0 && mIdx > 0) ? 'border-top:2px solid #c8d6e2' : '';
+
+        // Aggregate across orders in this (month, product) cell
+        let total = 0;
+        const fcmTotals = activeRules.map(() => 0);
+        let wValue = 0, wUnit = null, wMix = false;
+        ordersInCell.forEach(o => {
+          total += o.lotsPerMonth;
+          activeRules.forEach((r, ri) => { fcmTotals[ri] += getStripLots(o, r.acctNum, label); });
+          const pm = o.price.match(/^([\d.]+)\s+(.+)$/);
+          if (pm) {
+            if (!wUnit) wUnit = pm[2]; else if (wUnit !== pm[2]) wMix = true;
+            wValue += parseFloat(pm[1]) * o.lotsPerMonth;
+          }
+        });
+
+        const avgPx = total > 0 && !wMix && wUnit ? wValue / total : null;
+        const avgPxStr = avgPx != null
+          ? `<span class="mono" style="font-size:.74rem">${avgPx.toFixed(4)}</span><span style="font-size:.6rem;color:var(--faint);margin-left:3px">${wUnit}</span>`
+          : `<span style="color:var(--faint)">—</span>`;
+
+        const sumFcm = fcmTotals.reduce((s, v) => s + v, 0);
+        const diff = total - sumFcm;
+
+        const hasPending   = ordersInCell.some(o => o.status === 'pending');
+        const hasFinalized = ordersInCell.some(o => o.status === 'finalized');
+        const statusHtml = hasPending && hasFinalized
+          ? `<span class="badge b-amber" style="font-size:.6rem"><span class="b-dot"></span>Mixed</span>`
+          : hasPending
+            ? `<span class="badge b-amber" style="font-size:.6rem"><span class="b-dot"></span>Pending</span>`
+            : `<span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Finalized</span>`;
+
+        const orderChips = ordersInCell.map(o =>
+          `<span style="font-family:monospace;font-size:.68rem;background:${o.status==='finalized'?'#dcfce7':'#fef3c7'};color:${o.status==='finalized'?'#15803d':'#92400e'};padding:1px 6px;border-radius:3px" title="${o.lotsPerMonth} lots/mo">${o.id}</span>`
+        ).join(' ');
+
+        const expandIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;transform:${expanded?'rotate(90deg)':'rotate(0)'};transition:.15s"><path d="${expanded?'M6 9l6 6 6-6':'M9 18l6-6-6-6'}"/></svg>`;
+        const rowBg = ordersInCell.length >= 3 ? 'background:#fff8e1' : ordersInCell.length === 2 ? 'background:#f0f9ff' : '';
+
+        // SMA cells: inline inputs only when exactly one pending order in this cell
+        const singlePending = ordersInCell.length === 1 && ordersInCell[0].status === 'pending';
+        const o1 = ordersInCell[0];
+        const fcmCells = fcmTotals.map((v, i) => {
+          const r = activeRules[i];
+          if (singlePending) {
+            const sa = r.acctNum.replace(/'/g, "\\'");
+            const sl = label.replace(/'/g, "\\'");
+            return `<td class="r" style="${sepStyle}"><input type="number" min="0" value="${v}" style="${inputStyle(COLORS[r.ci])}" onchange="setStripLots('${o1.id}','${sa}','${sl}',this.value)" onclick="event.stopPropagation()"></td>`;
+          }
+          return `<td class="r mono" style="color:${COLORS[r.ci]};${sepStyle}">${v}</td>`;
+        }).join('');
+
+        const prodChip = `<span style="font-size:.63rem;background:#eff6ff;color:var(--primary);padding:1px 5px;border-radius:3px;font-weight:500">${prod}</span>`;
+
+        rows += `<tr onclick="toggleStrip('${safeKey}')" style="cursor:pointer;${rowBg}">
+          <td style="font-weight:500;display:flex;align-items:center;gap:5px;${sepStyle}">${expandIcon}${label}</td>
+          <td style="${sepStyle}">${prodChip}</td>
+          <td class="r mono" style="font-weight:600;${sepStyle}">${total}</td>
+          <td class="r" style="white-space:nowrap;${sepStyle}">${avgPxStr}</td>
+          ${fcmCells}
+          ${leftoverCell(diff, sepStyle)}
+          <td style="padding-left:8px;${sepStyle}">${orderChips}${ordersInCell.length > 1 ? `<span style="font-size:.65rem;color:var(--faint);margin-left:5px">(${ordersInCell.length} overlap)</span>` : ''}</td>
+          <td style="${sepStyle}">${statusHtml}</td>
+        </tr>`;
+
+        if (expanded) {
+          ordersInCell.forEach(o => {
+            const isPending = o.status === 'pending';
+            const oFcmCells = activeRules.map(r => {
+              const v = getStripLots(o, r.acctNum, label);
+              if (isPending) {
+                const sa = r.acctNum.replace(/'/g, "\\'");
+                const sl = label.replace(/'/g, "\\'");
+                return `<td class="r"><input type="number" min="0" value="${v}" style="${inputStyle(COLORS[r.ci])}" onchange="setStripLots('${o.id}','${sa}','${sl}',this.value)" onclick="event.stopPropagation()"></td>`;
+              }
+              return `<td class="r mono" style="color:${COLORS[r.ci]};opacity:.75">${v || '—'}</td>`;
+            }).join('');
+            const oSum = activeRules.reduce((s, r) => s + getStripLots(o, r.acctNum, label), 0);
+            const oDiff = o.lotsPerMonth - oSum;
+            rows += `<tr style="background:#f8fafc;border-left:3px solid ${isPending?'var(--warning)':'var(--success)'}">
+              <td style="padding-left:28px;font-family:monospace;font-size:.7rem;color:var(--muted)">${o.id}</td>
+              <td style="font-size:.65rem;color:var(--primary)">${prod}</td>
+              <td class="r mono" style="color:var(--muted)">${o.lotsPerMonth}</td>
+              <td class="r" style="font-size:.71rem;color:var(--muted);white-space:nowrap">${o.price}</td>
+              ${oFcmCells}
+              ${leftoverCell(oDiff, '')}
+              <td style="font-size:.69rem;color:var(--muted);padding-left:8px">${isPending?`<span style="color:var(--warning)">Pending</span>`:`<span style="color:var(--success)">✓ Finalized</span>`} · ${o.short}</td>
+              <td style="white-space:nowrap">${isPending
+                ? `<button class="btn btn-success" style="font-size:.6rem;padding:1px 7px;height:19px" onclick="finalizeOrder('${o.id.replace(/'/g,"\\'")}');event.stopPropagation()">Finalize</button>`
+                : `<button class="btn btn-ghost" style="font-size:.6rem;padding:1px 7px;height:19px;color:var(--muted)" onclick="unfinalizeOrder('${o.id.replace(/'/g,"\\'")}');event.stopPropagation()">Unfinalize</button>`
+              }</td>
+            </tr>`;
+          });
+          const tickerSplits = BOOK_LEV_KEY[book] ? computeTickerSplit(BOOK_LEV_KEY[book], prod) : null;
+          const targetStr = activeRules.map(r => {
+            const pct = tickerSplits ? (tickerSplits[r.acctNum] * 100).toFixed(0) : (r.target*100).toFixed(0);
+            return `${r.acctNum} ${pct}%`;
+          }).join(' · ');
+          rows += `<tr style="background:#f1f5f9;border-left:3px solid var(--primary)">
+            <td style="padding-left:28px;font-size:.68rem;color:var(--faint)">Subtotal</td>
+            <td></td>
+            <td class="r mono" style="font-weight:600">${total}</td>
+            <td class="r" style="white-space:nowrap">${avgPxStr}</td>
+            ${activeRules.map((r,i) => `<td class="r mono" style="font-weight:600;color:${COLORS[r.ci]}">${fcmTotals[i]}</td>`).join('')}
+            ${leftoverCell(diff, '')}
+            <td style="font-size:.68rem;color:var(--faint);padding-left:8px">${activeRules.map((r,i) => `${r.acctNum} ${total>0?((fcmTotals[i]/total)*100).toFixed(0):0}%`).join(' · ')} <span style="margin-left:6px;color:var(--muted)">(expected: ${targetStr})</span></td>
+            <td></td>
+          </tr>`;
+        }
+      });
+    });
+
+    return `<div style="margin:12px 18px 0;background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+      <div style="padding:8px 13px;background:#f4f7fb;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <span style="font-weight:600;font-size:.8rem">${book}</span>
+        <span style="font-size:.69rem;color:var(--muted);background:var(--input-bg);padding:1px 8px;border-radius:4px;border:1px solid var(--border)">${activeRules.map(r=>r.acctNum).join(' · ')}</span>
+        <span style="margin-left:auto;font-size:.69rem;color:var(--muted)">${sortedMonths.length} month${sortedMonths.length>1?'s':''}</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="min-width:90px">Month</th>
+          <th style="width:50px">Product</th>
+          <th class="r" style="width:54px">Total</th>
+          <th class="r" style="width:130px">Avg Price</th>
+          ${fcmHeaders}
+          <th class="r" style="width:64px">Leftover</th>
+          <th>Parent Trades</th>
+          <th style="width:88px">Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = (html || '<div style="padding:40px;text-align:center;color:var(--muted)">No data matches the current filters.</div>') +
+    '<div style="height:16px"></div>';
+}
+
+function toggleStrip(key) {
+  if (expandedStrip.has(key)) expandedStrip.delete(key); else expandedStrip.add(key);
+  renderStrip();
+}
+
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+(function initForm() {
+  // Trade date → today
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById('trade-date').value = `${yyyy}-${mm}-${dd}`;
+
+  // Contract start/end → current month
+  const ym = `${yyyy}-${mm}`;
+  document.getElementById('contract-start').value = ym;
+  document.getElementById('contract-end').value = ym;
+})();
+
+// ─── AUM & Ratios ─────────────────────────────────────────────────────────────
+// AUM data: acctNum → { client, fcm, aum (M), asOf, updatedBy }
+const AUM_DATA = {
+  'MS-5758778': { client: 'Apex Capital Management',  fcm: 'Morgan Stanley', aum: 450, asOf: 'Mar 1, 2026', updatedBy: 'J. Smith' },
+  'JPM-568767': { client: 'Meridian Asset Partners',  fcm: 'JP Morgan',      aum: 360, asOf: 'Mar 1, 2026', updatedBy: 'J. Smith' },
+  'GS-456456':  { client: 'Clearwater Fund Ltd.',     fcm: 'Goldman Sachs',  aum: 600, asOf: 'Mar 1, 2026', updatedBy: 'A. Chen'  },
+  'CIT-88234':  { client: 'Bravo Alpha Capital LLC',  fcm: 'Citadel Securities', aum: 520, asOf: 'Mar 1, 2026', updatedBy: 'R. Gupta' },
+  'BAR-44512':  { client: 'Thornfield Asset Mgmt',    fcm: 'Barclays',       aum: 380, asOf: 'Mar 1, 2026', updatedBy: 'R. Gupta' },
+};
+
+// Leverage factor: per-SMA per-book key = acctNum + '|' + bookKey
+// Initial values chosen so Omnibus-Energy → 30/30/40, Omnibus-Gas → 50/50
+const LEVERAGE_DATA = {
+  'MS-5758778|energy':  0.80,   // 450 × 0.80 = 360 → 30%
+  'JPM-568767|energy':  1.00,   // 360 × 1.00 = 360 → 30%
+  'GS-456456|energy':   0.80,   // 600 × 0.80 = 480 → 40%
+  'MS-5758778|gas':     0.500,  // 450 × 0.500 = 225 → 50%
+  'GS-456456|gas':      0.375,  // 600 × 0.375 = 225 → 50%
+};
+
+const AUM_BOOKS = {
+  energy: { bookName: 'Omnibus-Energy', bodyId: 'aum-body-energy', totalAumId: 'aum-total-aum-energy', totalWtdId: 'aum-total-wtd-energy' },
+  gas:    { bookName: 'Omnibus-Gas',    bodyId: 'aum-body-gas',    totalAumId: 'aum-total-aum-gas',    totalWtdId: 'aum-total-wtd-gas'    },
+  crude:  { bookName: 'Omnibus-Crude',  bodyId: 'aum-body-crude',  totalAumId: 'aum-total-aum-crude',  totalWtdId: 'aum-total-wtd-crude'  },
+};
+
+// Ticker-level leverage data for Omnibus-Energy (ticker leverage mode).
+// Each row = one ticker; each account can have a different multiplier.
+// The 'default' row applies to any ticker not explicitly listed.
+const TICKER_LEV_DATA = {
+  energy: {
+    tickers: [
+      { symbol:'NG',  name:'Natural Gas',   lev:{ 'MS-5758778':1.2, 'JPM-568767':1.0, 'GS-456456':1.5 } },
+      { symbol:'WTI', name:'WTI Crude Oil', lev:{ 'MS-5758778':1.0, 'JPM-568767':1.2, 'GS-456456':1.0 } },
+    ],
+    default: { 'MS-5758778':1.0, 'JPM-568767':1.0, 'GS-456456':1.0 },
+  },
+  gas: {
+    tickers: [
+      { symbol:'HH',  name:'Henry Hub',     lev:{ 'MS-5758778':1.5, 'GS-456456':1.0 } },
+    ],
+    default: { 'MS-5758778':1.0, 'GS-456456':1.0 },
+  },
+  crude: {
+    tickers: [
+      { symbol:'WTI', name:'WTI Crude Oil', lev:{ 'CIT-88234':1.2, 'BAR-44512':1.0, 'MS-5758778':0.8 } },
+    ],
+    default: { 'CIT-88234':1.0, 'BAR-44512':1.0, 'MS-5758778':1.0 },
+  },
+};
+
+// Map book name → TICKER_LEV_DATA key
+const BOOK_LEV_KEY = { 'Omnibus-Energy':'energy', 'Omnibus-Gas':'gas', 'Omnibus-Crude':'crude' };
+
+// Returns { acctNum: splitFraction } for a given book + ticker symbol.
+// Falls back to the "All other tickers" default row if the ticker isn't configured.
+function computeTickerSplit(bookKey, tickerSym) {
+  const cfg  = TICKER_LEV_DATA[bookKey];
+  const book = AUM_BOOKS[bookKey];
+  if (!cfg || !book) return null;
+  const rules = (BOOK_RULES[book.bookName] || []).filter(r => r.status === 'active');
+  const levRow = cfg.tickers.find(t => t.symbol === tickerSym)?.lev ?? cfg.default;
+  const total  = rules.reduce((s, r) => s + (AUM_DATA[r.acctNum]?.aum || 0) * (levRow[r.acctNum] || 1), 0);
+  if (!total) return null;
+  const out = {};
+  rules.forEach(r => { out[r.acctNum] = (AUM_DATA[r.acctNum]?.aum || 0) * (levRow[r.acctNum] || 1) / total; });
+  return out;
+}
+
+function renderAumTables() {
+  renderAumAccounts();
+  renderTickerMatrix('energy');
+  renderTickerMatrix('gas');
+  renderTickerMatrix('crude');
+}
+
+function renderAumAccounts() {
+  const body = document.getElementById('aum-accounts-body');
+  if (!body) return;
+  // Collect unique accounts across all active rules
+  const seen = new Set();
+  const accounts = [];
+  Object.values(BOOK_RULES).forEach(rules =>
+    rules.filter(r => r.status === 'active').forEach(r => {
+      if (!seen.has(r.acctNum)) { seen.add(r.acctNum); accounts.push(r); }
+    })
+  );
+  body.innerHTML = accounts.map(r => {
+    const d = AUM_DATA[r.acctNum] || { client: r.fcm, fcm: r.fcm, aum: 0, asOf: '—', updatedBy: '—' };
+    const esc = s => s.replace(/'/g, "\\'");
+    return '<tr>' +
+      '<td style="font-weight:500;font-size:.78rem">' + d.client + '</td>' +
+      '<td class="mono" style="font-size:.72rem;color:var(--muted)">' + r.acctNum + '</td>' +
+      '<td><div class="fund-chip"><div class="fund-dot" style="background:' + COLORS[r.ci] + '"></div><span>' + d.fcm + '</span></div></td>' +
+      '<td class="r" style="padding:3px 8px">' +
+        '<input type="number" min="0" step="10" value="' + d.aum + '"' +
+        ' style="width:80px;height:22px;font-size:.72rem;text-align:right;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);padding:0 5px"' +
+        ' oninput="AUM_DATA[\'' + esc(r.acctNum) + '\'].aum=parseFloat(this.value)||0;renderAumTables()">' +
+      '</td>' +
+      '<td class="r mono" style="font-size:.7rem;color:var(--faint)">' + d.asOf + '</td>' +
+      '<td class="r mono" style="font-size:.7rem;color:var(--faint)">' + d.updatedBy + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function recalcAum(key) {
+  const cfg = AUM_BOOKS[key];
+  const rules = (BOOK_RULES[cfg.bookName] || []).filter(r => r.status === 'active');
+  const totalWtd = rules.reduce((s, r) => {
+    const lk = r.acctNum + '|' + key;
+    return s + (AUM_DATA[r.acctNum]?.aum || 0) * (LEVERAGE_DATA[lk] || 1);
+  }, 0);
+  const totalAum = rules.reduce((s, r) => s + (AUM_DATA[r.acctNum]?.aum || 0), 0);
+
+  const body = document.getElementById(cfg.bodyId);
+  if (!body) return;
+
+  body.innerHTML = rules.map(r => {
+    const lk  = r.acctNum + '|' + key;
+    const d   = AUM_DATA[r.acctNum] || { client: r.fcm, fcm: r.fcm, aum: 0 };
+    const lev = LEVERAGE_DATA[lk] || 1;
+    const wtd = d.aum * lev;
+    const derived    = totalWtd > 0 ? wtd / totalWtd : 0;
+    const delta      = derived - r.target;
+    const absDelta   = Math.abs(delta);
+    const deltaColor = absDelta < 0.005 ? 'var(--muted)' : absDelta < 0.02 ? 'var(--warning)' : 'var(--danger)';
+    const deltaTxt   = (delta >= 0 ? '+' : '') + (delta * 100).toFixed(1) + '%';
+    const esc = s => s.replace(/'/g, "\\'");
+    return '<tr>' +
+      // Client name + account# + FCM (read-only — edit in the accounts table above)
+      '<td style="font-weight:500;font-size:.78rem">' + d.client + '</td>' +
+      '<td class="mono" style="font-size:.72rem;color:var(--muted)">' + r.acctNum + '</td>' +
+      '<td><div class="fund-chip"><div class="fund-dot" style="background:' + COLORS[r.ci] + '"></div><span>' + d.fcm + '</span></div></td>' +
+      // AUM read-only (edit in the accounts section above)
+      '<td class="r mono" style="font-size:.72rem;color:var(--muted)">' + d.aum.toLocaleString() + '</td>' +
+      // Leverage editable per-account per-book
+      '<td class="r" style="padding:3px 8px">' +
+        '<input type="number" min="0.01" step="0.05" value="' + lev.toFixed(2) + '"' +
+        ' style="width:58px;height:22px;font-size:.72rem;text-align:right;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);padding:0 5px"' +
+        ' title="Leverage for ' + d.client + ' in ' + cfg.bookName + '"' +
+        ' oninput="LEVERAGE_DATA[\'' + esc(lk) + '\']=parseFloat(this.value)||1;recalcAum(\'' + key + '\')">' +
+      '</td>' +
+      '<td class="r mono" style="font-size:.72rem;color:var(--muted)">' + wtd.toFixed(0) + '</td>' +
+      '<td class="r mono" style="font-weight:600;color:var(--text)">' + (derived * 100).toFixed(1) + '%</td>' +
+      '<td class="r mono" style="color:var(--muted)">' + (r.target * 100).toFixed(1) + '%</td>' +
+      '<td class="r mono" style="color:' + deltaColor + ';font-weight:500">' + deltaTxt + '</td>' +
+      '</tr>';
+  }).join('');
+
+  const totalEl    = document.getElementById(cfg.totalAumId);
+  const totalWtdEl = document.getElementById(cfg.totalWtdId);
+  if (totalEl)    totalEl.textContent    = '$' + totalAum.toLocaleString() + 'M';
+  if (totalWtdEl) totalWtdEl.textContent = totalWtd.toFixed(0);
+}
+
+function resetAumDerived(key) {
+  renderTickerMatrix(key);
+}
+
+// ─── Ticker-leverage matrix renderer (generic) ───────────────────────────────
+const _addingTicker = {};  // bookKey → true when the add-row form is visible
+
+function renderTickerMatrix(bookKey) {
+  const cfg   = TICKER_LEV_DATA[bookKey];
+  const book  = AUM_BOOKS[bookKey];
+  if (!cfg || !book) return;
+  const body = document.getElementById(book.bodyId);
+  if (!body) return;
+
+  const rules = (BOOK_RULES[book.bookName] || []).filter(r => r.status === 'active');
+  const accts = rules.map(r => r.acctNum);
+  const bk    = bookKey.replace(/'/g, "\\'");
+
+  function wtdExp(levRow, acct) {
+    return (AUM_DATA[acct]?.aum || 0) * (levRow[acct] || 1);
+  }
+  function splitPct(levRow) {
+    const total = accts.reduce((s, a) => s + wtdExp(levRow, a), 0);
+    return accts.map(a => total > 0 ? wtdExp(levRow, a) / total : 0);
+  }
+  function splitChips(pcts) {
+    return pcts.map((p, i) => {
+      const col = COLORS[rules[i]?.ci ?? i];
+      return '<span style="font-size:.7rem;font-weight:700;color:' + col + '">' + Math.round(p * 100) + '%</span>';
+    }).join('<span style="color:var(--faint);margin:0 3px">·</span>');
+  }
+  function levInput(sym, acct, val, isDefault) {
+    const ci = rules.find(r => r.acctNum === acct)?.ci ?? 0;
+    const col = COLORS[ci];
+    const highlighted = val !== 1;
+    const es = s => s.replace(/'/g, "\\'");
+    return '<td style="text-align:center;border-left:1px solid var(--border);padding:4px 6px">' +
+      '<input type="number" min="0.1" step="0.1" value="' + val + '"' +
+      ' style="width:56px;text-align:center;border:1px solid ' + (highlighted ? col : 'var(--border)') + ';border-radius:4px;padding:3px 4px;font-size:.76rem;font-family:monospace;background:' + (highlighted ? '#f0f7ff' : '#fff') + ';color:' + (highlighted ? col : 'var(--ink)') + ';font-weight:' + (highlighted ? '700' : '400') + '"' +
+      ' oninput="updateTickerLev(\'' + bk + '\',\'' + es(sym) + '\',\'' + es(acct) + '\',this.value,' + isDefault + ')">' +
+      '<span style="font-size:.6rem;color:var(--faint)">×</span>' +
+      '</td>';
+  }
+  function wtdCell(levRow, acct) {
+    const w = wtdExp(levRow, acct);
+    return '<td class="r mono" style="font-size:.71rem;color:var(--muted);padding:4px 8px">$' + w.toFixed(0) + 'M</td>';
+  }
+
+  const tickerRows = cfg.tickers.map(t => {
+    const pcts = splitPct(t.lev);
+    const es = s => s.replace(/'/g, "\\'");
+    return '<tr>' +
+      '<td style="padding:5px 12px">' +
+        '<span style="font-family:monospace;font-size:.75rem;font-weight:700;color:var(--ink)">' + t.symbol + '</span>' +
+        '<span style="font-size:.71rem;color:var(--muted);margin-left:6px">' + t.name + '</span>' +
+        '<button onclick="deleteTicker(\'' + bk + '\',\'' + es(t.symbol) + '\')" style="float:right;border:none;background:none;cursor:pointer;color:var(--danger);opacity:.55;font-size:.9rem;padding:0 4px;line-height:1" title="Remove ticker">×</button>' +
+      '</td>' +
+      accts.map(a => levInput(t.symbol, a, t.lev[a] ?? 1, false) + wtdCell(t.lev, a)).join('') +
+      '<td style="border-left:2px solid var(--border);padding:5px 12px;white-space:nowrap">' + splitChips(pcts) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  // ── Add-ticker inline form row ────────────────────────────────────────────
+  let addRow = '';
+  if (_addingTicker[bookKey]) {
+    const levCells = accts.map(a => {
+      return '<td style="text-align:center;border-left:1px solid var(--border);padding:4px 6px">' +
+        '<input id="atl-' + bk + '-' + a + '" type="number" min="0.1" step="0.1" value="1"' +
+        ' style="width:56px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:3px 4px;font-size:.76rem;font-family:monospace">' +
+        '<span style="font-size:.6rem;color:var(--faint)">×</span>' +
+        '</td>' +
+        '<td style="padding:4px 8px"></td>';
+    }).join('');
+    addRow = '<tr style="background:#fffbeb;border-top:1px dashed var(--warning)">' +
+      '<td style="padding:5px 10px;display:flex;gap:5px;align-items:center">' +
+        '<input id="at-sym-' + bk + '" placeholder="SYM" maxlength="6"' +
+        ' style="width:52px;border:1px solid var(--warning);border-radius:4px;padding:3px 5px;font-size:.74rem;font-family:monospace;font-weight:700;text-transform:uppercase">' +
+        '<input id="at-name-' + bk + '" placeholder="Name"' +
+        ' style="flex:1;border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:.73rem">' +
+      '</td>' +
+      levCells +
+      '<td style="border-left:2px solid var(--border);padding:5px 10px;white-space:nowrap">' +
+        '<button onclick="confirmAddTicker(\'' + bk + '\')" style="border:none;background:var(--success);color:#fff;border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;font-weight:600">Add</button>' +
+        ' <button onclick="cancelAddTicker(\'' + bk + '\')" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:2px 8px;font-size:.68rem;cursor:pointer;color:var(--muted)">Cancel</button>' +
+      '</td>' +
+      '</tr>';
+  }
+
+  const defPcts = splitPct(cfg.default);
+  const defaultRow = '<tr style="background:#f8fafc;border-top:2px solid var(--border)">' +
+    '<td style="padding:5px 12px"><span style="font-size:.72rem;font-style:italic;color:var(--muted)">All other tickers</span>' +
+    '</td>' +
+    accts.map(a => levInput('_default', a, cfg.default[a] ?? 1, true) + wtdCell(cfg.default, a)).join('') +
+    '<td style="border-left:2px solid var(--border);padding:5px 12px;white-space:nowrap">' + splitChips(defPcts) + '</td>' +
+    '</tr>';
+
+  body.innerHTML = tickerRows + addRow + defaultRow;
+}
+
+function updateTickerLev(bookKey, sym, acct, val, isDefault) {
+  const v = parseFloat(val) || 1;
+  const cfg = TICKER_LEV_DATA[bookKey];
+  if (!cfg) return;
+  if (isDefault) {
+    cfg.default[acct] = v;
+  } else {
+    const t = cfg.tickers.find(t => t.symbol === sym);
+    if (t) t.lev[acct] = v;
+  }
+  renderTickerMatrix(bookKey);
+}
+
+function deleteTicker(bookKey, sym) {
+  const cfg = TICKER_LEV_DATA[bookKey];
+  if (!cfg) return;
+  cfg.tickers = cfg.tickers.filter(t => t.symbol !== sym);
+  renderTickerMatrix(bookKey);
+}
+
+function showAddTickerRow(bookKey) {
+  _addingTicker[bookKey] = true;
+  renderTickerMatrix(bookKey);
+  // Focus the symbol input after render
+  const inp = document.getElementById('at-sym-' + bookKey);
+  if (inp) inp.focus();
+}
+
+function cancelAddTicker(bookKey) {
+  _addingTicker[bookKey] = false;
+  renderTickerMatrix(bookKey);
+}
+
+function confirmAddTicker(bookKey) {
+  const sym  = (document.getElementById('at-sym-' + bookKey)?.value || '').trim().toUpperCase();
+  const name = (document.getElementById('at-name-' + bookKey)?.value || '').trim();
+  if (!sym) { alert('Symbol is required'); return; }
+  const cfg = TICKER_LEV_DATA[bookKey];
+  if (!cfg) return;
+  if (cfg.tickers.find(t => t.symbol === sym)) { alert(sym + ' already exists'); return; }
+  const rules = (BOOK_RULES[AUM_BOOKS[bookKey].bookName] || []).filter(r => r.status === 'active');
+  const lev = {};
+  rules.forEach(r => {
+    const inp = document.getElementById('atl-' + bookKey + '-' + r.acctNum);
+    lev[r.acctNum] = inp ? (parseFloat(inp.value) || 1) : 1;
+  });
+  cfg.tickers.push({ symbol: sym, name: name || sym, lev });
+  _addingTicker[bookKey] = false;
+  renderTickerMatrix(bookKey);
+}
+
+function applyAumToMapping(key, bookName) {
+  const rules = (BOOK_RULES[bookName] || []).filter(r => r.status === 'active');
+  // Use the "All other tickers" default row leverage as the baseline ratio
+  const defLev = (TICKER_LEV_DATA[key] || {}).default || {};
+  const totalWtd = rules.reduce((s, r) => {
+    return s + (AUM_DATA[r.acctNum]?.aum || 0) * (defLev[r.acctNum] || 1);
+  }, 0);
+  if (totalWtd === 0) return;
+
+  const lines = rules.map(r => {
+    const wtd = (AUM_DATA[r.acctNum]?.aum || 0) * (defLev[r.acctNum] || 1);
+    return r.fcm + ': ' + (wtd / totalWtd * 100).toFixed(1) + '%';
+  }).join(', ');
+
+  if (!confirm('Apply derived ratios to Mapping Rules for ' + bookName + '?\n\n' + lines + '\n\nThis will update the active target percentages.')) return;
+
+  rules.forEach(r => {
+    const wtd = (AUM_DATA[r.acctNum]?.aum || 0) * (defLev[r.acctNum] || 1);
+    r.target  = parseFloat((wtd / totalWtd).toFixed(4));
+  });
+
+  renderTickerMatrix(key);
+  renderAllBookCards();
+}
+
+renderTradesList();
+showSection('allocations');
+updatePreview();
+</script>
+
+<!-- ════════════════════════════════════════════ EDIT SMA LINE MODAL -->
+<div id="modal-edit-sma" class="modal-overlay" style="display:none" onclick="closeEditSMAModal()">
+  <div class="modal-card" style="width:420px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-weight:600;font-size:.88rem">Edit SMA Line</div>
+      <button class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeEditSMAModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-field" style="grid-column:1/-1">
+        <label class="form-label">SMA / FCM Name</label>
+        <input class="form-input" id="es-fcm" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Account #</label>
+        <input class="form-input" id="es-acct" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Ratio %</label>
+        <input class="form-input" id="es-ratio" type="number" min="0" max="100" step="0.1" />
+      </div>
+      <div class="form-field" style="grid-column:1/-1">
+        <label class="form-label">Effective From</label>
+        <input class="form-input" id="es-from" type="text" placeholder="e.g. Jan 1, 2026" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="saveEditedSMALine()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditSMAModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ NEW BOOK MODAL -->
+<div id="modal-new-book" class="modal-overlay" style="display:none" onclick="closeNewBookModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-weight:600;font-size:.88rem">New Book Mapping</div>
+      <button class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="closeNewBookModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div class="form-field">
+          <label class="form-label">Book Name</label>
+          <input class="form-input" id="nb-name" placeholder="e.g. Omnibus-AgriEnergy" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Reference #</label>
+          <div style="display:flex;align-items:center;gap:0">
+            <span style="padding:0 8px;height:27px;display:flex;align-items:center;background:var(--input-bg);border:1px solid var(--input-border);border-right:none;border-radius:4px 0 0 4px;font-size:.74rem;color:var(--muted)">#</span>
+            <input class="form-input" id="nb-ref" style="border-radius:0 4px 4px 0;border-left:none" placeholder="GH5604" />
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">SMA Account Lines</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 72px 26px;gap:6px;margin-bottom:4px;padding:0 2px">
+        <span style="font-size:.67rem;color:var(--faint)">SMA / FCM Name</span>
+        <span style="font-size:.67rem;color:var(--faint)">Account #</span>
+        <span style="font-size:.67rem;color:var(--faint)">Ratio %</span>
+        <span></span>
+      </div>
+      <div id="nb-lines"></div>
+      <button class="btn btn-outline btn-xs" style="margin-top:6px" onclick="addNBLine()">+ Add SMA Line</button>
+
+      <div class="nb-total-row">
+        <span style="color:var(--muted)">Total ratio:</span>
+        <span id="nb-total" style="font-weight:600">0%</span>
+        <span id="nb-total-badge"></span>
+        <span style="margin-left:auto;font-size:.69rem;color:var(--faint)">Must reach exactly 100% to auto-split</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="createBook()">Create Book</button>
+      <button class="btn btn-outline" onclick="closeNewBookModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── New book modal ────────────────────────────────────────────────────────────
+const BOOKS_META = {
+  'Omnibus-Energy': '#GH5600',
+  'Omnibus-Gas':    '#GH5601',
+  'Omnibus-Crude':  '#GH5603',
+};
+let nextBookRef = 5604;
+
+function openNewBookModal() {
+  document.getElementById('nb-name').value = '';
+  document.getElementById('nb-ref').value = 'GH' + nextBookRef;
+  document.getElementById('nb-lines').innerHTML = '';
+  updateNBTotal();
+  addNBLine();
+  document.getElementById('modal-new-book').style.display = 'flex';
+}
+
+function closeNewBookModal() {
+  document.getElementById('modal-new-book').style.display = 'none';
+}
+
+function addNBLine() {
+  const div = document.createElement('div');
+  div.className = 'nb-line';
+  div.innerHTML = `
+    <input class="form-input" placeholder="e.g. Morgan Stanley" oninput="updateNBTotal()" style="height:27px;font-size:.74rem" />
+    <input class="form-input" placeholder="e.g. MS-5758778" style="height:27px;font-size:.74rem" />
+    <input class="form-input" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateNBTotal()" style="height:27px;font-size:.74rem;text-align:right" />
+    <button class="nb-remove" onclick="removeNBLine(this)" title="Remove">✕</button>`;
+  document.getElementById('nb-lines').appendChild(div);
+  updateNBTotal();
+}
+
+function removeNBLine(btn) {
+  btn.closest('.nb-line').remove();
+  updateNBTotal();
+}
+
+function updateNBTotal() {
+  const inputs = document.querySelectorAll('#nb-lines .nb-line input[type="number"]');
+  let total = 0;
+  inputs.forEach(i => { total += parseFloat(i.value) || 0; });
+  document.getElementById('nb-total').textContent = total.toFixed(1) + '%';
+  const badge = document.getElementById('nb-total-badge');
+  if (total === 100) {
+    badge.innerHTML = '<span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Valid</span>';
+    document.getElementById('nb-total').style.color = 'var(--success)';
+  } else if (total > 100) {
+    badge.innerHTML = '<span class="badge b-red" style="font-size:.6rem"><span class="b-dot"></span>Over 100%</span>';
+    document.getElementById('nb-total').style.color = 'var(--danger)';
+  } else {
+    badge.innerHTML = total > 0 ? '<span class="badge b-amber" style="font-size:.6rem"><span class="b-dot"></span>Incomplete</span>' : '';
+    document.getElementById('nb-total').style.color = total > 0 ? 'var(--warning)' : 'var(--muted)';
+  }
+}
+
+function buildBookCardHTML(name, ref, rules) {
+  // If this book has ticker-leverage data configured, show the NAV-weighted card
+  const bookKey = BOOK_LEV_KEY[name];
+  if (bookKey && TICKER_LEV_DATA[bookKey]) return buildNavWeightedCardHTML(name, ref, rules);
+
+  // ── Fixed-ratio mode (for books without ticker leverage configured) ─────────
+  const activeRules = rules.filter(r => r.status !== 'retired');
+  const total = activeRules.reduce((s, r) => s + r.target, 0);
+  const valid = Math.abs(total - 1) < 0.001;
+  const pct = Math.round(total * 100);
+  const inc = !valid;
+  const borderC = inc ? '#fca5a5' : 'var(--border)';
+  const headerBg = inc ? '#fff5f5' : '#f0f7ff';
+  const headerBorder = inc ? '#fca5a5' : '#bfdbfe';
+  const nameColor = inc ? '#991b1b' : '#1e40af';
+  const refBg = inc ? '#fee2e2' : '#dbeafe';
+  const svgStroke = inc ? '#dc2626' : '#2563eb';
+  const barFg = inc ? '#ef4444' : '#22c55e';
+  const barBg = inc ? '#fee2e2' : '#dbeafe';
+  const totalColor = inc ? '#dc2626' : '#15803d';
+  const ratioLabelColor = inc ? '#dc2626' : '#3b82f6';
+  const subtitle = inc
+    ? '· ratios incomplete — auto-split disabled'
+    : '· fixed ratio';
+  const badge = inc
+    ? `<span class="badge b-red" style="font-size:.6rem"><span class="b-dot"></span>Incomplete</span>`
+    : `<span class="badge b-green" style="font-size:.6rem"><span class="b-dot"></span>Valid</span>`;
+  const addBtnClass = inc ? 'btn-danger' : 'btn-outline';
+  const bookAttr = name.replace(/'/g, "\\'");
+
+  const rows = rules.map(r => {
+    const barW = Math.round(r.target * 100);
+    const pctStr = (r.target * 100).toFixed(1) + '%';
+    if (r.status === 'retired') {
+      const dateRange = r.effectiveTo ? `${r.effectiveFrom} → ${r.effectiveTo}` : r.effectiveFrom;
+      return `<tr style="opacity:.42">
+        <td><div class="fund-chip"><div class="fund-dot" style="background:${COLORS[r.ci]}"></div><span>${r.fcm}</span></div></td>
+        <td style="font-family:monospace;font-size:.72rem;color:var(--muted)">${r.acctNum}</td>
+        <td style="text-align:center"><span class="ratio-pill" style="background:#f1f5f9;color:#94a3b8">${pctStr}</span></td>
+        <td style="color:var(--muted)">${dateRange}</td>
+        <td><span class="badge b-gray"><span class="b-dot"></span>Retired</span></td>
+        <td><button class="btn btn-ghost btn-xs">View</button></td>
+      </tr>`;
+    }
+    const rowBadge = inc
+      ? `<span class="badge b-amber"><span class="b-dot"></span>Incomplete</span>`
+      : `<span class="badge b-green"><span class="b-dot"></span>Active</span>`;
+    return `<tr>
+      <td><div class="fund-chip"><div class="fund-dot" style="background:${COLORS[r.ci]}"></div><span style="font-weight:500">${r.fcm}</span></div></td>
+      <td style="font-family:monospace;font-size:.72rem;color:var(--muted)">${r.acctNum}</td>
+      <td style="text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+          <div style="width:40px;height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden"><div style="width:${barW}%;height:100%;background:${COLORS[r.ci]};border-radius:2px"></div></div>
+          <span class="ratio-pill${inc ? ' warn' : ''}">${pctStr}</span>
+        </div>
+      </td>
+      <td style="color:var(--muted)">${r.effectiveFrom || 'Today'}</td>
+      <td>${rowBadge}</td>
+      <td>
+        <button class="btn btn-ghost btn-xs" onclick="editSMALine('${bookAttr}',this)">Edit</button>
+        <button class="btn btn-ghost btn-xs" onclick="retireSMALine('${bookAttr}',this)">Retire</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const warnRow = inc ? `<tr>
+    <td colspan="6" style="padding:7px 13px;font-size:.71rem;color:var(--danger);background:#fff5f5">
+      ⚠ ${100 - pct}% unassigned — ratios must total 100% to enable auto-split.
+    </td></tr>` : '';
+
+  return `<div data-book="${name}" style="margin:10px 16px 12px;border:1px solid ${borderC};border-radius:6px;overflow:hidden">
+    <div style="background:${headerBg};border-bottom:1px solid ${headerBorder};padding:9px 13px;display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;flex:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${svgStroke}" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        <span style="font-size:.82rem;font-weight:600;color:${nameColor}">${name}</span>
+        <span style="font-family:monospace;font-size:.72rem;background:${refBg};color:${nameColor};padding:1px 6px;border-radius:3px">${ref}</span>
+        <span style="font-size:.68rem;color:#6b7a99">${subtitle}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <div style="font-size:.66rem;color:${ratioLabelColor};white-space:nowrap">Ratio total</div>
+        <div style="width:80px;height:5px;background:${barBg};border-radius:3px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${barFg};border-radius:3px"></div>
+        </div>
+        <span style="font-size:.72rem;font-weight:600;color:${totalColor}">${pct}%</span>
+        ${badge}
+      </div>
+      <div style="display:flex;gap:5px;margin-left:8px">
+        <button class="btn btn-ghost btn-xs">History</button>
+        <button class="btn ${addBtnClass} btn-xs">+ Add SMA Line</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:160px">SMA</th>
+        <th style="width:110px">Account #</th>
+        <th style="width:90px;text-align:center">Fixed Ratio</th>
+        <th style="width:110px">Effective From</th>
+        <th style="width:75px">Status</th>
+        <th>Actions</th>
+      </tr></thead>
+      <tbody>${rows}${warnRow}</tbody>
+    </table>
+  </div>`;
+}
+
+// ─── NAV-weighted book card (Mapping Rules tab — read-only summary) ────────────
+// Configuration lives in AUM & Ratios tab. This card just shows the result.
+function buildNavWeightedCardHTML(name, ref, rules) {
+  const activeRules = rules.filter(r => r.status !== 'retired');
+  const bookAttr = name.replace(/'/g, "\\'");
+  const tlCfg = TICKER_LEV_DATA[BOOK_LEV_KEY[name]] || { tickers:[], default:{} };
+  const accts = activeRules.map(r => r.acctNum);
+
+  function wtdExp(levRow, acct) { return (AUM_DATA[acct]?.aum || 0) * (levRow[acct] || 1); }
+  function splitPct(levRow) {
+    const total = accts.reduce((s, a) => s + wtdExp(levRow, a), 0);
+    return accts.map(a => total > 0 ? wtdExp(levRow, a) / total : 0);
+  }
+  function splitChips(pcts) {
+    return pcts.map((p, i) => {
+      const col = COLORS[activeRules[i]?.ci ?? i];
+      return `<span style="font-size:.7rem;font-weight:700;color:${col}">${Math.round(p*100)}%</span>`;
+    }).join('<span style="color:var(--faint);margin:0 3px">·</span>');
+  }
+
+  const acctHeaders = activeRules.map(r =>
+    `<th style="text-align:right;color:${COLORS[r.ci]};font-size:.68rem;font-weight:600">
+      ${r.fcm.split(' ').pop()}<br>
+      <span style="font-family:monospace;font-size:.6rem;font-weight:400;color:#94a3b8">${r.acctNum}</span>
+    </th>`
+  ).join('');
+
+  const tickerRows = [...tlCfg.tickers, { symbol:'—', name:'All other tickers', lev: tlCfg.default, isDefault:true }].map(t => {
+    const pcts = splitPct(t.lev);
+    const isDefault = !!t.isDefault;
+    const pctCells = pcts.map((p, i) =>
+      `<td class="r" style="font-size:.73rem;font-weight:${p > 0.4 ? '700' : '500'};color:${COLORS[activeRules[i]?.ci ?? i]};opacity:${isDefault ? '.6' : '1'}">${Math.round(p*100)}%</td>`
+    ).join('');
+    return `<tr style="${isDefault ? 'background:#f8fafc;font-style:italic;' : ''}border-top:${isDefault ? '2px solid var(--border)' : 'none'}">
+      <td style="padding:5px 12px">
+        <span style="font-family:monospace;font-size:.74rem;font-weight:${isDefault ? '400' : '700'};color:${isDefault ? 'var(--muted)' : 'var(--ink)'}">${t.symbol}</span>
+        <span style="font-size:.71rem;color:var(--muted);margin-left:5px">${t.name}</span>
+      </td>
+      ${pctCells}
+      <td style="padding:5px 12px;white-space:nowrap">${splitChips(pcts)}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div data-book="${name}" style="margin:10px 16px 12px;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+    <div style="background:#f0f7ff;border-bottom:1px solid #bfdbfe;padding:9px 13px;display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;flex:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        <span style="font-size:.82rem;font-weight:600;color:#1e40af">${name}</span>
+        <span style="font-family:monospace;font-size:.72rem;background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:3px">${ref}</span>
+        <span style="font-size:.68rem;color:#6b7a99">· ticker leverage</span>
+      </div>
+      <span class="badge b-blue" style="font-size:.6rem"><span class="b-dot"></span>Ticker leverage</span>
+      <button class="btn btn-ghost btn-xs" onclick="showTab('aum')" style="margin-left:4px">Configure in AUM &amp; Ratios →</button>
+    </div>
+    <table style="width:100%;font-size:.78rem">
+      <thead><tr style="background:#f8fafc">
+        <th style="width:170px;text-align:left;padding:6px 12px">Ticker</th>
+        ${acctHeaders}
+        <th style="min-width:130px;text-align:left;padding:6px 12px">Effective Split</th>
+      </tr></thead>
+      <tbody>${tickerRows}</tbody>
+    </table>
+  </div>`;
+}
+
+// ─── Render all book cards from BOOK_RULES ────────────────────────────────────
+function renderAllBookCards() {
+  const container = document.getElementById('book-cards-container');
+  container.innerHTML = Object.keys(BOOKS_META).map(name =>
+    buildBookCardHTML(name, BOOKS_META[name], BOOK_RULES[name] || [])
+  ).join('');
+}
+
+function rerenderCard(name) {
+  const existing = document.querySelector(`[data-book="${name}"]`);
+  if (!existing) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = buildBookCardHTML(name, BOOKS_META[name], BOOK_RULES[name] || []);
+  existing.replaceWith(tmp.firstChild);
+}
+
+// ─── Edit SMA line ────────────────────────────────────────────────────────────
+let _editBook = null, _editRuleIdx = null;
+
+function editSMALine(bookName, btn) {
+  const tr = btn.closest('tr');
+  const trs = Array.from(tr.closest('tbody').querySelectorAll('tr'));
+  // Find index among active (non-retired) rows only
+  const activeRows = trs.filter(r => !r.style.opacity);
+  const rowIdx = activeRows.indexOf(tr);
+  const activeRules = BOOK_RULES[bookName].filter(r => r.status !== 'retired');
+  const rule = activeRules[rowIdx];
+  if (!rule) return;
+  _editBook = bookName;
+  _editRuleIdx = BOOK_RULES[bookName].indexOf(rule);
+
+  document.getElementById('es-fcm').value = rule.fcm;
+  document.getElementById('es-acct').value = rule.acctNum;
+  document.getElementById('es-ratio').value = (rule.target * 100).toFixed(1);
+  document.getElementById('es-from').value = rule.effectiveFrom || '';
+  document.getElementById('modal-edit-sma').style.display = 'flex';
+}
+
+function saveEditedSMALine() {
+  const fcm   = document.getElementById('es-fcm').value.trim();
+  const acct  = document.getElementById('es-acct').value.trim();
+  const ratio = parseFloat(document.getElementById('es-ratio').value);
+  const from  = document.getElementById('es-from').value.trim();
+  if (!fcm || !acct || isNaN(ratio) || ratio <= 0) {
+    alert('Please fill in all fields.'); return;
+  }
+  const rule = BOOK_RULES[_editBook][_editRuleIdx];
+  rule.fcm = fcm;
+  rule.acctNum = acct;
+  rule.target = ratio / 100;
+  if (from) rule.effectiveFrom = from;
+  rerenderCard(_editBook);
+  // Keep split preview in sync
+  updatePreview();
+  closeEditSMAModal();
+}
+
+function closeEditSMAModal() {
+  document.getElementById('modal-edit-sma').style.display = 'none';
+  _editBook = null; _editRuleIdx = null;
+}
+
+// ─── Retire SMA line ──────────────────────────────────────────────────────────
+function retireSMALine(bookName, btn) {
+  const tr = btn.closest('tr');
+  const trs = Array.from(tr.closest('tbody').querySelectorAll('tr'));
+  const activeRows = trs.filter(r => !r.style.opacity);
+  const rowIdx = activeRows.indexOf(tr);
+  const activeRules = BOOK_RULES[bookName].filter(r => r.status !== 'retired');
+  const rule = activeRules[rowIdx];
+  if (!rule) return;
+
+  const confirmMsg = `Retire ${rule.fcm} (${rule.acctNum}) from ${bookName}?\n\nThis line will no longer be used for new allocation trades. Existing finalized trades are unaffected.`;
+  if (!confirm(confirmMsg)) return;
+
+  const today = new Date();
+  const retireDate = today.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  rule.status = 'retired';
+  rule.effectiveTo = retireDate;
+  rerenderCard(bookName);
+  updatePreview();
+}
+
+function createBook() {
+  const name = document.getElementById('nb-name').value.trim();
+  const refRaw = document.getElementById('nb-ref').value.trim().replace(/^#?\s*/, '');
+  const ref = '#' + refRaw;
+
+  if (!name) { alert('Book name is required.'); return; }
+  if (BOOKS_META[name]) { alert('A book with that name already exists.'); return; }
+  if (!refRaw) { alert('Reference number is required.'); return; }
+
+  const lines = document.querySelectorAll('#nb-lines .nb-line');
+  if (lines.length === 0) { alert('Add at least one SMA line.'); return; }
+
+  const rules = [];
+  let totalPct = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const inputs = lines[i].querySelectorAll('input');
+    const fcm = inputs[0].value.trim();
+    const acctNum = inputs[1].value.trim();
+    const pct = parseFloat(inputs[2].value) || 0;
+    if (!fcm || !acctNum || pct <= 0) {
+      alert('Please fill in all SMA fields (name, account #, and ratio > 0).'); return;
+    }
+    totalPct += pct;
+    rules.push({ fcm, acctNum, target: pct / 100, ci: i % 4 });
+  }
+
+  // Store in data
+  BOOKS_META[name] = ref;
+  BOOK_RULES[name] = rules;
+  nextBookRef++;
+
+  // Append card to mapping rules
+  const container = document.getElementById('book-cards-container');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = buildBookCardHTML(name, ref, rules);
+  container.appendChild(tmp.firstChild);
+
+  // Update both book dropdowns
+  const opt1 = new Option(`${name} (${ref})`, name);
+  document.getElementById('order-book').appendChild(opt1.cloneNode(true));
+  const opt2 = document.createElement('option');
+  opt2.textContent = `${name} (${ref})`;
+  document.getElementById('mapping-book-filter').appendChild(opt2);
+
+  closeNewBookModal();
+}
+
+// Run after all functions are defined
+renderAllBookCards();
+</script>
+</body>
+</html>

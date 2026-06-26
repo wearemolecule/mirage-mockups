@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoicing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="css/shared.css">
+<link rel="stylesheet" href="css/app-sidebar.css">
+<link rel="stylesheet" href="css/invoicing.css">
+<script defer src="js/app-path.js"></script>
+<script defer src="js/app-header.js"></script>
+<script defer src="js/certificate-inventory-badges.js"></script>
+<script defer src="js/app-sidebar.js"></script>
+</head>
+<body class="invoicing-page app-sidebar-enabled" data-app-header-account="Hulk">
+<div class="app-header-mount"></div>
+
+<main class="main-content">
+  <div class="page-header">
+    <div class="page-header__title-row">
+      <h1 class="page-title">INVOICING</h1>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="card-header">
+      <div class="card-title">Settled Sublegs — Monthly</div>
+      <div class="card-actions action-toolbar">
+        <button type="button" class="action-btn">Refresh</button>
+        <button type="button" class="action-btn">Export</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="inv-content">
+    <div class="filter-panel">
+      <div class="filter-row">
+        <div class="filter-group">
+          <span class="filter-label">Settlement date</span>
+          <input type="text" class="filter-input inv-filter-date-range" value="04/01/2026 - 05/31/2026" aria-label="Settlement date range">
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Agreement</span>
+          <select class="filter-input" aria-label="Agreement">
+            <option>All</option>
+            <option>Hulk-PT-Wind-2024</option>
+            <option>Hulk-Hydro-2023</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Counterparty</span>
+          <select class="filter-input" aria-label="Counterparty">
+            <option>All</option>
+            <option>EDP Renováveis</option>
+            <option>Iberdrola SA</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Invoice status</span>
+          <select class="filter-input" aria-label="Invoice status">
+            <option>All</option>
+          </select>
+        </div>
+        <button type="button" class="action-btn">Search</button>
+      </div>
+    </div>
+
+    <div class="panels-container">
+      <div class="content-bottom">
+        <div class="table-wrapper">
+          <div class="refine-row">
+            <div class="refine-input-group">
+              <span class="refine-icon" style="cursor:pointer" title="Search current results"><i class="fas fa-search" aria-hidden="true"></i></span>
+              <input type="text" class="refine-input" placeholder="Search current results" aria-label="Search current results">
+            </div>
+            <div class="refine-right">
+              <button type="button" class="icon-btn" title="Refresh"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+              <button type="button" class="icon-btn" title="Column options" aria-label="Column options"><i class="fas fa-arrow-down-up-across-line" aria-hidden="true"></i></button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table data-table--row-select trades-grid inv-sublegs-grid">
+              <thead>
+                <tr>
+                  <th class="trades-col-menu" aria-label="Actions"></th>
+                  <th class="inv-col-checkbox">
+                    <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)" aria-label="Select all rows">
+                  </th>
+                  <th>Subleg ID</th>
+                  <th>Trade ID</th>
+                  <th>Agreement</th>
+                  <th>Counterparty</th>
+                  <th>Product</th>
+                  <th>Period</th>
+                  <th>Settlement Date</th>
+                  <th class="inv-col-num">Subleg Qty</th>
+                  <th class="inv-col-status">Invoice Status</th>
+                  <th class="inv-col-num">ILI Amount</th>
+                  <th>ILI Date</th>
+                  <th>ERP Ref</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="pagination-row">
+            <div style="position:relative"></div>
+            <div class="pagination-info">
+              <span class="pagination-count-text">Showing 1–10 of 10 sublegs</span>
+              <div class="pagination-controls">
+                <button type="button" class="page-btn" disabled title="First page"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+                <button type="button" class="page-btn" disabled title="Previous page"><i class="fas fa-angle-left" aria-hidden="true"></i></button>
+                <span class="pagination-page-text">Page 1 of 1</span>
+                <button type="button" class="page-btn" disabled title="Next page"><i class="fas fa-angle-right" aria-hidden="true"></i></button>
+                <button type="button" class="page-btn" disabled title="Last page"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="selection-bar" id="selection-bar">
+  <span class="selection-count"><span id="selection-count">0</span> sublegs selected</span>
+  <div class="selection-actions">
+    <button type="button" class="selection-btn secondary">Mark Ready for Invoicing</button>
+    <button type="button" class="selection-btn secondary">Mark Finalized</button>
+  </div>
+  <button type="button" class="close-selection" onclick="clearSelection()" aria-label="Clear selection"><i class="fas fa-times" aria-hidden="true"></i></button>
+</div>
+
+<script defer src="js/invoicing.js"></script>
+</body>
+</html>

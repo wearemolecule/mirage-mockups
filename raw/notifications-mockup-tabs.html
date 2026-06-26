@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Molecule — Notification Inbox (Tabs)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: #1a1a2e; height: 56px;
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 32px;
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .navbar-brand { font-weight: 700; font-size: 15px; color: #fff; letter-spacing: 1.5px; text-transform: uppercase; }
+    .navbar-links { display: flex; gap: 24px; flex: 1; }
+    .navbar-links a { color: rgba(255,255,255,0.65); font-size: 13px; text-decoration: none; cursor: pointer; }
+    .navbar-links a:hover { color: #fff; }
+    .navbar-right { display: flex; align-items: center; gap: 16px; }
+    .bell-wrapper { position: relative; cursor: pointer; }
+    .bell-btn {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .bell-btn:hover { background: rgba(255,255,255,0.1); }
+    .bell-btn svg { width: 20px; height: 20px; }
+    .badge {
+      position: absolute; top: -2px; right: -2px;
+      background: #e53935; color: #fff;
+      font-size: 10px; font-weight: 700;
+      border-radius: 10px; min-width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; border: 2px solid #1a1a2e;
+    }
+    .avatar {
+      width: 32px; height: 32px; background: #4a6fa5; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      position: fixed; top: 60px; right: 16px;
+      width: 400px; max-height: calc(100vh - 76px);
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.05);
+      display: flex; flex-direction: column;
+      overflow: hidden; z-index: 99;
+      transform: translateY(-6px); opacity: 0; pointer-events: none;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+    .panel.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+    /* ── PANEL HEADER ── */
+    .panel-header { flex-shrink: 0; }
+
+    .panel-title-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 14px 10px;
+    }
+    .panel-title-left { display: flex; align-items: center; gap: 7px; }
+    .back-btn-inline {
+      display: none; align-items: center; gap: 3px;
+      background: none; border: none; color: #4a6fa5; font-size: 13px;
+      font-weight: 500; cursor: pointer; padding: 0; font-family: inherit;
+    }
+    .back-btn-inline:hover { text-decoration: underline; }
+    .back-btn-inline svg { width: 13px; height: 13px; }
+    .panel-title { font-size: 14px; font-weight: 700; color: #111827; }
+    .unread-pill {
+      background: #4a6fa5; color: #fff; font-size: 10px; font-weight: 700;
+      border-radius: 10px; min-width: 19px; height: 19px;
+      display: flex; align-items: center; justify-content: center; padding: 0 5px;
+    }
+    .panel-title-right { display: flex; align-items: center; gap: 2px; }
+
+    /* ── ICON BUTTONS ── */
+    .icon-btn {
+      background: none; border: none; cursor: pointer; color: #9ca3af;
+      width: 30px; height: 30px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s, color 0.12s; position: relative;
+    }
+    .icon-btn:hover { background: #f3f4f6; color: #374151; }
+    .icon-btn svg { width: 16px; height: 16px; }
+
+    /* Active dot on icon buttons */
+    .icon-btn .active-dot {
+      position: absolute; top: 4px; right: 4px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #4a6fa5; border: 1.5px solid #fff;
+      display: none;
+    }
+    .icon-btn .active-dot.show { display: block; }
+
+    /* ── DROPDOWNS (filter & menu) ── */
+    .drop-wrap { position: relative; }
+    .dropdown {
+      position: absolute; top: calc(100% + 4px); right: 0;
+      background: #fff; border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.11);
+      z-index: 500; overflow: hidden; display: none;
+    }
+    .dropdown.open { display: block; }
+
+    /* Filter dropdown */
+    .filter-dropdown { min-width: 190px; padding: 12px 14px 10px; }
+    .filter-group { margin-bottom: 10px; }
+    .filter-group:last-child { margin-bottom: 0; }
+    .filter-group-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #9ca3af; margin-bottom: 5px;
+    }
+    .filter-select {
+      width: 100%; background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 5px; padding: 6px 8px;
+      font-size: 12px; font-weight: 500; color: #374151;
+      cursor: pointer; outline: none; font-family: inherit;
+    }
+    .filter-select:focus { border-color: #4a6fa5; }
+
+    /* Menu dropdown */
+    .menu-dropdown { min-width: 175px; }
+    .menu-item {
+      width: 100%; display: flex; align-items: center; gap: 9px;
+      padding: 9px 14px; border: none; background: none; cursor: pointer;
+      font-size: 13px; color: #374151; text-align: left;
+      font-family: inherit; transition: background 0.1s;
+    }
+    .menu-item:hover { background: #f9fafb; }
+    .menu-item svg { width: 14px; height: 14px; color: #9ca3af; flex-shrink: 0; }
+    .menu-item.danger { color: #e53935; }
+    .menu-item.danger:hover { background: #fef2f2; }
+    .menu-item.danger svg { color: #f87171; }
+    .menu-divider { height: 1px; background: #f3f4f6; }
+
+    /* ── TAB BAR ── */
+    .tab-bar { display: flex; padding: 0 6px; border-bottom: 1px solid #f0f0f0; }
+    .tab-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      padding: 7px 2px 6px; border: none; background: none; cursor: pointer;
+      color: #9ca3af; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s, background 0.12s;
+      border-radius: 6px 6px 0 0; position: relative; font-family: inherit;
+    }
+    .tab-btn:hover { color: #6b7280; background: #fafafa; }
+    .tab-btn.active { color: #4a6fa5; border-bottom-color: #4a6fa5; }
+    .tab-btn.active:hover { background: #f5f8ff; }
+    .tab-icon-wrap { position: relative; display: inline-flex; }
+    .tab-btn svg { width: 17px; height: 17px; }
+    .tab-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase; line-height: 1; white-space: nowrap; }
+    .tab-count {
+      position: absolute; top: -5px; right: -8px;
+      background: #e53935; color: #fff; font-size: 8px; font-weight: 700;
+      border-radius: 6px; min-width: 13px; height: 13px;
+      display: none; align-items: center; justify-content: center;
+      padding: 0 3px; border: 1.5px solid #fff; line-height: 1;
+    }
+    .tab-count.show { display: flex; }
+
+    /* ── NOTIFICATION LIST ── */
+    .panel-body { overflow-y: auto; flex: 1; }
+
+    .section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.7px; color: #9ca3af; padding: 10px 14px 4px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .section-count {
+      background: #f3f4f6; color: #6b7280; border-radius: 8px;
+      font-size: 9px; font-weight: 700; padding: 1px 5px;
+      letter-spacing: 0; text-transform: none;
+    }
+
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 38px 11px 14px;
+      cursor: pointer; position: relative;
+      border-bottom: 1px solid #f7f7f7;
+      transition: background 0.1s;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: #fafafa; }
+    .notif-item.unread { background: #f5f8ff; }
+    .notif-item.unread:hover { background: #eef4ff; }
+
+    .unread-dot {
+      width: 6px; height: 6px; background: #4a6fa5;
+      border-radius: 50%; flex-shrink: 0; margin-top: 8px;
+    }
+    .unread-dot.off { background: transparent; }
+
+    .notif-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .i-trade      { background: #eff4ff; }
+    .i-upload     { background: #fffbeb; }
+    .i-upload-err { background: #fff1f1; }
+    .i-valuation  { background: #f5f0ff; }
+    .i-market     { background: #f0fdf4; }
+    .i-system     { background: #f3f4f6; }
+    .i-release    { background: #e0f7fa; }
+
+    .notif-content { flex: 1; min-width: 0; }
+    .notif-title { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+    .notif-msg {
+      font-size: 12px; color: #6b7280; line-height: 1.4;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .notif-msg.err { color: #e53935; }
+    .notif-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+    .notif-time { font-size: 11px; color: #9ca3af; }
+    .notif-link { font-size: 11px; color: #4a6fa5; font-weight: 500; white-space: nowrap; }
+    .notif-link:hover { text-decoration: underline; }
+
+    .del-btn {
+      position: absolute; top: 50%; right: 9px;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: #d1d5db; font-size: 16px; line-height: 1;
+      padding: 3px 5px; border-radius: 4px;
+      opacity: 0; transition: opacity 0.12s, color 0.12s, background 0.12s;
+    }
+    .notif-item:hover .del-btn { opacity: 1; }
+    .del-btn:hover { background: #fee2e2; color: #e53935; }
+
+    .load-more {
+      text-align: center; padding: 14px;
+      font-size: 12px; color: #4a6fa5; cursor: pointer; font-weight: 500;
+    }
+    .load-more:hover { text-decoration: underline; }
+
+    .empty-state { text-align: center; padding: 50px 24px; color: #9ca3af; }
+    .empty-icon { font-size: 34px; margin-bottom: 10px; }
+    .empty-title { font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
+    .empty-sub { font-size: 12px; }
+
+    /* ── PREFERENCES VIEW ── */
+    .prefs-view { flex: 1; overflow-y: auto; display: none; }
+    .prefs-view.on { display: flex; flex-direction: column; }
+
+    .prefs-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #9ca3af;
+      padding: 16px 16px 8px;
+    }
+
+    .channel-list { padding: 0 16px; }
+    .channel-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .channel-row:last-child { border-bottom: none; }
+    .channel-left { display: flex; align-items: center; gap: 12px; }
+    .channel-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .ch-inapp   { background: #eff4ff; }
+    .ch-email   { background: #f0fdf4; }
+    .ch-push    { background: #fff7ed; }
+    .ch-slack   { background: #f5f0ff; }
+    .channel-info { display: flex; flex-direction: column; gap: 2px; }
+    .channel-name { font-size: 13px; font-weight: 600; color: #111827; }
+    .channel-desc { font-size: 11px; color: #9ca3af; line-height: 1.4; }
+
+    /* Larger toggle for prefs */
+    .tog {
+      position: relative; display: inline-block;
+      width: 38px; height: 21px; cursor: pointer; flex-shrink: 0;
+    }
+    .tog input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .tog-track {
+      position: absolute; inset: 0;
+      background: #d1d5db; border-radius: 11px; transition: background 0.2s;
+    }
+    .tog input:checked + .tog-track { background: #4a6fa5; }
+    .tog input:disabled + .tog-track { background: #4a6fa5; opacity: 0.4; cursor: not-allowed; }
+    .tog-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 17px; height: 17px; background: #fff;
+      border-radius: 50%; transition: left 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .tog input:checked ~ .tog-thumb { left: 19px; }
+
+    .prefs-divider { height: 1px; background: #f3f4f6; margin: 4px 0; }
+
+    .prefs-tiers { padding: 4px 16px 20px; }
+    .tier-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #9ca3af; margin-bottom: 10px;
+    }
+    .tier-row {
+      font-size: 11px; color: #6b7280; margin-bottom: 8px;
+      display: flex; gap: 8px; align-items: flex-start; line-height: 1.4;
+    }
+    .tier-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; }
+    .t1 { background: #fef2f2; color: #e53935; }
+    .t2 { background: #fff7ed; color: #c2410c; }
+    .t3 { background: #f3f4f6; color: #6b7280; }
+
+    /* ── PUSH NOTIFICATIONS ── */
+    .push-area { position: fixed; bottom: 56px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 200; }
+    .push-card {
+      width: 330px; background: #fff; border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+      padding: 13px 14px; display: flex; gap: 11px; align-items: flex-start;
+      animation: slideIn 0.25s ease; border-left: 3px solid #e53935;
+    }
+    .push-card.ok { border-left-color: #16a34a; }
+    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .push-icon { width: 34px; height: 34px; border-radius: 7px; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .push-body { flex: 1; }
+    .push-app { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; margin-bottom: 2px; }
+    .push-title { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 1px; }
+    .push-msg { font-size: 12px; color: #6b7280; line-height: 1.4; }
+    .push-x { background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 17px; flex-shrink: 0; }
+    .push-x:hover { color: #6b7280; }
+
+    /* ── DEMO BAR ── */
+    .demo-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1a1a2e; padding: 10px 20px;
+      display: flex; gap: 8px; align-items: center;
+      z-index: 400; flex-wrap: wrap;
+    }
+    .demo-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.45); font-weight: 700; white-space: nowrap; }
+    .demo-btn {
+      padding: 5px 11px; border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.07); color: #fff;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .demo-btn:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── PAGE ── */
+    .page-content { margin-top: 56px; padding: 32px 24px 80px; }
+    .page-heading { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+    .page-sub { font-size: 13px; color: #6b7280; line-height: 1.7; }
+    .compare-link { display: inline-block; margin-top: 10px; font-size: 12px; color: #4a6fa5; font-weight: 500; text-decoration: underline; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <span class="navbar-brand">Molecule</span>
+  <div class="navbar-links">
+    <a>Trades</a><a>Market Data</a><a>Valuations</a><a>Reports</a><a>Reconciliation</a>
+  </div>
+  <div class="navbar-right">
+    <div class="bell-wrapper" onclick="togglePanel()">
+      <button class="bell-btn" title="Notifications">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+      </button>
+      <span class="badge" id="badge">5</span>
+    </div>
+    <div class="avatar">MS</div>
+  </div>
+</nav>
+
+<!-- ══ NOTIFICATION PANEL ══ -->
+<div class="panel" id="panel">
+  <div class="panel-header">
+
+    <!-- Title row -->
+    <div class="panel-title-row">
+      <div class="panel-title-left">
+        <button class="back-btn-inline" id="back-btn" onclick="setMode('list')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <span class="panel-title" id="panel-title">Notifications</span>
+        <span class="unread-pill" id="unread-pill">5</span>
+      </div>
+      <div class="panel-title-right" id="header-actions">
+
+        <!-- Filter / Sort -->
+        <div class="drop-wrap" id="filter-wrap">
+          <button class="icon-btn" onclick="toggleFilter()" title="Filter &amp; sort">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+            </svg>
+            <span class="active-dot" id="filter-dot"></span>
+          </button>
+          <div class="dropdown filter-dropdown" id="filter-dropdown">
+            <div class="filter-group">
+              <div class="filter-group-label">Show</div>
+              <select class="filter-select" id="show-filter" onchange="renderNotifications(); updateFilterDot()">
+                <option value="all">All</option>
+                <option value="unread">Unread only</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <div class="filter-group-label">Sort</div>
+              <select class="filter-select" id="sort-by" onchange="renderNotifications(); updateFilterDot()">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="unread-first">Unread</option>
+                <option value="read-first">Read</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bulk actions -->
+        <div class="drop-wrap" id="menu-wrap">
+          <button class="icon-btn" onclick="toggleMenu()" title="Actions">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
+            </svg>
+          </button>
+          <div class="dropdown menu-dropdown" id="menu-dropdown">
+            <button class="menu-item" onclick="markAllRead(); closeMenu()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Mark all as read
+            </button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" onclick="deleteRead(); closeMenu()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              Delete read
+            </button>
+            <button class="menu-item danger" onclick="deleteAll(); closeMenu()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              Delete all
+            </button>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <button class="icon-btn" id="prefs-btn" onclick="setMode('prefs')" title="Notification preferences">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar" id="tab-bar">
+      <button class="tab-btn active" data-tab="all" onclick="setTab(this,'all')" title="All notifications">
+        <div class="tab-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="tab-count" id="tc-all"></span>
+        </div>
+        <span class="tab-lbl">All</span>
+      </button>
+      <button class="tab-btn" data-tab="trade" onclick="setTab(this,'trade')" title="Trade Activity">
+        <div class="tab-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+          <span class="tab-count" id="tc-trade"></span>
+        </div>
+        <span class="tab-lbl">Trades</span>
+      </button>
+      <button class="tab-btn" data-tab="market" onclick="setTab(this,'market')" title="Market Data">
+        <div class="tab-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+          <span class="tab-count" id="tc-market"></span>
+        </div>
+        <span class="tab-lbl">Market</span>
+      </button>
+      <button class="tab-btn" data-tab="valuation" onclick="setTab(this,'valuation')" title="Valuations &amp; P&amp;L">
+        <div class="tab-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+          <span class="tab-count" id="tc-valuation"></span>
+        </div>
+        <span class="tab-lbl">P&amp;L</span>
+      </button>
+      <button class="tab-btn" data-tab="others" onclick="setTab(this,'others')" title="Imports &amp; Uploads">
+        <div class="tab-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+          <span class="tab-count" id="tc-others"></span>
+        </div>
+        <span class="tab-lbl">Others</span>
+      </button>
+      <button class="tab-btn" data-tab="system" onclick="setTab(this,'system')" title="Product Updates">
+        <div class="tab-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+          <span class="tab-count" id="tc-system"></span>
+        </div>
+        <span class="tab-lbl">Updates</span>
+      </button>
+    </div>
+
+  </div><!-- /panel-header -->
+
+  <!-- LIST -->
+  <div class="panel-body" id="panel-body"></div>
+
+  <!-- PREFERENCES -->
+  <div class="prefs-view" id="prefs-view">
+    <div class="prefs-section-title">Notification Channels</div>
+    <div class="channel-list">
+      <div class="channel-row">
+        <div class="channel-left">
+          <div class="channel-icon ch-inapp">🔔</div>
+          <div class="channel-info">
+            <div class="channel-name">In-App</div>
+            <div class="channel-desc">Always on. Shown in the notification inbox.</div>
+          </div>
+        </div>
+        <label class="tog"><input type="checkbox" checked disabled><div class="tog-track"></div><div class="tog-thumb"></div></label>
+      </div>
+      <div class="channel-row">
+        <div class="channel-left">
+          <div class="channel-icon ch-email">✉️</div>
+          <div class="channel-info">
+            <div class="channel-name">Email</div>
+            <div class="channel-desc">Important alerts sent to your inbox.</div>
+          </div>
+        </div>
+        <label class="tog"><input type="checkbox" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+      </div>
+      <div class="channel-row">
+        <div class="channel-left">
+          <div class="channel-icon ch-push">📲</div>
+          <div class="channel-info">
+            <div class="channel-name">Push</div>
+            <div class="channel-desc">Browser or mobile push notifications.</div>
+          </div>
+        </div>
+        <label class="tog"><input type="checkbox"><div class="tog-track"></div><div class="tog-thumb"></div></label>
+      </div>
+      <div class="channel-row">
+        <div class="channel-left">
+          <div class="channel-icon ch-slack">💬</div>
+          <div class="channel-info">
+            <div class="channel-name">Slack</div>
+            <div class="channel-desc">Alerts in your connected Slack workspace.</div>
+          </div>
+        </div>
+        <label class="tog"><input type="checkbox"><div class="tog-track"></div><div class="tog-thumb"></div></label>
+      </div>
+    </div>
+
+    <div class="prefs-divider" style="margin-top:8px"></div>
+    <div class="prefs-tiers" style="margin-top:4px">
+      <div class="tier-title">Push Notification Tiers</div>
+      <div class="tier-row"><span class="tier-badge t1">Tier 1 — Always</span>Upload failures, busted trades, critical valuation errors</div>
+      <div class="tier-row"><span class="tier-badge t2">Tier 2 — Opt-in</span>Trade confirmations, lock changes, date corrections</div>
+      <div class="tier-row"><span class="tier-badge t3">Tier 3 — In-App Only</span>Curve uploads, reconciliation files, bulk operations</div>
+    </div>
+  </div>
+
+</div><!-- /panel -->
+
+<div class="push-area" id="push-area"></div>
+
+<div class="page-content">
+  <div class="page-heading">Trades</div>
+  <div class="page-sub">
+    Click the bell to open the notification inbox.<br>
+    Tabs: <strong>All · Trades · Market · P&L · Others · Updates</strong><br>
+    Use the <strong>sliders icon</strong> to filter and sort. Use <strong>☰</strong> for bulk actions. Use <strong>⚙</strong> for preferences.
+  </div>
+  <span class="compare-link" onclick="window.open('notifications-mockup.html')">→ Compare with dropdown version</span>
+</div>
+
+<div class="demo-bar">
+  <span class="demo-label">Demo →</span>
+  <button class="demo-btn" onclick="triggerPush('err','Trade Upload Failed','curves_nymex.xlsx — 3 rows could not be processed')">Push: Upload Error</button>
+  <button class="demo-btn" onclick="triggerPush('err','CME Busted Trade','TRD-4821 was busted by the exchange')">Push: Busted Trade</button>
+  <button class="demo-btn" onclick="triggerPush('ok','Trade Confirmed','TRD-4819 confirmed by operations.')">Push: Confirmed</button>
+  <button class="demo-btn" onclick="triggerPush('err','Valuation Error','TRD-4802 could not be valued.')">Push: Val Error</button>
+  <button class="demo-btn" onclick="addDemo()">+ Add Notification</button>
+</div>
+
+<script>
+  /* ── DATA ── */
+  const H = 3600000, D = 86400000, N = Date.now();
+
+  let notifications = [
+    { id:1,  cat:'trade',     time:N-2*60*1000,  read:false, icon:'🔄', cls:'i-trade',       title:'Trade Workflow Updated',      msg:'TRD-4821 moved to Confirmed status',                    link:'View Trade →' },
+    { id:2,  cat:'trade',     time:N-15*60*1000, read:false, icon:'✅', cls:'i-trade',       title:'Trade Confirmed',             msg:'TRD-4819 confirmed by operations',                      link:'View Trade →' },
+    { id:3,  cat:'trade',     time:N-H,          read:false, icon:'🔒', cls:'i-trade',       title:'Bulk Lock Updated',           msg:'42 trades locked until 1 Mar 2026',                     link:'' },
+    { id:4,  cat:'trade',     time:N-3*H,        read:true,  icon:'↔️', cls:'i-trade',       title:'Interbook Trade Transfer',    msg:'TRD-4801 moved from Alpha to Beta book',                link:'View Trade →' },
+    { id:5,  cat:'upload',    time:N-3.5*H,      read:false, icon:'📁', cls:'i-upload-err',  title:'Trade Upload Failed',         msg:'curves_nymex.xlsx — 3 rows could not be processed',     link:'View errors →', err:true },
+    { id:6,  cat:'upload',    time:N-4*H,        read:true,  icon:'📁', cls:'i-upload',      title:'Trade Upload Complete',       msg:'trades_feb24.csv — 120 rows processed',                 link:'' },
+    { id:7,  cat:'valuation', time:N-5*H,        read:false, icon:'⚠️', cls:'i-valuation',   title:'Valuation Error',             msg:'TRD-4802 could not be valued — missing curve data',      link:'View Trade →', err:true },
+    { id:8,  cat:'upload',    time:N-D-2*H,      read:true,  icon:'📊', cls:'i-upload',      title:'Curve Upload Complete',       msg:'nymex_curves_feb24.xlsx — 840 rows',                    link:'' },
+    { id:9,  cat:'upload',    time:N-D-4*H,      read:true,  icon:'📋', cls:'i-upload',      title:'Reconciliation File Upload',  msg:'recon_feb23.csv — 2 discrepancies found',               link:'View →' },
+    { id:10, cat:'market',    time:N-D-2.5*H,    read:false, icon:'📈', cls:'i-market',      title:'CME Busted Trade',            msg:'TRD-4790 was busted by the exchange',                   link:'View Trade →' },
+    { id:11, cat:'market',    time:N-2*D,        read:true,  icon:'📅', cls:'i-market',      title:'Trade Date Corrected',        msg:'TRD-4775 date updated from Sat to Mon by ICE',          link:'View Trade →' },
+    { id:12, cat:'system',    time:N-3*D,        read:true,  icon:'🆕', cls:'i-release',     title:"What's new — Molecule v3.12", msg:'Market Data v3, notification inbox, AS Gen improvements', link:'Read →' },
+  ];
+
+  let nextId = 13, panelOpen = false, activeTab = 'all', currentMode = 'list';
+  let menuOpen = false, filterOpen = false;
+
+  const TAB_CAT = { trade:'trade', market:'market', valuation:'valuation', others:'upload', system:'system' };
+  const demoPool = [
+    { cat:'trade',     icon:'⚠️', cls:'i-trade',     title:'Trade Rejected',        msg:'TRD-4830 rejected by counterparty',     link:'View Trade →', err:true },
+    { cat:'market',    icon:'📈', cls:'i-market',     title:'ICE Trade Sweep',       msg:'TRD-4825 swept by ICE exchange',         link:'View Trade →' },
+    { cat:'valuation', icon:'📊', cls:'i-valuation',  title:'P&L Report Ready',      msg:'Daily P&L generated for 24 Feb',         link:'View Report →' },
+    { cat:'upload',    icon:'📋', cls:'i-upload',     title:'Recon Upload Complete', msg:'recon_latest.csv — 0 discrepancies',     link:'' },
+    { cat:'trade',     icon:'🔓', cls:'i-trade',      title:'Trades Unlocked',       msg:'18 trades unlocked for editing',         link:'' },
+  ];
+  let demoIdx = 0;
+
+  /* ── HELPERS ── */
+  function fmtTime(ts) {
+    const diff = Date.now()-ts, m = Math.floor(diff/60000), h = Math.floor(diff/H);
+    if (m<1)  return 'Just now';
+    if (m<60) return `${m}m ago`;
+    if (h<24) return `${h}h ago`;
+    const d=new Date(ts), t=new Date(), y=new Date(Date.now()-D);
+    if (d.toDateString()===t.toDateString()) return 'Today '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    if (d.toDateString()===y.toDateString()) return 'Yesterday '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+
+  function makeSortFn(s) {
+    return (a,b) => {
+      if (s==='newest')       return b.time-a.time;
+      if (s==='oldest')       return a.time-b.time;
+      if (s==='unread-first') return a.read!==b.read?(a.read?1:-1):b.time-a.time;
+      if (s==='read-first')   return a.read!==b.read?(a.read?-1:1):b.time-a.time;
+      return b.time-a.time;
+    };
+  }
+
+  function notifHTML(n) {
+    const uc=n.read?'off':'', rc=n.read?'':'unread', mc=n.err?'err':'';
+    const lk=n.link?`<span class="notif-link">${n.link}</span>`:`<span></span>`;
+    return `
+      <div class="notif-item ${rc}" data-id="${n.id}" onclick="markRead(${n.id},this)">
+        <div class="unread-dot ${uc}"></div>
+        <div class="notif-icon ${n.cls}">${n.icon}</div>
+        <div class="notif-content">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-msg ${mc}">${n.msg}</div>
+          <div class="notif-footer">
+            <span class="notif-time">${fmtTime(n.time)}</span>
+            ${lk}
+          </div>
+        </div>
+        <button class="del-btn" onclick="deleteOne(event,${n.id})" title="Delete">×</button>
+      </div>`;
+  }
+
+  /* ── RENDER ── */
+  function renderNotifications() {
+    const show = document.getElementById('show-filter').value;
+    const sort = document.getElementById('sort-by').value;
+    const sf   = makeSortFn(sort);
+    let items;
+
+    if (activeTab === 'all') {
+      items = show==='unread' ? notifications.filter(n=>!n.read) : [...notifications];
+    } else {
+      const cat = TAB_CAT[activeTab];
+      items = notifications.filter(n=>n.cat===cat);
+      if (show==='unread') items = items.filter(n=>!n.read);
+    }
+
+    items.sort(sf);
+    let html = items.map(notifHTML).join('');
+
+    if (!html) {
+      const names = {trade:'Trades',market:'Market Data',valuation:'Valuations',others:'Uploads',system:'Product Updates'};
+      const scope = activeTab==='all' ? '' : ` in ${names[activeTab]||''}`;
+      html = `<div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <div class="empty-title">No notifications${scope}</div>
+        <div class="empty-sub">${show==='unread'?"You're all caught up!":'Nothing here yet.'}</div>
+      </div>`;
+    } else {
+      html += `<div class="load-more" onclick="alert('Load older notifications')">Load older notifications</div>`;
+    }
+
+    document.getElementById('panel-body').innerHTML = html;
+    updateBadge(); updateTabCounts();
+  }
+
+  function updateBadge() {
+    const c = notifications.filter(n=>!n.read).length;
+    document.getElementById('badge').textContent = c;
+    document.getElementById('badge').style.display = c ? 'flex' : 'none';
+    document.getElementById('unread-pill').textContent = c;
+    document.getElementById('unread-pill').style.display = c ? 'flex' : 'none';
+  }
+
+  function updateTabCounts() {
+    setTC('tc-all', notifications.filter(n=>!n.read).length);
+    const m = {'tc-trade':'trade','tc-market':'market','tc-valuation':'valuation','tc-others':'upload','tc-system':'system'};
+    for (const [id,cat] of Object.entries(m)) setTC(id, notifications.filter(n=>n.cat===cat&&!n.read).length);
+  }
+
+  function setTC(id, c) {
+    const el = document.getElementById(id); if (!el) return;
+    el.textContent = c>9?'9+':c; el.classList.toggle('show', c>0);
+  }
+
+  function updateFilterDot() {
+    const show = document.getElementById('show-filter').value;
+    const sort = document.getElementById('sort-by').value;
+    const active = show!=='all' || sort!=='newest';
+    document.getElementById('filter-dot').classList.toggle('show', active);
+  }
+
+  /* ── TABS ── */
+  function setTab(el, tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+    renderNotifications();
+  }
+
+  /* ── PANEL ── */
+  function togglePanel() {
+    panelOpen = !panelOpen;
+    document.getElementById('panel').classList.toggle('open', panelOpen);
+    if (panelOpen) renderNotifications();
+  }
+
+  document.addEventListener('click', function(e) {
+    const panel = document.getElementById('panel');
+    const bell  = document.querySelector('.bell-wrapper');
+    const demo  = document.querySelector('.demo-bar');
+    if (panelOpen && !panel.contains(e.target) && !bell.contains(e.target) && !demo.contains(e.target)) {
+      panelOpen = false; panel.classList.remove('open');
+    }
+    if (filterOpen && !document.getElementById('filter-wrap').contains(e.target)) closeFilter();
+    if (menuOpen   && !document.getElementById('menu-wrap').contains(e.target))   closeMenu();
+  });
+
+  /* ── FILTER DROPDOWN ── */
+  function toggleFilter() { filterOpen=!filterOpen; document.getElementById('filter-dropdown').classList.toggle('open',filterOpen); if(filterOpen) closeMenu(); }
+  function closeFilter()  { filterOpen=false; document.getElementById('filter-dropdown').classList.remove('open'); }
+
+  /* ── MENU DROPDOWN ── */
+  function toggleMenu() { menuOpen=!menuOpen; document.getElementById('menu-dropdown').classList.toggle('open',menuOpen); if(menuOpen) closeFilter(); }
+  function closeMenu()  { menuOpen=false; document.getElementById('menu-dropdown').classList.remove('open'); }
+
+  /* ── MODE ── */
+  function setMode(m) {
+    currentMode = m;
+    const pv   = document.getElementById('prefs-view');
+    const pb   = document.getElementById('panel-body');
+    const tb   = document.getElementById('tab-bar');
+    const ha   = document.getElementById('header-actions');
+    const bk   = document.getElementById('back-btn');
+    const ttl  = document.getElementById('panel-title');
+    const pll  = document.getElementById('unread-pill');
+
+    if (m==='prefs') {
+      pv.classList.add('on');
+      pb.style.display = tb.style.display = ha.style.display = 'none';
+      bk.style.display = 'flex';
+      ttl.textContent  = 'Preferences';
+      pll.style.display = 'none';
+    } else {
+      pv.classList.remove('on');
+      pb.style.display = tb.style.display = ha.style.display = '';
+      bk.style.display = 'none';
+      ttl.textContent  = 'Notifications';
+      renderNotifications();
+    }
+  }
+
+  /* ── ACTIONS ── */
+  function markRead(id, el) {
+    const n = notifications.find(x=>x.id===id); if (n) n.read=true;
+    if (el) { el.classList.remove('unread'); const d=el.querySelector('.unread-dot'); if(d) d.classList.add('off'); }
+    updateBadge(); updateTabCounts();
+  }
+  function markAllRead()   { notifications.forEach(n=>n.read=true); renderNotifications(); }
+  function deleteOne(e,id) { e.stopPropagation(); notifications=notifications.filter(n=>n.id!==id); renderNotifications(); }
+  function deleteRead()    { notifications=notifications.filter(n=>!n.read); renderNotifications(); }
+  function deleteAll()     { if(!confirm('Delete all notifications?')) return; notifications=[]; renderNotifications(); }
+
+  /* ── PUSH ── */
+  function triggerPush(type,title,message) {
+    const area=document.getElementById('push-area');
+    const card=document.createElement('div');
+    card.className='push-card'+(type==='ok'?' ok':'');
+    card.innerHTML=`<div class="push-icon">⚡</div>
+      <div class="push-body"><div class="push-app">Molecule</div><div class="push-title">${title}</div><div class="push-msg">${message}</div></div>
+      <button class="push-x" onclick="this.closest('.push-card').remove()">×</button>`;
+    area.prepend(card);
+    setTimeout(()=>{
+      card.style.transition='opacity 0.35s,transform 0.35s';
+      card.style.opacity='0'; card.style.transform='translateX(40px)';
+      setTimeout(()=>card.remove(),370);
+    },5000);
+  }
+
+  /* ── DEMO ── */
+  function addDemo() {
+    const t=demoPool[demoIdx++%demoPool.length];
+    notifications.unshift({...t,id:nextId++,time:Date.now(),read:false});
+    if(panelOpen) renderNotifications();
+    updateBadge(); updateTabCounts();
+  }
+
+  /* ── INIT ── */
+  updateBadge(); updateTabCounts();
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory — Allocation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/app-sidebar.css">
+<link rel="stylesheet" href="../css/certificate-inventory.css">
+<script defer src="../js/app-path.js"></script>
+<script defer src="../js/app-header.js"></script>
+<script defer src="../js/certificate-inventory-badges.js"></script>
+<script defer src="../js/app-sidebar.js"></script>
+</head>
+<body class="ci-matching-page app-sidebar-enabled" data-app-header-account="Verde Energy">
+<div class="app-header-mount"></div>
+
+<main class="main-content">
+  <div class="page-header">
+    <div class="page-header__title-row">
+      <h1 class="page-title page-nav-context page-nav-context--prefixed">
+        <span class="page-nav-context__prefix">Inventory</span>
+        <span class="page-nav-context__sep" aria-hidden="true"></span>
+        <span class="page-nav-context__leaf">Allocation</span>
+      </h1>
+    </div>
+  </div>
+  <div id="ci-matching-content">
+    <div class="ci-matching-split">
+      <div class="ci-matching-split-left">
+        <div class="content-card ci-matching-queue-card">
+          <div class="card-header">
+            <div class="card-title ci-matching-queue-card-title">
+              Certificate Queue
+              <span class="app-count-badge" id="ci-matching-queue-count" hidden aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="ci-matching-queue-body">
+            <div class="ci-matching-queue-filters">
+              <div class="filter-group">
+                <span class="filter-label">Source</span>
+                <select class="filter-input" id="ci-matching-queue-filter-source" aria-label="Source">
+                  <option>All</option>
+                  <option>Innovo Sync</option>
+                  <option>Auto-match</option>
+                  <option>Manual Upload</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-label">Registry</span>
+                <select class="filter-input" id="ci-matching-queue-filter-registry" aria-label="Registry">
+                  <option>All</option>
+                  <option>M-RETS</option>
+                  <option>WREGIS</option>
+                  <option>ERCOT</option>
+                  <option>NAR</option>
+                </select>
+              </div>
+              <div class="ci-matching-queue-filters-actions">
+                <button type="button" class="load-data-btn-secondary" id="ci-matching-queue-clear-filters-btn" onclick="ciMatchingClearFilters()">Clear</button>
+                <button type="button" class="load-data-btn" onclick="ciMatchingApplyFilters()">Apply</button>
+              </div>
+            </div>
+            <div class="ci-matching-queue-list" id="ci-matching-queue-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-resize-handle ci-matching-resize-handle" id="ci-matching-resize-handle" role="separator" aria-orientation="vertical" aria-label="Resize allocation panels" tabindex="0">
+        <i class="fas fa-grip-lines-vertical" aria-hidden="true"></i>
+      </div>
+
+      <div class="ci-matching-split-right">
+        <div id="ci-matching-detail" class="content-card ci-matching-batch-panel"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script defer src="../js/certificate-inventory-shared.js"></script>
+<script defer src="../js/certificate-inventory-match-catalog.js"></script>
+<script defer src="../js/certificate-inventory-matching.js"></script>
+<script defer src="../js/certificate-inventory-split.js"></script>
+</body>
+</html>
