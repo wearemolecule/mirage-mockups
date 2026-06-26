@@ -6,9 +6,37 @@
 <title>Mirage Mockups</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/shared.css">
 <style>
+body.mockup-home-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--color-gray-100);
+}
+.mockup-home-brand {
+  flex-shrink: 0;
+  background: #1e1e22;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mockup-home-brand__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1em 1.5em;
+}
+.mockup-home-brand__inner img {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+.mockup-home-page__body {
+  flex: 1 0 auto;
+  width: 100%;
+  background: var(--color-bg-primary);
+}
 .mockup-home {
   max-width: 720px;
   margin: 0 auto;
@@ -23,6 +51,8 @@
   margin-bottom: 0.35em;
 }
 .mockup-home__note {
+  font-size: 16px;
+  font-weight: 300;
   color: var(--color-text-secondary);
   line-height: 1.5;
 }
@@ -43,6 +73,7 @@
 }
 .mockup-home__links a {
   color: var(--color-text-primary);
+  font-weight: 300;
   text-decoration: none;
   padding: 0.35em 0;
   display: inline-block;
@@ -51,9 +82,56 @@
   color: var(--color-red);
   text-decoration: underline;
 }
+/* Footer signoff — matches molecule.io _includes/layout/footer.html + _footer.scss */
+.mockup-home-footer {
+  flex-shrink: 0;
+  width: 100%;
+  margin: 0;
+  background: var(--color-gray-100);
+}
+.mockup-home-footer__signoff {
+  position: relative;
+  min-height: 95px;
+  padding-bottom: 1.25em;
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-700);
+  text-align: center;
+  border-top: 1px solid var(--color-border-medium);
+}
+.mockup-home-footer__logo {
+  position: absolute;
+  top: -23px;
+  left: 0;
+  right: 0;
+  width: 45px;
+  height: 45px;
+  margin-left: auto;
+  margin-right: auto;
+  background: url('images/logo-footer.svg') left center / contain no-repeat;
+}
+.mockup-home-footer__tagline {
+  margin: 0 0 5px;
+  padding-top: 35px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.mockup-home-footer__copyright {
+  margin: 0;
+  font-size: 0.8em;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+}
 </style>
 </head>
-<body>
+<body class="mockup-home-page">
+<div class="mockup-home-brand">
+  <div class="mockup-home-brand__inner">
+    <img src="images/logo-molecule.svg" alt="Molecule" width="200" height="57">
+  </div>
+</div>
+<div class="mockup-home-page__body">
 <div class="mockup-home">
   <header class="mockup-home__header">
     <h1 class="mockup-home__title">Mirage Mockups</h1>
@@ -105,5 +183,18 @@
     </ul>
   </section>
 </div>
+</div>
+<footer class="mockup-home-footer">
+  <div class="mockup-home-footer__signoff">
+    <div class="mockup-home-footer__logo" aria-hidden="true"></div>
+    <p class="mockup-home-footer__tagline">What We Value Runs The World</p>
+    <p class="mockup-home-footer__copyright">&copy; <span class="year"></span> Molecule Software, Inc. All Rights Reserved.</p>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.year').forEach(function (el) {
+  el.textContent = new Date().getFullYear();
+});
+</script>
 </body>
 </html>
