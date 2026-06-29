@@ -1,35 +1,28 @@
 #!/usr/bin/env python3
-"""Refresh static Updated timestamps in index.html from git history (run before push)."""
+"""Refresh static Updated timestamps in index.html from local file save times (run before push)."""
 import re
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX = ROOT / "index.html"
 
 
-from typing import Optional
+def file_last_saved(path: str) -> Optional[datetime]:
+    file_path = ROOT / path
+    if not file_path.is_file():
+        return None
+    return datetime.fromtimestamp(file_path.stat().st_mtime)
 
 
-def git_last_commit_iso(path: str) -> Optional[str]:
-    result = subprocess.run(
-        ["git", "log", "-1", "--format=%cI", "--", path],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    iso = result.stdout.strip()
-    return iso or None
-
-
-def format_display(iso: str) -> str:
-    dt = datetime.fromisoformat(iso)
+def format_saved(dt: datetime) -> Tuple[str, str]:
+    iso = dt.isoformat(timespec="seconds")
     hour = dt.hour % 12 or 12
     am_pm = "AM" if dt.hour < 12 else "PM"
-    return f"{dt.strftime('%b')} {dt.day}, {dt.year}, {hour}:{dt.minute:02d} {am_pm}"
+    display = f"{dt.strftime('%b')} {dt.day}, {dt.year}, {hour}:{dt.minute:02d} {am_pm}"
+    return iso, display
 
 
 def main() -> int:
@@ -44,10 +37,10 @@ def main() -> int:
         nonlocal updated
         link = match.group(1)
         href = match.group(2)
-        iso = git_last_commit_iso(href)
-        if not iso:
+        saved = file_last_saved(href)
+        if not saved:
             return match.group(0)
-        display = format_display(iso)
+        iso, display = format_saved(saved)
         updated += 1
         return (
             f"{link}"
@@ -56,7 +49,7 @@ def main() -> int:
 
     pattern = re.compile(
         r'(<a href="([^"]+\.html)">[^<]+</a>\s*)'
-        r'<time class="mockup-home__updated" datetime="[^"]*">[^<]*</time>'
+        r'<time class="mockup-home__updated"(?: datetime="[^"]*")?>[^<]*</time>'
     )
     new_text, count = pattern.subn(replace_row, text)
     if count == 0:
