@@ -40,23 +40,25 @@ def main() -> int:
     text = INDEX.read_text(encoding="utf-8")
     updated = 0
 
-    def replace_time(match):
+    def replace_row(match):
         nonlocal updated
-        href = match.group(1)
+        link = match.group(1)
+        href = match.group(2)
         iso = git_last_commit_iso(href)
         if not iso:
             return match.group(0)
         display = format_display(iso)
         updated += 1
         return (
+            f"{link}"
             f'<time class="mockup-home__updated" datetime="{iso}">{display}</time>'
         )
 
     pattern = re.compile(
-        r'<a href="([^"]+\.html)">[^<]+</a>\s*'
+        r'(<a href="([^"]+\.html)">[^<]+</a>\s*)'
         r'<time class="mockup-home__updated" datetime="[^"]*">[^<]*</time>'
     )
-    new_text, count = pattern.subn(replace_time, text)
+    new_text, count = pattern.subn(replace_row, text)
     if count == 0:
         print("error: no mockup-home__updated entries found in index.html", file=sys.stderr)
         return 1
