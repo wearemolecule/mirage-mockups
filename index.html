@@ -62,24 +62,58 @@ body.mockup-home-page {
 .mockup-home__section {
   margin-bottom: 1.75em;
 }
-.mockup-home__section-title {
-  font-size: 16px;
-  font-weight: 500;
+.mockup-home__section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25em;
   margin-bottom: 0.65em;
   padding-bottom: 0.35em;
   border-bottom: 1px solid var(--color-border-medium);
 }
+.mockup-home__section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+.mockup-home__section-updated-label {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .mockup-home__links {
   list-style: none;
   display: grid;
-  gap: 0.45em;
+  gap: 0.5em;
+}
+.mockup-home__link-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px dotted var(--color-border-medium);
+}
+.mockup-home__link-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 .mockup-home__links a {
   color: var(--color-text-primary);
   font-weight: 300;
   text-decoration: none;
-  padding: 0.35em 0;
-  display: inline-block;
+  padding: 0.2em 0 0;
+  min-width: 0;
+}
+.mockup-home__updated {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 0.2em 0 0;
 }
 .mockup-home__links a:hover {
   color: var(--color-red);
@@ -142,47 +176,92 @@ body.mockup-home-page {
   </header>
 
   <section class="mockup-home__section">
-    <h2 class="mockup-home__section-title">Fund Allocations</h2>
+    <div class="mockup-home__section-head">
+      <h2 class="mockup-home__section-title">Fund Allocations</h2>
+      <span class="mockup-home__section-updated-label">Updated</span>
+    </div>
     <ul class="mockup-home__links">
-      <li><a href="fund-allocations/fund-allocations.html">Fund Allocations</a></li>
-      <li><a href="fund-allocations/settings.html">Settings</a></li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
     </ul>
   </section>
 
   <section class="mockup-home__section">
-    <h2 class="mockup-home__section-title">Trades</h2>
+    <div class="mockup-home__section-head">
+      <h2 class="mockup-home__section-title">Trades</h2>
+      <span class="mockup-home__section-updated-label">Updated</span>
+    </div>
     <ul class="mockup-home__links">
-      <li><a href="trades/trades.html">Trades</a></li>
-      <li><a href="trades/trade-edit.html">Trade Edit</a></li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
     </ul>
   </section>
 
   <section class="mockup-home__section">
-    <h2 class="mockup-home__section-title">Certificate Inventory</h2>
+    <div class="mockup-home__section-head">
+      <h2 class="mockup-home__section-title">Certificate Inventory</h2>
+      <span class="mockup-home__section-updated-label">Updated</span>
+    </div>
     <ul class="mockup-home__links">
-      <li><a href="certificate-inventory/portfolio.html">Portfolio</a></li>
-      <li><a href="certificate-inventory/matching.html">Matching</a></li>
-      <li><a href="certificate-inventory/registry-activity.html">Registry Activity</a></li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
     </ul>
   </section>
 
   <section class="mockup-home__section">
-    <h2 class="mockup-home__section-title">Actualization</h2>
+    <div class="mockup-home__section-head">
+      <h2 class="mockup-home__section-title">Actualization</h2>
+      <span class="mockup-home__section-updated-label">Updated</span>
+    </div>
     <ul class="mockup-home__links">
-      <li><a href="actualization/allocations.html">Allocations</a></li>
-      <li><a href="actualization/allocations-detail.html">Allocations Detail</a></li>
-      <li><a href="actualization/nominations.html">Nominations</a></li>
-      <li><a href="actualization/nominations-detail.html">Nominations Detail</a></li>
-      <li><a href="actualization/ai-review.html">AI Review</a></li>
-      <li><a href="actualization/pipeline-map.html">Pipeline Map</a></li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
     </ul>
   </section>
 
   <section class="mockup-home__section">
-    <h2 class="mockup-home__section-title">Other</h2>
+    <div class="mockup-home__section-head">
+      <h2 class="mockup-home__section-title">Other</h2>
+      <span class="mockup-home__section-updated-label">Updated</span>
+    </div>
     <ul class="mockup-home__links">
-      <li><a href="invoicing.html">Invoicing</a></li>
-      <li><a href="market-data.html">Market Data</a></li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
+      <li class="mockup-home__link-row">
+        <time class="mockup-home__updated" datetime="2026-06-26T12:02:11-05:00">Jun 26, 2026, 12:02 PM</time>
+      </li>
     </ul>
   </section>
 </div>
