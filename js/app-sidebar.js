@@ -256,8 +256,8 @@
     var brand = document.createElement('div');
     brand.className = 'app-sidebar__brand';
     var logoA = document.createElement('a');
-    logoA.href = hrefForFile('trades.html', false, false, true);
-    logoA.setAttribute('aria-label', 'Molecule — Trades');
+    logoA.href = rootPrefix() + 'index.html';
+    logoA.setAttribute('aria-label', 'Molecule — Mirage mockups home');
     var img = document.createElement('img');
     img.src = logoSrc();
     img.alt = 'Molecule';
